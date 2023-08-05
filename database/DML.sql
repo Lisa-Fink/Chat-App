@@ -4,8 +4,10 @@
 -- --------------------------------------------------------------------------------------
 -- Servers
 
--- Get all Servers, selecting the server name, server image and id
-SELECT serverID, serverName, serverImageUrl FROM Servers;
+-- Get all Servers that a user belongs to, selecting the server name, server image and id
+SELECT s.serverID, s.serverName, s.serverImageUrl FROM Servers s
+	INNER JOIN UserServers us on s.serverID = us.serverID
+    WHERE us.userID = :userID
 
 -- Add a server using a given server name and optional serverImageUrl
 INSERT INTO Servers (serverName, serverImageUrl) VALUES (:newServerName, :newServerImageUrl);
@@ -13,11 +15,21 @@ INSERT INTO Servers (serverName, serverImageUrl) VALUES (:newServerName, :newSer
 -- Add a user to the server (create UserServers) using the userID, serverID and roleID
 INSERT INTO UserServers (userID, serverID, roleID) VALUES (:newUserID, :newServerID, :newRoleID);
 
+-- Update serverImageUrl
+UPDATE Servers SET serverImageUrl = :newServerImageUrl WHERE serverID = :serverID;
+
+-- Update serverDescription
+UPDATE Servers SET serverDescription = :newServerDescription WHERE serverID = :serverID;
+
 -- Delete a Server using a given serverID
 DELETE FROM Servers WHERE serverID = :delServerID;
 
+-- --------------------------------------------------------------------------------------
+-- Invites
+
 -- Create Invite using a given serverID, inviteCode, and expirationTime
 INSERT INTO Invites (serverID, inviteCode, expirationTime) VALUES (:newServerID, :newInviteCode, :newExpirationTime);
+
 
 -- --------------------------------------------------------------------------------------
 -- Channels
@@ -86,28 +98,37 @@ DELETE FROM Reactions WHERE reactionID = :delReactionID;
 DELETE FROM Attachments WHERE attachmentID = :delAttachmentID;
 
 -- Edit a message text, time, set edited to true using a given messageID
-UPDATE Messages SET (text, time, edited) VALUES (:newText, :newTime, true);
+UPDATE Messages SET text = :newText, time = :newTime, edited = true WHERE messageID = :messageID
 
 -- Edit a message time, set edited to true using a given messageID (use if deleting an attachment)
-UPDATE Messages SET (time, edited) VALUES (:newTime, true);
+UPDATE Messages SET time = :newTime, edited = true WHERE messageID = :messageID
 
 -- --------------------------------------------------------------------------------------
 -- Users
 
--- Get all Users in a channel
+-- Get a User by userID
+SELECT * FROM Users WHERE userID = :userID;
+
+-- Get a User by email
+SELECT * FROM Users WHERE email = :email
+
+-- Get all Users in a channel, either they are listed in UserChannels or they are listed in UserServers with a high enough roleID
 SELECT u.userID, u.username
 FROM Users u
-JOIN UserChannels uc ON u.userID = uc.userID
-WHERE uc.channelID = :channelID;
+LEFT JOIN UserChannels uc ON u.userID = uc.userID
+LEFT JOIN UserServers us ON u.userID = us.userID
+WHERE uc.channelID = :channelID
+   OR (us.serverID = :serverID AND us.roleID <= :channelRoleID);
+
 
 -- Add a user using a given username, email, password, and userImageUrl
 INSERT INTO Users (username, email, password, userImageUrl) VALUES (:newUsername, :newEmail, :newPassword, :newUserImageUrl);
 
 -- Edit a user password using a given userID
-UPDATE Users SET (password) VALUES (:newPassword);
+UPDATE Users SET password =:newPassword WHERE userID = :userID;
 
 -- Edit a user userImageUrl using a given userID
-UPDATE Users SET (userImageURL) Values (:newUserImageUrl);
+UPDATE Users SET userImageURL = :newUserImageUrl WHERE userID = :userID;
 
 -- Delete a User using a given userID
 DELETE FROM Users WHERE userID = :delUserID;
