@@ -7,7 +7,7 @@
 -- Get all Servers that a user belongs to, selecting the server name, server image and id
 SELECT s.serverID, s.serverName, s.serverImageUrl FROM Servers s
 	INNER JOIN UserServers us on s.serverID = us.serverID
-    WHERE us.userID = :userID
+    WHERE us.userID = :userID;
 
 -- Add a server using a given server name and optional serverImageUrl
 INSERT INTO Servers (serverName, serverImageUrl) VALUES (:newServerName, :newServerImageUrl);
@@ -30,6 +30,17 @@ DELETE FROM Servers WHERE serverID = :delServerID;
 -- Create Invite using a given serverID, inviteCode, and expirationTime
 INSERT INTO Invites (serverID, inviteCode, expirationTime) VALUES (:newServerID, :newInviteCode, :newExpirationTime);
 
+-- Get Invite by InviteCode
+SELECT serverID, expirationTime FROM Invites WHERE inviteCode = :inviteCode;
+
+-- Delete Invite by inviteID
+DELETE FROM Invites WHERE inviteID = :inviteID;
+
+-- --------------------------------------------------------------------------------------
+-- ChannelTypes
+
+-- Get all ChannelTypes including the channelTypeID and channelType
+SELECT channelTypeID, channelType FROM ChannelTypes;
 
 -- --------------------------------------------------------------------------------------
 -- Channels
@@ -37,29 +48,26 @@ INSERT INTO Invites (serverID, inviteCode, expirationTime) VALUES (:newServerID,
 -- Get all Channels in a particular server
 SELECT channelID, channelName FROM Channels WHERE serverID = :serverID;
 
--- Get all ChannelTypes including the channelTypeID and channelType
-SELECT channelTypeID, channelType FROM ChannelTypes;
-
 -- Add a channel using a given serverID, roleID, channelTypeID, and channelName
 INSERT INTO Channels (serverID, roleID, channelTypeID, channelName) VALUES (:newServerID, :newRoleID, :newChannelTypeID, :newChannelName);
 
 -- Add a user to a channel (Create UserChannels) using a given userID and channelID
-INSERT INTO UserChannels (userID, channelID) VALUES (:newUserID, :newChannelID)
+INSERT INTO UserChannels (userID, channelID) VALUES (:newUserID, :newChannelID);
 
 -- Remove a user from a channel (Delete UserChannels) using a given userID and channelID
 DELETE FROM UserChannels WHERE userID = :userID and channelID = :delChannelID;
 
 -- Delete a Channel using a given channelID
-DELETE FROM Channels WHERE channelID = :delChannelID
+DELETE FROM Channels WHERE channelID = :delChannelID;
 
 -- Edit the channel roleID using the channelID
-UPDATE Channels SET roldID = :newRoldID WHERE channelID = updateChannelID;
+UPDATE Channels SET roleID = :newRoleID WHERE channelID = :updateChannelID;
 
 -- Edit the channel channelName using the channelID
-UPDATE Channels SET channelName = :newChannelName WHERE channelID = updateChannelID;
+UPDATE Channels SET channelName = :newChannelName WHERE channelID = :updateChannelID;
 
 -- Edit the channel roleID and channelName using the channelID
-UPDATE Channels SET channelName = :newChannelName, roldID = :newRoldID WHERE channelID = updateChannelID;
+UPDATE Channels SET channelName = :newChannelName, roleID = :newRoleID WHERE channelID = :updateChannelID;
 
 -- --------------------------------------------------------------------------------------
 -- Messages
@@ -98,10 +106,10 @@ DELETE FROM Reactions WHERE reactionID = :delReactionID;
 DELETE FROM Attachments WHERE attachmentID = :delAttachmentID;
 
 -- Edit a message text, time, set edited to true using a given messageID
-UPDATE Messages SET text = :newText, time = :newTime, edited = true WHERE messageID = :messageID
+UPDATE Messages SET text = :newText, time = :newTime, edited = true WHERE messageID = :messageID;
 
 -- Edit a message time, set edited to true using a given messageID (use if deleting an attachment)
-UPDATE Messages SET time = :newTime, edited = true WHERE messageID = :messageID
+UPDATE Messages SET time = :newTime, edited = true WHERE messageID = :messageID;
 
 -- --------------------------------------------------------------------------------------
 -- Users
@@ -110,7 +118,7 @@ UPDATE Messages SET time = :newTime, edited = true WHERE messageID = :messageID
 SELECT * FROM Users WHERE userID = :userID;
 
 -- Get a User by email
-SELECT * FROM Users WHERE email = :email
+SELECT * FROM Users WHERE email = :email;
 
 -- Get all Users in a channel, either they are listed in UserChannels or they are listed in UserServers with a high enough roleID
 SELECT u.userID, u.username
