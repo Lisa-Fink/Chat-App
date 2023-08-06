@@ -21,6 +21,9 @@ UPDATE Servers SET serverImageUrl = :newServerImageUrl WHERE serverID = :serverI
 -- Update serverDescription
 UPDATE Servers SET serverDescription = :newServerDescription WHERE serverID = :serverID;
 
+-- Edit a users role in a server
+UPDATE UserServers SET roleID = :newRoleID WHERE serverID = :serverID AND userID = :userID;
+
 -- Delete a Server using a given serverID
 DELETE FROM Servers WHERE serverID = :delServerID;
 

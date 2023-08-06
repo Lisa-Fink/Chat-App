@@ -82,6 +82,12 @@ public class ServersDao {
         jdbcTemplate.update(sql, serverDescription, serverID);
     }
 
+    // Update a Users role in the server
+    public void updateUserRole(int userID, int roleID, int serverID) {
+        String sql = "UPDATE UserServers SET roleID = ? WHERE serverID = ? AND userID = ?";
+        jdbcTemplate.update(sql, roleID, serverID, userID);
+    }
+
     // Delete a server using the serverID
     public void deleteServer(int serverID) {
         String sql = "DELETE FROM Servers WHERE serverID = ?";
