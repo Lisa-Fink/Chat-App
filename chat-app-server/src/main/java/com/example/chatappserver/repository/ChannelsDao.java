@@ -67,6 +67,11 @@ public class ChannelsDao {
         jdbcTemplate.batchUpdate(sql, batchArgs);
     }
 
+    public void addUserToChannel(int userID, int channelID) {
+        String sql = "INSERT INTO UserChannels (userID, channelID) VALUES (?, ?)";
+        jdbcTemplate.update(sql, userID, channelID);
+    }
+
     // Get all channels in a server
     public List<Channel> getChannelsInServer(int serverID) {
         String sql = "SELECT channelID, channelName FROM Channels WHERE serverID = ?";
@@ -95,6 +100,18 @@ public class ChannelsDao {
     public void deleteChannel(int channelID) {
         String sql = "DELETE FROM Channels WHERE channelID = ?";
         jdbcTemplate.update(sql, channelID);
+    }
+
+    // Remove multiple users from a channel (Delete UserChannel) using userIDs and channelID
+    public void removeUsersFromChannel(List<Integer> userIDs, int channelID) {
+        String sql = "DELETE FROM UserChannels WHERE userID = ? AND channelID = ?";
+
+        List<Object[]> batchArgs = new ArrayList<>();
+        for (int userID : userIDs) {
+            batchArgs.add(new Object[]{userID, channelID});
+        }
+
+        jdbcTemplate.batchUpdate(sql, batchArgs);
     }
 
     // Remove a user from a channel (Delete UserChannel) using userID and channelID
