@@ -33,20 +33,22 @@ public class ServersDao {
     // CRUD operations
 
     // Create a new Server
+    // Updates the Server with the new serverID
     public void create(Server server) {
-        String sql = "INSERT INTO Servers (serverName, serverImageUrl) " +
-                "VALUES (?, ?)";
+        String sql = "INSERT INTO Servers (serverName, serverDescription, serverImageUrl) " +
+                "VALUES (?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, server.getServerName());
-            ps.setString(2, server.getServerImageUrl());
+            ps.setString(2, server.getServerDescription());
+            ps.setString(3, server.getServerImageUrl());
             return ps;
         }, keyHolder);
 
-        // Get and set the userID
+        // Get and set the serverID
         int serverId = Objects.requireNonNull(keyHolder.getKey()).intValue();
         server.setServerID(serverId);
     }
