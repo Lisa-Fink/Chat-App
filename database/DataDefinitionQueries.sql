@@ -17,7 +17,6 @@ DROP TABLE IF EXISTS ChannelTypes;
 DROP TABLE IF EXISTS Servers;
 DROP TABLE IF EXISTS Roles;
 DROP TABLE IF EXISTS Users;
-DROP TABLE IF EXISTS FileTypes;
 
 -- Create the Users table
 CREATE TABLE Users (
@@ -80,12 +79,6 @@ CREATE TABLE UserChannels (
     FOREIGN KEY (channelID) REFERENCES Channels(channelID) ON DELETE CASCADE
 );
 
--- Create the FileTypes table
-CREATE TABLE FileTypes (
-    fileTypeID INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    fileTypeName VARCHAR(100) NOT NULL
-);
-
 -- Create the Messages table
 CREATE TABLE Messages (
     messageID INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -102,11 +95,9 @@ CREATE TABLE Messages (
 CREATE TABLE Attachments (
     attachmentID INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     messageID INT NOT NULL,
-    fileTypeID INT NOT NULL,
     filename VARCHAR(255) NOT NULL,
     attachmentUrl VARCHAR(255) NOT NULL,
-    FOREIGN KEY (messageID) REFERENCES Messages(messageID) ON DELETE CASCADE,
-    FOREIGN KEY (fileTypeID) REFERENCES FileTypes(fileTypeID)
+    FOREIGN KEY (messageID) REFERENCES Messages(messageID) ON DELETE CASCADE
 );
 
 -- Create the Emojis table

@@ -10,7 +10,7 @@ SELECT s.serverID, s.serverName, s.serverImageUrl FROM Servers s
     WHERE us.userID = :userID;
 
 -- Add a server using a given server name and optional serverImageUrl
-INSERT INTO Servers (serverName, serverImageUrl) VALUES (:newServerName, :newServerImageUrl);
+INSERT INTO Servers (serverName, serverImageUrl, serverDescription) VALUES (:newServerName, :newServerImageUrl, :newServerDescription);
 
 -- Add a user to the server (create UserServers) using the userID, serverID and roleID
 INSERT INTO UserServers (userID, serverID, roleID) VALUES (:newUserID, :newServerID, :newRoleID);
@@ -87,17 +87,14 @@ WHERE m.channelID = :channelID;
 -- Get all Emojis, including its emojiID, emojiCode, and emojiName
 SELECT emojiID, emojiCode, emojiName FROM Emojis;
 
--- Get all FileTypes including the fileTypeID and fileTypeName
-SELECT fileTypeID, fileTypeName FROM FileTypes;
-
 -- Add a message using a given text, time, userID, and channelID
 INSERT INTO Messages (text, time, userID, channelID) VALUES (:newText, :newTime, :newUserID, :newChannelID);
 
 -- Add a reaction to a message using a given emojiID, userID and messageID
 INSERT INTO Reactions (emojiID, userID, messageID) VALUES (:newEmojiID, :newUserID, :newMessageID);
 
--- Add an attachment to a message using a given filename, url, messageID, and fileTypeID
-INSERT INTO Attachments (filename, attachmentUrl, messageID, fileTypeID) VALUES (:newFileName, :newAttachmentUrl, :newMessageID, :newFileTypeID);
+-- Add an attachment to a message using a given filename, url, messageID
+INSERT INTO Attachments (filename, attachmentUrl, messageID) VALUES (:newFileName, :newAttachmentUrl, :newMessageID);
 
 -- Delete a message using a given messageID
 DELETE FROM Messages WHERE messageID = :delMessageID;
