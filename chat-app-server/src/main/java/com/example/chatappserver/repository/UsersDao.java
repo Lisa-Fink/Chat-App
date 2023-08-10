@@ -20,6 +20,7 @@ public class UsersDao {
 
     @Autowired
     public UsersDao(JdbcTemplate jdbcTemplate) {
+
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -57,11 +58,11 @@ public class UsersDao {
     }
 
 
-    // Get a User by userID
-    public User getById(int userId) {
-        String sql = "SELECT * FROM Users WHERE userID = ?";
-        return jdbcTemplate.queryForObject(sql, userRowMapper(), userId);
-    }
+//    // Get a User by userID
+//    public User getById(int userId) {
+//        String sql = "SELECT * FROM Users WHERE userID = ?";
+//        return jdbcTemplate.queryForObject(sql, userRowMapper(), userId);
+//    }
 
     // Get a User by email
     public User getByEmail(String email) {
@@ -76,22 +77,22 @@ public class UsersDao {
                 FROM Users u 
                 LEFT JOIN UserChannels uc ON u.userID = uc.userID 
                 LEFT JOIN UserServers us ON u.userID = us.userID 
-                WHERE uc.channelID = :channelID 
-                OR (us.serverID = :serverID AND us.roleID <= :channelRoleID)""";
+                WHERE uc.channelID = ?
+                OR (us.serverID = ? AND us.roleID <= ?)""";
 
-        return jdbcTemplate.query(sql, userRowMapper(), channelID);
+        return jdbcTemplate.query(sql, userRowMapper(), channelID, serverID, roleID);
     }
 
    // Edit a user password using a given userID
-    public void editPassword(User user) {
+    public void editPassword(int userID, String password) {
         String sql = "UPDATE Users SET password = ? WHERE userID = ?";
-        jdbcTemplate.update(sql, user.getPassword(), user.getUserID());
+        jdbcTemplate.update(sql, password, userID);
     }
 
     // Edit a user userImageUrl using a given userID
-    public void editUserImage(User user) {
+    public void editUserImage(int userID, String userImageUrl) {
         String sql = "UPDATE Users SET userImageURL = ? WHERE userID = ?";
-        jdbcTemplate.update(sql, user.getUserImageUrl(), user.getUserID());
+        jdbcTemplate.update(sql, userImageUrl, userID);
     }
 
     // Delete a User using a given userID
