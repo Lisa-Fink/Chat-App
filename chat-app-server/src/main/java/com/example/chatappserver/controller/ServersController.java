@@ -23,10 +23,10 @@ public class ServersController {
 
     // Creates a new server, using the Server object
     @PostMapping
-    public ResponseEntity<String> createServer(@RequestBody Server server) {
+    public ResponseEntity<Integer> createServer(@RequestBody Server server) {
         // TODO: do I need to check if server has a serverName, because that cannot be null?
         serversDao.create(server);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(server.getServerID());
     }
 
     // Returns a list of the Servers the user belongs to
