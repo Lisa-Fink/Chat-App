@@ -12,10 +12,40 @@ public class Message {
     private int channelID;
     private Boolean edited;
     private List<Reaction> reactions;
+    private List<Attachment> attachments;
     private String username;
     public Message() {}
 
-    public Message(int messageID, String text, Timestamp time, int userID, String username, int channelID, Boolean edited) {
+    // Used when creating new message
+    // creating new message (no reactions or attachments)
+    public Message(int messageID, String text, Timestamp time, int userID, String username, int channelID) {
+        this.messageID = messageID;
+        this.text = text;
+        this.time = time;
+        this.userID = userID;
+        this.username = username;
+        this.channelID = channelID;
+        this.edited = false;
+    }
+
+    // Used when creating new message
+    // creating with attachments but no reactions
+    public Message(int messageID, String text, Timestamp time, int userID,
+                   String username, int channelID, List<Attachment> attachments) {
+        this.messageID = messageID;
+        this.text = text;
+        this.time = time;
+        this.userID = userID;
+        this.username = username;
+        this.channelID = channelID;
+        this.edited = false;
+        this.attachments = attachments;
+    }
+
+    // Used when retrieving messages
+    // creating with attachments and reactions
+    public Message(int messageID, String text, Timestamp time, int userID,
+                   String username, int channelID, boolean edited) {
         this.messageID = messageID;
         this.text = text;
         this.time = time;
@@ -23,12 +53,22 @@ public class Message {
         this.username = username;
         this.channelID = channelID;
         this.edited = edited;
-        this.reactions = new ArrayList<>();
     }
 
     public void addReaction(Reaction reaction) {
+        if (reactions ==  null) { this.reactions = new ArrayList<>(); }
         reactions.add(reaction);
     }
+
+    public void addAttachment(Attachment attachment) {
+        if (attachments == null) { this.attachments = new ArrayList<>(); }
+        attachments.add(attachment);
+    }
+
+    public List<Attachment> getAttachments() {
+        return attachments;
+    }
+
     public int getMessageID() {
         return messageID;
     }
