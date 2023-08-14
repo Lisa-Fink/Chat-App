@@ -9,12 +9,11 @@ public class Attachment {
 
     public Attachment() {}
 
-    public Attachment(int attachmentID, String filename, String attachmentUrl, int messageID, int fileTypeID) {
+    public Attachment(int attachmentID, String filename, String attachmentUrl, int messageID) {
         this.attachmentID = attachmentID;
         this.filename = filename;
         this.attachmentUrl = attachmentUrl;
         this.messageID = messageID;
-        this.fileTypeID = fileTypeID;
     }
 
     public int getAttachmentID() {
@@ -47,13 +46,5 @@ public class Attachment {
 
     public void setMessageID(int messageID) {
         this.messageID = messageID;
-    }
-
-    public int getFileTypeID() {
-        return fileTypeID;
-    }
-
-    public void setFileTypeID(int fileTypeID) {
-        this.fileTypeID = fileTypeID;
     }
 }
