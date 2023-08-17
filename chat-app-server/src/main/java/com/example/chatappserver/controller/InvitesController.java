@@ -43,7 +43,7 @@ public class InvitesController {
     }
 
     @PostMapping
-    public ResponseEntity<Void>  createInvite(@RequestBody Invite invite) {
+    public ResponseEntity<String>  createInvite(@RequestBody Invite invite) {
         // TODO: user sending request needs to be in the server
         boolean success = false;
         invite.setInviteCode(createUniqueCode());
@@ -55,9 +55,8 @@ public class InvitesController {
             } catch (DataIntegrityViolationException e) {
                 invite.setInviteCode(createUniqueCode());
             }
-
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(invite.getInviteCode());
     }
 
     // Get Invite using code (will be used for validation when using the invite)
