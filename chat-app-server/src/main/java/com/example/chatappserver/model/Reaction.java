@@ -20,7 +20,8 @@ public class Reaction {
     public Reaction() {
     }
 
-    public Reaction(int reactionID, String emojiCode, String emojiName, int userID, String username) {
+    public Reaction(int messageID, int reactionID, String emojiCode, String emojiName, int userID, String username) {
+        this.messageID = messageID;
         this.reactionID = reactionID;
         this.emojiCode = emojiCode;
         this.emojiName = emojiName;

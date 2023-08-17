@@ -107,7 +107,7 @@ public class MessagesDao {
                 }
 
                 if (reactionID != null) { // Check if reactionID is not null
-                    Reaction reaction = new Reaction(reactionID, emojiCode, emojiName, userID, username);
+                    Reaction reaction = new Reaction(messageID, reactionID, emojiCode, emojiName, userID, username);
                     currentMessage.addReaction(reaction);
                 }
 
