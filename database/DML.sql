@@ -5,7 +5,7 @@
 -- Servers
 
 -- Get all Servers that a user belongs to, selecting the server name, server image and id
-SELECT s.serverID, s.serverName, s.serverImageUrl FROM Servers s
+SELECT s.serverID, s.serverName, s.serverDescription, s.serverImageUrl FROM Servers s
 	INNER JOIN UserServers us on s.serverID = us.serverID
     WHERE us.userID = :userID;
 
