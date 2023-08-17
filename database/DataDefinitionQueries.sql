@@ -126,3 +126,112 @@ CREATE TABLE Invites (
     expirationTime DATETIME NOT NULL,
     FOREIGN KEY (serverID) REFERENCES Servers(serverID) ON DELETE CASCADE
 );
+
+
+-- Populate the db with sample data
+-- Insert sample data for Chat App
+
+-- Users
+INSERT INTO Users (username, email, password, userImageUrl)
+VALUES
+    ('user1', 'user1@example.com', 'password1', 'https://example.com/user-image.jpg'),
+    ('user2', 'user2@example.com', 'password2', 'https://example.com/user-image.jpg'),
+    ('user3', 'user3@example.com', 'password3', 'https://example.com/user-image.jpg'),
+    ('user4', 'user4@example.com', 'password4', 'https://example.com/user-image.jpg'),
+    ('user5', 'user5@example.com', 'password5', 'https://example.com/user-image.jpg'),
+    ('user6', 'user6@example.com', 'password6', 'https://example.com/user-image.jpg');
+
+-- Servers
+INSERT INTO Servers (serverName, serverDescription, serverImageUrl)
+VALUES
+    ('server1', 'server 1 description', 'https://example.com/server1.jpg'),
+    ('server2', 'server 2 description', 'https://example.com/server1.jpg'),
+    ('server3', 'server 3 description', 'https://example.com/server1.jpg');
+
+-- Roles
+INSERT INTO Roles (roleName)
+VALUES
+    ('Creator'),
+    ('Admin'),
+    ('Moderator'),
+    ('Member');
+
+-- UserServers
+INSERT INTO UserServers (serverID, userID, roleID)
+VALUES
+    (1, 1, 1),
+    (1, 2, 2),
+    (1, 3, 4),
+    (2, 2, 1),
+    (2, 1, 4),
+    (2, 4, 4),
+    (3, 5, 1),
+    (3, 6, 2);
+
+-- ChannelTypes
+INSERT INTO ChannelTypes (channelType)
+VALUES
+    ('Text Channel'),
+    ('Voice Channel');
+
+
+-- Channels
+INSERT INTO Channels (serverID, roleID, channelTypeID, channelName)
+VALUES
+    (1, 4, 1, 'General'),
+    (2, 4, 1, 'General'),
+    (3, 4, 1, 'General'),
+    (1, 1, 1, 'Pokemon Champions Chat'),
+    (2, 4, 1, 'Minecraft Chat'),
+    (3, 4, 1, 'DND Chat'),
+    (2, 4, 1, 'Leetcode'),
+    (3, 4, 1, 'Personal Projects'),
+    (1, 2, 1, 'Admin Only'),
+    (1, 4, 2, 'Voice Chat');
+    
+
+-- UserChannels
+INSERT INTO UserChannels (userID, channelID)
+VALUES
+    (3, 4);
+
+-- Messages
+INSERT INTO Messages (userID, channelID, text, time)
+VALUES
+    (1, 1, 'Hello World!', '2023-08-16 15:30:00'),
+    (2, 1, 'Hello World Again!', '2023-08-16 15:31:00'),
+    (3, 1, 'Whatup Dog!', '2023-08-16 15:33:00'),
+    (2, 2, 'Hello Server 2 General!', '2023-08-16 15:30:00'),
+    (1, 2, 'Hi there!', '2023-08-16 15:31:00'),
+    (4, 2, 'Hello to you!', '2023-08-16 15:33:00'),
+    (5, 3, 'Hello Server 3 General', '2023-08-16 15:31:00'),
+    (6, 3, 'I also say hello!', '2023-08-16 15:33:00'),
+    (3, 4, 'Gengar Rocks!', '2023-08-16 17:33:00'),
+    (1, 7, 'I solved two sum!', '2023-08-16 15:33:00'),
+    (2, 7, 'I solved three sum!', '2023-08-16 15:35:00'),
+    (1, 9, 'Hello Admins!', '2023-08-16 15:31:00');
+
+-- Emojis
+INSERT INTO Emojis (emojiCode, emojiName)
+VALUES
+    ('U+1F604', 'Smile'),
+    ('U+2764', 'Heart'),
+    ('U+1F389', 'Party');
+
+-- Reactions
+INSERT INTO Reactions (emojiID, userID, messageID)
+VALUES
+    (1, 2, 10),
+    (2, 1, 9),
+    (3, 4, 5);
+
+-- Invites
+INSERT INTO Invites (serverID, inviteCode, expirationTime)
+VALUES
+    (1, 'abc123', '2023-09-15 00:00:00');
+
+-- Attachments
+INSERT INTO Attachments (messageID, filename, attachmentUrl)
+VALUES
+    (1, 'test.zip', 'http://example.com/test.zip');
+
