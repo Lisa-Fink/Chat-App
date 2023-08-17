@@ -61,9 +61,9 @@ public class ServersDao {
 
     // Get all Servers that a user belongs to, selecting server name, server image and id
     public List<Server> getAllUserServers(int userID) {
-        String sql = "SELECT s.serverID, s.serverName, s.serverImageUrl FROM Servers s " +
+        String sql = "SELECT s.serverID, s.serverName, s.serverDescription, s.serverImageUrl FROM Servers s " +
                 "INNER JOIN UserServers us on s.serverID = us.serverID " +
-                "WHERE us.userID = :userID";
+                "WHERE us.userID = ?";
 
         return jdbcTemplate.query(sql, serverRowMapper(), userID);
     }
