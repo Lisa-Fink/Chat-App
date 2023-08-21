@@ -77,7 +77,7 @@ UPDATE Channels SET channelName = :newChannelName, roleID = :newRoleID WHERE cha
 
 -- Get all Messages in a particular channel, get all Reactions to each message including the emojiCode, emojiName, and username, get all Attachments to each message
 -- including the attachmentUrl, filename, attachmentID
-SELECT m.messageID, m.text, m.time, m.edited, u.username,
+SELECT m.messageID, m.text, m.time, m.edited, u.username, u.userID,
        r.reactionID, e.emojiCode, e.emojiName,
        a.attachmentID, a.attachmentUrl, a.filename
 FROM Messages m
@@ -124,12 +124,18 @@ SELECT * FROM Users WHERE userID = :userID;
 SELECT * FROM Users WHERE email = :email;
 
 -- Get all Users in a channel, either they are listed in UserChannels or they are listed in UserServers with a high enough roleID
-SELECT u.userID, u.username
-FROM Users u
+SELECT DISTINCT u.userID, u.username, u.userImageUrl, us.roleID
+	FROM Users u
+LEFT JOIN UserServers us ON us.userID = u.userID
+LEFT JOIN Channels c ON c.channelID = :channelID
 LEFT JOIN UserChannels uc ON u.userID = uc.userID
+	WHERE uc.channelID = :channelID
+UNION
+SELECT DISTINCT u.userID, u.username, u.userImageUrl, us.roleID
+	FROM Users u
+LEFT JOIN Channels c ON c.channelID = :channelID
 LEFT JOIN UserServers us ON u.userID = us.userID
-WHERE uc.channelID = :channelID
-   OR (us.serverID = :serverID AND us.roleID <= :channelRoleID);
+	WHERE us.serverID = :serverID AND us.roleID <= c.roleID;
 
 
 -- Add a user using a given username, email, password, and userImageUrl
