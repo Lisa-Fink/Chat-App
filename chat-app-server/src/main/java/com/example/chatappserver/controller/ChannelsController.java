@@ -27,8 +27,17 @@ public class ChannelsController {
         return ResponseEntity.status(HttpStatus.CREATED).body(channel.getChannelID());
     }
 
+    // Add multiple users to a channel (Create UserChannels)
+    @PostMapping("/{channelID}/users")
+    public ResponseEntity<Void> addUsersToChannel(
+            @PathVariable int channelID, @RequestBody List<Integer> userIDs) {
+        // TODO: user sending request needs admin+ status
+        channelsDao.addUsersToChannel(userIDs, channelID);
+        return ResponseEntity.ok().build();
+    }
+
     // Add a user to a channel (Create UserChannel)
-    @PostMapping("/{channelID}/{userID}")
+    @PostMapping("/{channelID}/users/{userID}")
     public ResponseEntity<Void> addUserToChannel(
             @PathVariable int channelID, @PathVariable int userID) {
         // TODO: user sending request needs admin+ status
@@ -80,6 +89,8 @@ public class ChannelsController {
             return channelName;
         }
     }
+
+    // Update the channel role
     @PutMapping("/{channelID}")
     public ResponseEntity<Void> updateRoleID(
             @PathVariable int channelID, @RequestBody ChannelUpdateReq channelUpdateReq) {
@@ -89,9 +100,8 @@ public class ChannelsController {
         return ResponseEntity.ok().build();
     }
 
-
     // Delete a Channel
-    @DeleteMapping("/{channelID")
+    @DeleteMapping("/{channelID}")
     public ResponseEntity<Void> deleteChannel(@PathVariable int channelID) {
         // TODO: user sending request needs creator status
         channelsDao.deleteChannel(channelID);
@@ -108,7 +118,7 @@ public class ChannelsController {
     }
 
     // Remove a user from a channel (Delete UserChannel)
-    @DeleteMapping("/{channelID}/{userID}")
+    @DeleteMapping("/{channelID}/users/{userID}")
     public ResponseEntity<Void> deleteUserChannel(@PathVariable int channelID,
                                                   @PathVariable int userID) {
         // TODO: user sending request needs admin+ status
