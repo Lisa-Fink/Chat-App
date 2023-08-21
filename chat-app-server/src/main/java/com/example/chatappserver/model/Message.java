@@ -18,25 +18,42 @@ public class Message {
 
     // Used when creating new message
     // creating new message (no reactions or attachments)
-    public Message(int messageID, String text, Timestamp time, int userID, String username, int channelID) {
+    public Message(int messageID, String text, Timestamp time, int userID, int channelID) {
         this.messageID = messageID;
         this.text = text;
         this.time = time;
         this.userID = userID;
-        this.username = username;
         this.channelID = channelID;
         this.edited = false;
     }
 
+    public List<Reaction> getReactions() {
+        return reactions;
+    }
+
+    public void setReactions(List<Reaction> reactions) {
+        this.reactions = reactions;
+    }
+
+    public void setAttachments(List<Attachment> attachments) {
+        this.attachments = attachments;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     // Used when creating new message
     // creating with attachments but no reactions
-    public Message(int messageID, String text, Timestamp time, int userID,
-                   String username, int channelID, List<Attachment> attachments) {
-        this.messageID = messageID;
+    public Message(int userID, int channelID, String text, Timestamp time,
+                   List<Attachment> attachments) {
         this.text = text;
         this.time = time;
         this.userID = userID;
-        this.username = username;
         this.channelID = channelID;
         this.edited = false;
         this.attachments = attachments;
