@@ -244,7 +244,7 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 
 ### Create a User
 
-- `POST /users`: Create a new user.
+- `POST /users`: Create a new user. (username and email must be unique)
     - Request:
       ```json
       {
@@ -255,10 +255,14 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
       }
       ```
     - Response:
-        - Status: 201 Created
+        - Status: 201 Created (userID returned)
       ```json
-      { "userID": 123 }
+      123 
       ```
+        - Status: 400 Bad Request
+      ```json
+        { "error": "Email address is already in use"}
+        ```
 
 ### User Login
 
@@ -274,21 +278,21 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 
 ### Get Users in a Channel
 
-- `GET /users/{serverID}/{channelID}/{maxRoleID}`: Get all users in a channel.
+- `GET /users/{serverID}/{channelID}`: Get all users in a channel.
     - Response:
       ```json
       [
         {
           "userID": 123,
           "username": "user123",
-          "email": "user123@example.com",
-          "imageURL": "https://example.com/user-image.png"
+          "imageURL": "https://example.com/user-image.png",
+          "roleID": 1
         },
         {
           "userID": 124,
           "username": "user124",
-          "email": "user124@example.com",
-          "imageURL": "https://example.com/user124-image.png"
+          "imageURL": "https://example.com/user124-image.png",
+          "roleID": 4
         }
       ]
       ```
@@ -297,8 +301,8 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 
 - `PUT /users/{userID}/password`: Update a user's password.
     - Request:
-      ```json
-      "newpassword"
+      ```text
+      newpassword
       ```
 
 
@@ -306,11 +310,11 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 
 - `PUT /users/{userID}/image`: Update a user's image.
     - Request:
-      ```json
-      "https://example.com/new-user-image.png"
+      ```text
+      https://example.com/new-user-image.png
       ```
 
 
 ### Delete User
 
-- `DELETE /users/{userID}/delete`: Delete a user.
+- `DELETE /users/{userID}`: Delete a user.
