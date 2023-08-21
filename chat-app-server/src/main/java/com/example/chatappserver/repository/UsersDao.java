@@ -1,6 +1,7 @@
 package com.example.chatappserver.repository;
 
 import com.example.chatappserver.model.User;
+import com.example.chatappserver.model.UserChannelResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -36,6 +37,18 @@ public class UsersDao {
         };
     }
 
+    private static RowMapper<UserChannelResponse> userChannelRowMapper() {
+        return (resultSet, rowNum) -> {
+            UserChannelResponse user = new UserChannelResponse();
+            user.setUserID(resultSet.getInt("userID"));
+            user.setUsername(resultSet.getString("username"));
+            user.setUserImageUrl(resultSet.getString("userImageUrl"));
+            user.setRoleID(resultSet.getInt("roleID"));
+            return user;
+        };
+    }
+
+
     // CRUD operations
 
     // Create a new User and set the userID to the generated userID in the DB
@@ -57,6 +70,17 @@ public class UsersDao {
         user.setUserID(userId);
     }
 
+    // Check for unique username/email
+    public boolean isUsernameUnique(String username) {
+        String sql = "SELECT COUNT(*) FROM Users WHERE username = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, username);
+        return count != null && count == 0;
+    }
+    public boolean isEmailUnique(String email) {
+        String sql = "SELECT COUNT(*) FROM Users WHERE email = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, email);
+        return count != null && count == 0;
+    }
 
 //    // Get a User by userID
 //    public User getById(int userId) {
@@ -71,16 +95,24 @@ public class UsersDao {
     }
 
     // Get a List of all Users in a channel by channelID
-    public List<User> getUsersInChannel(int channelID, int serverID, int roleID) {
+    public List<UserChannelResponse> getUsersInChannel(int channelID, int serverID) {
+        // First select: User is in UserChannels with a matching channelID
+        // Second select: User is in UserServers with a valid roleID
         String sql = """
-                SELECT u.userID, u.username
-                FROM Users u 
-                LEFT JOIN UserChannels uc ON u.userID = uc.userID 
-                LEFT JOIN UserServers us ON u.userID = us.userID 
-                WHERE uc.channelID = ?
-                OR (us.serverID = ? AND us.roleID <= ?)""";
+                SELECT DISTINCT u.userID, u.username, u.userImageUrl, us.roleID
+                	FROM Users u
+                LEFT JOIN UserServers us ON us.userID = u.userID
+                LEFT JOIN Channels c ON c.channelID = ?
+                LEFT JOIN UserChannels uc ON u.userID = uc.userID
+                	WHERE uc.channelID = ?
+                UNION
+                SELECT DISTINCT u.userID, u.username, u.userImageUrl, us.roleID
+                	FROM Users u
+                LEFT JOIN Channels c ON c.channelID = ?
+                LEFT JOIN UserServers us ON u.userID = us.userID
+                	WHERE us.serverID = ? AND us.roleID <= c.roleID""";
 
-        return jdbcTemplate.query(sql, userRowMapper(), channelID, serverID, roleID);
+        return jdbcTemplate.query(sql, userChannelRowMapper(), channelID, channelID, channelID, serverID);
     }
 
    // Edit a user password using a given userID
