@@ -61,14 +61,16 @@ public class MessagesDao {
         create(message);
         for (Attachment attachment: message.getAttachments()) {
             // attachments will have a max of 3 attachments
+            attachment.setMessageID(message.getMessageID());
             attachmentsDao.addAttachment(attachment);
         }
+
     }
 
 
     // Get all Messages in a channel, and all Reactions to each message including the emojiCode, emojiName, and username
     public List<Message> getMessagesInChannel(int channelID) {
-        String sql = "SELECT m.messageID, m.text, m.time, m.edited, u.username, " +
+        String sql = "SELECT m.messageID, m.text, m.time, m.edited, u.username, u.userID, " +
                 "       r.reactionID, e.emojiCode, e.emojiName, " +
                 "       a.attachmentID, a.attachmentUrl, a.filename " +
                 "FROM Messages m " +
@@ -76,7 +78,7 @@ public class MessagesDao {
                 "LEFT JOIN Reactions r ON m.messageID = r.messageID " +
                 "LEFT JOIN Emojis e ON r.emojiID = e.emojiID " +
                 "LEFT JOIN Attachments a ON m.messageID = a.messageID " +
-                "WHERE m.channelID = :channelID;";
+                "WHERE m.channelID = ?";
 
         return jdbcTemplate.query(sql, preparedStatement -> {
             preparedStatement.setInt(1, channelID);
@@ -92,11 +94,11 @@ public class MessagesDao {
                 int userID = resultSet.getInt("userID");
                 String username = resultSet.getString("username");
 
-                Integer reactionID = resultSet.getInt("reactionID");
+                int reactionID = resultSet.getInt("reactionID");
                 String emojiCode = resultSet.getString("emojiCode");
                 String emojiName = resultSet.getString("emojiName");
 
-                Integer attachmentID = resultSet.getInt("attachmentID");
+                int attachmentID = resultSet.getInt("attachmentID");
                 String filename = resultSet.getString("filename");
                 String attachmentUrl = resultSet.getString("attachmentUrl");
 
@@ -106,12 +108,12 @@ public class MessagesDao {
                     messages.add(currentMessage);
                 }
 
-                if (reactionID != null) { // Check if reactionID is not null
+                if (reactionID != 0) { // Check if reactionID is not null
                     Reaction reaction = new Reaction(messageID, reactionID, emojiCode, emojiName, userID, username);
                     currentMessage.addReaction(reaction);
                 }
 
-                if (attachmentID != null) { // Check if reactionID is not null
+                if (attachmentID != 0) { // Check if reactionID is not null
                     Attachment attachment = new Attachment(attachmentID, filename, attachmentUrl, messageID);
                     currentMessage.addAttachment(attachment);
                 }
@@ -122,9 +124,9 @@ public class MessagesDao {
     }
 
     // Edit a message text, time, set edited to true using a given messageID
-    public void editMessage(Message message) {
+    public void editMessageText(int messageID, String text, Timestamp time) {
         String sql = "UPDATE Messages SET text = ?, time = ?, edited = true WHERE messageID = ?";
-        jdbcTemplate.update(sql, message.getText(), message.getTime(), message.getMessageID());
+        jdbcTemplate.update(sql, text, time, messageID);
     }
 
     // Edit a message time, set edited to true using a given messageID
@@ -140,25 +142,11 @@ public class MessagesDao {
         attachmentsDao.deleteAttachments(attachmentIDs);
     }
 
-    public void deleteMessageOnly(int messageID) {
+    public void deleteMessage(int messageID) {
         String sql = "DELETE FROM Messages WHERE messageID = ?";
         jdbcTemplate.update(sql, messageID);
     }
-    public void deleteMessageAttachmentsReactions(int messageID) {
-        deleteMessageOnly(messageID);
-        attachmentsDao.deleteMessagesAttachments(messageID);
-        reactionsDao.deleteMessagesReactions(messageID);
-    }
 
-    public void deleteMessageAttachments(int messageID) {
-        deleteMessageOnly(messageID);
-        attachmentsDao.deleteMessagesAttachments(messageID);
-    }
-
-    public void deleteMessageReactions(int messageID) {
-        deleteMessageOnly(messageID);
-        reactionsDao.deleteMessagesReactions(messageID);
-    }
 }
 
 

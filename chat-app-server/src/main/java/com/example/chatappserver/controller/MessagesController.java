@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @RestController
@@ -36,6 +37,7 @@ public class MessagesController {
 
         MessageAttachmentResponse res = new MessageAttachmentResponse(
                 message.getMessageID(), attachmentIds);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
@@ -46,11 +48,30 @@ public class MessagesController {
         List<Message> res = messagesDao.getMessagesInChannel(channelID);
         return ResponseEntity.ok(res);
     }
+    private static class MessageEditRequest {
+        private String text;
+        private Timestamp time;
 
-    // Edit a message, no change to attachments
-    @PutMapping
-    public ResponseEntity<Void> editMessage(@RequestBody Message message) {
-        messagesDao.editMessage(message);
+        public Timestamp getTime() {
+            return time;
+        }
+
+        public void setTime(Timestamp time) {
+            this.time = time;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+        }
+    }
+    // Edit a message text, no change to attachments
+    @PutMapping("/{messageID}")
+    public ResponseEntity<Void> editMessage(@RequestBody MessageEditRequest editMessage, @PathVariable int messageID) {
+        messagesDao.editMessageText(messageID, editMessage.getText(), editMessage.getTime());
         return ResponseEntity.ok().build();
     }
 
@@ -62,33 +83,10 @@ public class MessagesController {
         return ResponseEntity.ok().build();
     }
 
-    // Delete a message, removing all attachments and all reactions
-    @DeleteMapping("/attachments-reactions/{messageID}")
-    public ResponseEntity<Void> deleteMessageAttachmentsReactions(@PathVariable int messageID) {
-        messagesDao.deleteMessageAttachmentsReactions(messageID);
-        return ResponseEntity.ok().build();
-    }
-
-    // Delete a message, removing all attachments
-    @DeleteMapping("/attachments/{messageID}")
-    public ResponseEntity<Void> deleteMessageAttachments(@PathVariable int messageID) {
-        messagesDao.deleteMessageAttachments(messageID);
-        return ResponseEntity.ok().build();
-    }
-
-    // Delete a message, removing all reactions
-    @DeleteMapping("/reactions/{messageID}")
-    public ResponseEntity<Void> deleteMessageReactions(@PathVariable int messageID) {
-        messagesDao.deleteMessageReactions(messageID);
-        return ResponseEntity.ok().build();
-    }
-
     // Delete a message with no attachments or reactions
     @DeleteMapping("/{messageID}")
     public ResponseEntity<Void> deleteMessage(@PathVariable int messageID) {
-        messagesDao.deleteMessageOnly(messageID);
+        messagesDao.deleteMessage(messageID);
         return ResponseEntity.ok().build();
     }
-
-
 }
