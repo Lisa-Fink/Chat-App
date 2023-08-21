@@ -13,7 +13,7 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 - [Users](#users)
 
 ## Channels
-
+### Create Channel/UserChannel
 - `POST /channels`: Create a new channel.
     - Request:
       ```json
@@ -30,8 +30,12 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
           { "channelID": 123 }
           ```
 
-- `POST /channels/{channelID}/{userID}`: Add a user to a channel.
-
+- `POST /channels/{channelID}/users/{userID}`: Add a user to a channel.
+- `POST /channels/{channelID}/users`: Add multiple users to a channel
+  - Request (list of usersIDs):
+    ```json
+    [1,3,6,2,]
+### Get Channels
 - `GET /channels/{serverID}`: Get all channels in a server.
     - Response:
       ```json
@@ -45,13 +49,16 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
         }
       ]
       ```
-
+### Update Channel
+(Request json string/int)
 - `PUT /channels/{channelID}/role`: Update the channel's role.
 - `PUT /channels/{channelID}/name`: Update the channel's name.
 - `PUT /channels/{channelID}`: Update the channel's role and name.
+
+### Delete Channel/UserChannel
 - `DELETE /channels/{channelID}`: Delete a channel.
-- `DELETE /channels/{channelID}/users`: Remove multiple users from a channel.
-- `DELETE /channels/{channelID}/{userID}`: Remove a user from a channel.
+- `DELETE /channels/{channelID}/users`: Remove multiple users from a channel. (Request json list)
+- `DELETE /channels/{channelID}/users/{userID}`: Remove a user from a channel.
 
 
 ## Emojis
@@ -60,11 +67,23 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 
 ## Invites
 - `POST /invites`: Create an invite.
+    - Request:
+    ```json
+  { "serverID":  1, "expirationTime":  "2199-08-17T14:30:00.000Z" }
+  ```
     - Response:
     ```json
     "invitecode"
     ```
 - `GET /invites/{inviteCode}`: Get an invite using the invite code.
+  - Response:
+  ```json
+  {
+  "serverID": 1,
+    "inviteCode": "11911010385761221692637972572",
+    "expirationTime": "2199-08-17"
+  }
+  ```
 
 
 ## Messages
@@ -78,7 +97,7 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
         "userID": 123,
         "channelID": 456,
         "text": "Hello, world!",
-        "time": "2023-07-30T14:30:00Z",
+        "time": "2023-07-30T14:30:00Z"
       }
       ```
     - Response:
@@ -91,18 +110,16 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
     - Request:
       ```json
       {
-        "userID": 123,
-        "channelID": 456,
+        "userID": 1,
+        "channelID": 1,
         "text": "Message with attachments",
         "time": "2023-07-30T14:30:00Z",
         "attachments": [
           {
-            "attachmentID": 101,
             "attachmentUrl": "https://example.com/file1.png",
             "filename": "file1.png"
           },
           {
-            "attachmentID": 102,
             "attachmentUrl": "https://example.com/file2.png",
             "filename": "file2.png"
           }
@@ -159,14 +176,17 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 
 ### Edit and Delete Messages
 
-- `PUT /messages`: Edit a message without changing attachments.
+- `PUT /messages/{messageID}`: Edit a messages text without changing attachments.
+  - Request:
+  ```json
+    { "text": "New Text", "time": "2023-08-22T18:38:34.000+00:00"}
+    ```
 - `PUT /messages/attachments/{messageID}`: Edit a message by removing attachment(s).
-- `DELETE /messages/attachments-reactions/{messageID}`: Delete a message, removing all attachments and reactions.
-- `DELETE /messages/attachments/{messageID}`: Delete a message, removing all attachments.
-- `DELETE /messages/reactions/{messageID}`: Delete a message, removing all reactions.
-- `DELETE /messages/{messageID}`: Delete a message with no attachments or reactions.
-
-
+  - Request (list of attachmentIDs):
+  ```json
+    [1, 2, 3]
+    ```
+- `DELETE /messages/{messageID}`: Delete a message, removing all attachments and reactions (CASCADE).
 
 ## Servers
 
@@ -209,7 +229,7 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
       ```
 
 ### Update Server Details
-
+(Request sent as text)
 - `PUT /servers/{serverID}/image`: Update the server's image.
 - `PUT /servers/{serverID}/description`: Update the server's description.
 - `PUT /servers/{serverID}/{userID}/role`: Update the role of a user in the server.
