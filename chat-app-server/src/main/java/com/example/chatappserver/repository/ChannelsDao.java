@@ -22,10 +22,10 @@ public class ChannelsDao {
     @Autowired
     public ChannelsDao(JdbcTemplate jdbcTemplate) {this.jdbcTemplate = jdbcTemplate;}
 
-    private static RowMapper<Channel> channelRowMapper() {
+    private static RowMapper<Channel> channelRowMapper(int serverID) {
         return (resultSet, rowNum) -> new Channel(
                 resultSet.getInt("channelID"),
-                resultSet.getInt("serverID"),
+                serverID,
                 resultSet.getInt("roleID"),
                 resultSet.getInt("channelTypeID"),
                 resultSet.getString("channelName")
@@ -74,8 +74,9 @@ public class ChannelsDao {
 
     // Get all channels in a server
     public List<Channel> getChannelsInServer(int serverID) {
-        String sql = "SELECT channelID, channelName FROM Channels WHERE serverID = ?";
-        return jdbcTemplate.query(sql, channelRowMapper(), serverID);
+        String sql = "SELECT channelID, roleID, channelTypeID, channelName " +
+                "FROM Channels WHERE serverID = ?";
+        return jdbcTemplate.query(sql, channelRowMapper(serverID), serverID);
     }
 
     // Edit the roleID using the channelID
