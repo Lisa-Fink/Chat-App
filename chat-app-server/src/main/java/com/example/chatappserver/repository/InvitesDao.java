@@ -15,10 +15,10 @@ public class InvitesDao {
     @Autowired
     public InvitesDao(JdbcTemplate jdbcTemplate) {this.jdbcTemplate = jdbcTemplate;}
 
-    private static RowMapper<Invite> inviteRowMapper() {
+    private static RowMapper<Invite> inviteRowMapper(String inviteCode) {
         return (resultSet, rowNum) -> new Invite(
                 resultSet.getInt("serverID"),
-                resultSet.getString("inviteCode"),
+                inviteCode,
                 resultSet.getDate("expirationTime")
         );
     }
@@ -35,11 +35,11 @@ public class InvitesDao {
     // Get the invitation that matches the code
     public Invite getInviteByCode(String inviteCode) {
         String sql = "SELECT serverID, expirationTime FROM Invites WHERE inviteCode = ?";
-        return jdbcTemplate.queryForObject(sql, inviteRowMapper(), inviteCode);
+        return jdbcTemplate.queryForObject(sql, inviteRowMapper(inviteCode), inviteCode);
     }
 
     //  Delete Invite by inviteID
-    public void deleteServer(int inviteID) {
+    public void deleteInvite(int inviteID) {
         String sql = "DELETE FROM Invites WHERE inviteID = ?";
         jdbcTemplate.update(sql,  inviteID);
     }
