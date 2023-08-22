@@ -2,6 +2,7 @@ package com.example.chatappserver.repository;
 
 import com.example.chatappserver.model.User;
 import com.example.chatappserver.model.UserChannelResponse;
+import com.example.chatappserver.model.UserLoginRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -93,6 +94,7 @@ public class UsersDao {
         String sql = "SELECT * FROM Users WHERE email = ?";
         return jdbcTemplate.queryForObject(sql, userRowMapper(), email);
     }
+
 
     // Get a List of all Users in a channel by channelID
     public List<UserChannelResponse> getUsersInChannel(int channelID, int serverID) {

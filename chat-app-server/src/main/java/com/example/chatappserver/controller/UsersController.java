@@ -1,9 +1,8 @@
 package com.example.chatappserver.controller;
 
-import com.example.chatappserver.model.User;
-import com.example.chatappserver.model.UserChannelResponse;
-import com.example.chatappserver.model.UserLoginRequest;
+import com.example.chatappserver.model.*;
 import com.example.chatappserver.repository.UsersDao;
+import com.example.chatappserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,31 +15,41 @@ import java.util.List;
 public class UsersController {
 
     private final UsersDao usersDao;
+    private final UserService userService;
 
     @Autowired
-    public UsersController(UsersDao usersDao) {
+    public UsersController(UsersDao usersDao, UserService userService) {
         this.usersDao = usersDao;
+        this.userService = userService;
     }
 
     // Creates a new user, using the User object, returning the new userID
-    @PostMapping
+    @PostMapping("/signup")
     public ResponseEntity<?> createUser(@RequestBody User user) {
-        if (!usersDao.isUsernameUnique(user.getUsername())) {
+        if (!userService.checkAvailableUsername(user.getUsername())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"" + "Username not available" + "\"}");
         }
-        if (!usersDao.isEmailUnique(user.getEmail())) {
+        if (!userService.checkAvailableEmail(user.getEmail())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"" + "Email address is already in use" + "\"}");
         }
-        usersDao.create(user);
-        // needs to return user.getUserID()
-        return ResponseEntity.status(HttpStatus.CREATED).body(user.getUserID());
+        String token = userService.registerUser(user);
+        // needs to return userID
+        JwtAuthResponse jwtAuthResponse = new JwtAuthResponse(token);
+        JwtLoginResponse jwtLoginResponse = new JwtLoginResponse(jwtAuthResponse,
+            user.getEmail(), user.getUserID(), user.getUserImageUrl(), user.getUsername());
+        return ResponseEntity.status(HttpStatus.CREATED).body(jwtLoginResponse);
     }
+
 
     // Login using email and password
     @PostMapping("/login")
-    public ResponseEntity<String>loginUserWithEmail(@RequestBody UserLoginRequest loginRequest) {
-        // TODO: user auth and security
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?>loginUserWithEmail(@RequestBody UserLoginRequest loginRequest) {
+        System.out.println("controller");
+        JwtLoginResponse jwtLoginResponse = userService.loginUser(loginRequest);
+        if (jwtLoginResponse == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"" + "Invalid Email/Password" + "\"}");
+        }
+        return ResponseEntity.ok(jwtLoginResponse);
     }
 
     // Returns all Users in a channel
@@ -56,7 +65,7 @@ public class UsersController {
     public ResponseEntity<Void> updateUserPassword(@PathVariable int userID,
                                                    @RequestBody String password) {
         // TODO: Authenticate that user sending request has the same userID
-        usersDao.editPassword(userID, password);
+        userService.updateUserPassword(userID, password);
         return ResponseEntity.ok().build();
     }
 

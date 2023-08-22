@@ -1,27 +1,33 @@
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+package com.example.chatappserver.model;
 
-import java.util.Collection;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 
-public class CustomUserDetails implements UserDetails {
+import java.util.Collections;
 
-    private final String username;
-    private final String password;
-    private final String userImageUrl; // Your custom field
-    private final Collection<? extends GrantedAuthority> authorities;
+public class CustomUserDetails extends User {
 
-    public CustomUserDetails(String username, String password, String userImageUrl, Collection<? extends GrantedAuthority> authorities) {
-        this.username = username;
-        this.password = password;
+    private final int userId;
+    private final String userImageUrl;
+    private final String dbUsername;
+
+    public CustomUserDetails(int userId, String userImageUrl, String username, String password,
+                             String dbUsername) {
+        super(username, password, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+        this.userId = userId;
         this.userImageUrl = userImageUrl;
-        this.authorities = authorities;
+        this.dbUsername = dbUsername;
     }
 
-    // Implement the UserDetails methods
-    // ...
+    public String getDbUsername() {
+        return dbUsername;
+    }
 
-    // Create getters for your custom field
     public String getUserImageUrl() {
         return userImageUrl;
+    }
+
+    public int getUserId() {
+        return userId;
     }
 }

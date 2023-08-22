@@ -16,7 +16,7 @@ public class User {
         this.userImageUrl = userImageUrl;
     }
 
-    public int getUserID() {
+    public Integer getUserID() {
         return userID;
     }
 
