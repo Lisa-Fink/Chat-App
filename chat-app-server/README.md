@@ -244,7 +244,7 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 
 ### Create a User
 
-- `POST /users`: Create a new user. (username and email must be unique)
+- `POST /users/signup`: Create a new user. (username and email must be unique)
     - Request:
       ```json
       {
