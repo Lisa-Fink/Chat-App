@@ -1,7 +1,10 @@
 package com.example.chatappserver.repository;
 
 import com.example.chatappserver.model.Server;
+import com.example.chatappserver.model.UserServer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -26,6 +29,15 @@ public class ServersDao {
                 resultSet.getString("serverName"),
                 resultSet.getString("serverDescription"),
                 resultSet.getString("serverImageUrl")
+        );
+    }
+
+    private static RowMapper<UserServer> userServerRowMapper() {
+        return (resultSet, rowNum) -> new UserServer(
+                resultSet.getInt("userServerID"),
+                resultSet.getInt("serverID"),
+                resultSet.getInt("userID"),
+                resultSet.getInt("roleID")
         );
     }
 
@@ -94,6 +106,47 @@ public class ServersDao {
     public void deleteServer(int serverID) {
         String sql = "DELETE FROM Servers WHERE serverID = ?";
         jdbcTemplate.update(sql,  serverID);
+    }
+
+    // Deletes a UserServer
+    public void deleteUserServer(int serverID, int userID) {
+        String sql = "DELETE FROM UserServers WHERE serverID = ? AND userID = ?";
+        jdbcTemplate.update(sql, serverID, userID);
+    }
+
+    // Get UserServer using userID and serverID
+    public UserServer getUserServer(int userID, int serverID)  {
+        String sql = "SELECT * FROM UserServers WHERE userID = ? AND serverID = ?";
+        try {
+            return jdbcTemplate.queryForObject(sql, userServerRowMapper(), userID, serverID);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    // Check for UserServer using userID and serverID
+    public boolean inServer(int userID, int serverID) {
+        String sql = "SELECT COUNT(*) FROM UserServers WHERE userID = ? and serverID = ?";
+
+        try {
+            Integer count = jdbcTemplate.queryForObject(sql, Integer.class, userID, serverID);
+            return count != null && count > 0;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
+    }
+
+    // Check for UserServer with specific role
+    public boolean inServerAsRole(int userID, int serverID, int roleID) {
+        if (userID < 0 || roleID < 0) { throw new IllegalArgumentException("Invalid ID"); };
+        String sql = "SELECT COUNT(*) FROM UserServers WHERE userID = ? AND serverID = ? AND roleID <= ?";
+
+        try {
+            Integer count = jdbcTemplate.queryForObject(sql, Integer.class, userID, serverID, roleID);
+            return count != null && count > 0;
+        } catch (DataAccessException e) {
+            return false;
+        }
     }
 
 }

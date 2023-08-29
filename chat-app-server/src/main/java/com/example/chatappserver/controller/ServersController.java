@@ -1,10 +1,15 @@
 package com.example.chatappserver.controller;
 
+import com.example.chatappserver.model.CustomUserDetails;
 import com.example.chatappserver.model.Server;
+import com.example.chatappserver.model.User;
 import com.example.chatappserver.repository.ServersDao;
+import com.example.chatappserver.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,61 +18,116 @@ import java.util.List;
 @RequestMapping("/servers")
 public class ServersController {
     private final ServersDao serversDao;
+    private final AuthService authService;
 
     @Autowired
-    public ServersController(ServersDao serversDao) {
+    public ServersController(ServersDao serversDao, AuthService authService) {
         this.serversDao = serversDao;
+        this.authService = authService;
     }
-    // TODO: will need to validate the user sending the request is a valid user and logged in
 
 
     // Creates a new server, using the Server object
     @PostMapping
-    public ResponseEntity<Integer> createServer(@RequestBody Server server) {
-        // TODO: do I need to check if server has a serverName, because that cannot be null?
+    public ResponseEntity<Object> createServer(@RequestBody Server server,
+                                                @AuthenticationPrincipal CustomUserDetails user) {
+        // Check if serverName isn't empty/null
+        if (server.getServerName() == null || server.getServerName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("ServerName cannot be null or empty.");
+        }
+        // create the server
         serversDao.create(server);
+
+        // add the user to the server with Creator role
+        int creatorRole = 1;
+        serversDao.addUser(user.getUserId(), server.getServerID(), creatorRole);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(server.getServerID());
     }
 
+    // Adds a user to a server, create UserServers
+    @PostMapping("/{serverID}/users")
+    public ResponseEntity<Object> addUserToServer(@AuthenticationPrincipal CustomUserDetails user,
+                                                @PathVariable int serverID) {
+        int basicUserRole = 4;
+        try {
+            serversDao.addUser(user.getUserId(), serverID, basicUserRole);
+            return ResponseEntity.ok().build();
+        } catch (DataIntegrityViolationException e) {
+            // Handle user is already in Server
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("User is already a member of this server.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while adding the user to the server.");
+        }
+
+    }
+
     // Returns a list of the Servers the user belongs to
-    @GetMapping("/{userID}")
-    public ResponseEntity<List<Server>> getUserServers(@PathVariable int userID) {
-        // TODO: validate that user sending request has the same userID
-        List<Server> userServers = serversDao.getAllUserServers(userID);
+    @GetMapping
+    public ResponseEntity<List<Server>> getUserServers(
+            @AuthenticationPrincipal CustomUserDetails user) {
+        List<Server> userServers = serversDao.getAllUserServers(user.getUserId());
         return ResponseEntity.ok(userServers);
     }
 
     // Updates the Server's image
     @PutMapping("/{serverID}/image")
-    public ResponseEntity<Void> updateServerImageUrl(@PathVariable int serverID, @RequestBody String serverImageUrl) {
-        // TODO: validate that user sending request has role of admin/above
+    public ResponseEntity<Void> updateServerImageUrl(
+            @PathVariable int serverID, @RequestBody String serverImageUrl,
+            @AuthenticationPrincipal CustomUserDetails user) {
+        if (!authService.userIsAdmin(user.getUserId(), serverID)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         serversDao.updateImage(serverID, serverImageUrl);
         return ResponseEntity.ok().build();
     }
 
     // Updates the Server's description
     @PutMapping("/{serverID}/description")
-    public ResponseEntity<Void> updateServerDescription(@PathVariable int serverID, @RequestBody String serverDescription) {
-        // TODO: validate that user sending request has role of admin/above
+    public ResponseEntity<Void> updateServerDescription(
+            @PathVariable int serverID, @RequestBody String serverDescription,
+            @AuthenticationPrincipal CustomUserDetails user) {
+        if (!authService.userIsAdmin(user.getUserId(), serverID)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         serversDao.updateDescription(serverID, serverDescription);
         return ResponseEntity.ok().build();
     }
 
     // Updates the Role of a User in the Server
-    @PutMapping("/{serverID}/{userID}/role")
-    public ResponseEntity<Void> updateServerDescription(@PathVariable int serverID, @PathVariable int userID, @RequestBody int roleID) {
-        // TODO: validate that user sending request has role of admin/above
-        serversDao.updateUserRole(userID, roleID, serverID);
+    @PutMapping("/{serverID}/users/role")
+    public ResponseEntity<Void> updateServerDescription(
+            @PathVariable int serverID, @PathVariable int userID,
+            @RequestBody int roleID, @AuthenticationPrincipal CustomUserDetails user) {
+        if (!authService.userIsAdmin(user.getUserId(), serverID)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        serversDao.updateUserRole(user.getUserId(), roleID, serverID);
         return ResponseEntity.ok().build();
     }
 
     // Deletes a Server
     @DeleteMapping("/{serverID}")
-    public ResponseEntity<Void> deleteServer(@PathVariable int serverID) {
-        // TODO: validate that user sending request has role of creator
+    public ResponseEntity<Void> deleteServer(
+            @PathVariable int serverID,
+            @AuthenticationPrincipal CustomUserDetails user) {
+        if (!authService.userIsCreator(user.getUserId(), serverID)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         serversDao.deleteServer(serverID);
         return ResponseEntity.ok().build();
     }
 
-
+    // Remove a user from a server, Deletes UserServers
+    @DeleteMapping("/{serverID}/users")
+    public ResponseEntity<Void> deleteUserFromServer(
+            @PathVariable int serverID, @AuthenticationPrincipal CustomUserDetails user) {
+        if (!authService.userIsAdmin(user.getUserId(), serverID)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        serversDao.deleteUserServer(serverID, user.getUserId());
+        return ResponseEntity.ok().build();
+    }
 }

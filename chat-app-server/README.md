@@ -192,7 +192,7 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 
 ### Create a Server
 
-- `POST /servers`: Create a new server.
+- `POST /servers`: Create a new server. Also creates a UserServer for the user sending the request, with a role of Creator (1)
     - Request:
       ```json
       {
@@ -229,15 +229,14 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
       ```
 
 ### Update Server Details
-(Request sent as text)
+(Request sent as text. User sending request must have role of Admin or above: 1 or 2)
 - `PUT /servers/{serverID}/image`: Update the server's image.
 - `PUT /servers/{serverID}/description`: Update the server's description.
 - `PUT /servers/{serverID}/{userID}/role`: Update the role of a user in the server.
 
 ### Delete Server
-
+(User sending request must have role of Creator: 0)
 - `DELETE /servers/{serverID}`: Delete a server.
-    - Note: This operation requires the user sending the request to have the role of creator.
 
 
 ## Users
@@ -274,6 +273,18 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
         "password": "userpassword"
       }
       ```
+    - Response:
+    ```json
+      {
+  "jwtAuthResponse": {
+        "token": "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbjFAZXhhbXBsZS5jb20iLCJ1c2VySUQiOjEyLCJ1c2VySW1hZ2VVcmwiOiJodHRwOi8vZXhhbXBsZS5jb20vdXNlci1pbWFnZS5qcGciLCJkYlVzZXJuYW1lIjoiYWRtaW4xIiwiaWF0IjoxNjkzMjQ2NzQ2LCJleHAiOjE2OTM4NTE1NDZ9.bI-pbuzsH6fR0RrzG7xOcGRt4fKG_H8HPOQ71jc-rG61rRCd2iZlyebPZyceUGKy"
+    },
+    "email": "admin1@example.com",
+    "userID": 12,
+    "userImageUrl": "http://example.com/user-image.jpg",
+    "username": "admin1"
+  }
+    ```
        
 
 ### Get Users in a Channel
