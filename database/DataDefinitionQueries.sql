@@ -49,7 +49,8 @@ CREATE TABLE UserServers (
     roleID INT NOT NULL,
     FOREIGN KEY (serverID) REFERENCES Servers(serverID) ON DELETE CASCADE,
     FOREIGN KEY (userID) REFERENCES Users(userID) ON DELETE CASCADE,
-    FOREIGN KEY (roleID) REFERENCES Roles(roleID)
+    FOREIGN KEY (roleID) REFERENCES Roles(roleID),
+    CONSTRAINT uq_user_server UNIQUE (userID, serverID)
 );
 
 -- Create the ChannelTypes table (previously SubchannelTypes)
