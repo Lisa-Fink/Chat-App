@@ -1,10 +1,14 @@
 package com.example.chatappserver.controller;
 
+import com.example.chatappserver.model.CustomUserDetails;
 import com.example.chatappserver.model.Invite;
 import com.example.chatappserver.repository.InvitesDao;
+import com.example.chatappserver.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Random;
@@ -14,9 +18,13 @@ import java.util.Random;
 @RequestMapping("/invites")
 public class InvitesController {
     private final InvitesDao invitesDao;
+    private final AuthService authService;
 
     @Autowired
-    public InvitesController(InvitesDao invitesDao) { this.invitesDao = invitesDao ; }
+    public InvitesController(InvitesDao invitesDao, AuthService authService) {
+        this.invitesDao = invitesDao ;
+        this.authService = authService;
+    }
 
     // Create Invite
     private String createUniqueCode() {
@@ -43,8 +51,11 @@ public class InvitesController {
     }
 
     @PostMapping
-    public ResponseEntity<String>  createInvite(@RequestBody Invite invite) {
-        // TODO: user sending request needs to be in the server
+    public ResponseEntity<String>  createInvite(
+            @RequestBody Invite invite, @AuthenticationPrincipal CustomUserDetails user) {
+        if (!authService.userInServer(user.getUserId(), invite.getServerID())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         boolean success = false;
         invite.setInviteCode(createUniqueCode());
         // If the generated code isn't unique, will create a new one until it is
