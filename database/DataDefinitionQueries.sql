@@ -68,7 +68,8 @@ CREATE TABLE Channels (
     channelName VARCHAR(100) NOT NULL,
     FOREIGN KEY (serverID) REFERENCES Servers(serverID) ON DELETE CASCADE,
     FOREIGN KEY (roleID) REFERENCES Roles(roleID),
-    FOREIGN KEY (channelTypeID) REFERENCES ChannelTypes(channelTypeID)
+    FOREIGN KEY (channelTypeID) REFERENCES ChannelTypes(channelTypeID),
+    CONSTRAINT unique_server_channel_name UNIQUE (serverID, channelName)
 );
 
 -- Create the UserChannels table (for M:M relationship between Users and Channels)

@@ -87,6 +87,13 @@ public class ChannelsDao {
                 userID, userID, serverID);
     }
 
+    // Check if a Channel with the serverID and channelName exists
+    public boolean isChannelExists(int serverID, String channelName) {
+        String sql = "SELECT COUNT(*) FROM Channels WHERE serverID = ? AND channelName = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, serverID, channelName);
+        return count != null && count > 0;
+    }
+
     // Edit the roleID using the channelID
     public void updateRole(int roleID, int channelID) {
         String sql = "UPDATE Channels SET roleID = ? WHERE channelID = ?";

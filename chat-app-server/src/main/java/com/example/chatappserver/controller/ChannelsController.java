@@ -39,6 +39,10 @@ public class ChannelsController {
         // RoleID must be >= 2
         if (channel.getRoleID() == 1) {
             return ResponseEntity.badRequest().body("RoleID must be greater than or equal to 2.");
+        } if (channel.getServerID() != serverID) {
+            return ResponseEntity.badRequest().body("ServerID must match.");
+        } if (channelsDao.isChannelExists(serverID, channel.getChannelName())) {
+            return ResponseEntity.badRequest().body("Channel with the same name already exists.");
         }
         channelsDao.create(channel);
         return ResponseEntity.status(HttpStatus.CREATED).body(channel.getChannelID());
@@ -73,9 +77,10 @@ public class ChannelsController {
     // Get all Channels in a Server, that the user has access to
     @GetMapping
     public ResponseEntity<List<Channel>> getChannelsInServer(
-            @PathVariable int serverID, @AuthenticationPrincipal User user) {
+            @PathVariable int serverID,
+            @AuthenticationPrincipal CustomUserDetails user) {
         List<Channel> channels = channelsDao.getChannelsInServer(
-                serverID, user.getUserID());
+                serverID, user.getUserId());
         return ResponseEntity.ok(channels);
     }
 
