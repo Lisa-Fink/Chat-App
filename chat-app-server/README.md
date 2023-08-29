@@ -94,8 +94,8 @@ Add multiple users to a channel
 ## Messages
 
 ### Create a Message
-
-- `POST /messages`: Create a new message without attachments.
+(user sending request must be in the channel)
+- `POST /servers/{serverID}/channels/{channelID}/messages`: Create a new message without attachments.
     - Request:
       ```json
       {
@@ -111,7 +111,7 @@ Add multiple users to a channel
       { "messageID": 789 }
       ```
 
-- `POST /messages/attachments`: Create a new message with 1-3 attachments.
+- `POST /servers/{serverID}/channels/{channelID}/messages/attachments`: Create a new message with 1-3 attachments.
     - Request:
       ```json
       {
@@ -141,8 +141,8 @@ Add multiple users to a channel
       ```
 
 ### Get Messages
-
-- `GET /messages/{channelID}`: Get all messages in a channel.
+(user sending request must be in the channel)
+- `GET /servers/{serverID}/channels/{channelID}/messages`: Get all messages in a channel.
     - Response:
       ```json
       [
@@ -180,18 +180,18 @@ Add multiple users to a channel
       ```
 
 ### Edit and Delete Messages
-
-- `PUT /messages/{messageID}`: Edit a messages text without changing attachments.
+(user sending request must be the creator of the message, or a moderator if deleting a message)
+- `PUT /servers/{serverID}/channels/{channelID}/messages/{messageID}`: Edit a messages text without changing attachments.
   - Request:
   ```json
     { "text": "New Text", "time": "2023-08-22T18:38:34.000+00:00"}
     ```
-- `PUT /messages/attachments/{messageID}`: Edit a message by removing attachment(s).
+- `PUT /servers/{serverID}/channels/{channelID}/messages/attachments/{messageID}`: Edit a message by removing attachment(s).
   - Request (list of attachmentIDs):
   ```json
     [1, 2, 3]
     ```
-- `DELETE /messages/{messageID}`: Delete a message, removing all attachments and reactions (CASCADE).
+- `DELETE /servers/{serverID}/channels/{channelID}/messages/{messageID}`: Delete a message, removing all attachments and reactions (CASCADE).
 
 ## Servers
 
@@ -293,7 +293,7 @@ Add multiple users to a channel
        
 
 ### Get Users in a Channel
-
+(user sending request must be in the channel)
 - `GET /users/{serverID}/{channelID}`: Get all users in a channel.
     - Response:
       ```json
@@ -315,7 +315,7 @@ Add multiple users to a channel
 
 ### Update User Password
 
-- `PUT /users/{userID}/password`: Update a user's password.
+- `PUT /users/password`: Update a user's password.
     - Request:
       ```text
       newpassword
@@ -324,7 +324,7 @@ Add multiple users to a channel
 
 ### Update User Image
 
-- `PUT /users/{userID}/image`: Update a user's image.
+- `PUT /users/image`: Update a user's image.
     - Request:
       ```text
       https://example.com/new-user-image.png
@@ -333,4 +333,4 @@ Add multiple users to a channel
 
 ### Delete User
 
-- `DELETE /users/{userID}`: Delete a user.
+- `DELETE /users`: Delete a user.
