@@ -9,6 +9,15 @@ SELECT s.serverID, s.serverName, s.serverDescription, s.serverImageUrl FROM Serv
 	INNER JOIN UserServers us on s.serverID = us.serverID
     WHERE us.userID = :userID;
 
+-- Get UserServer using userID and serverID
+SELECT * FROM UserServers WHERE userID = :userID AND serverID = :serverID
+
+-- Checks if there is a UserServer with userID and serverID
+SELECT COUNT(*) FROM UserServers WHERE userID = :userID and serverID = :serverID
+
+-- Checks if there is a UserServer with userID, serverID, and greater than or equal to a specifc roleID
+SELECT COUNT(*) FROM UserServers WHERE userID = :userID AND serverID = :serverID AND roleID <= :roleID
+
 -- Add a server using a given server name and optional serverImageUrl
 INSERT INTO Servers (serverName, serverImageUrl, serverDescription) VALUES (:newServerName, :newServerImageUrl, :newServerDescription);
 
@@ -26,6 +35,9 @@ UPDATE UserServers SET roleID = :newRoleID WHERE serverID = :serverID AND userID
 
 -- Delete a Server using a given serverID
 DELETE FROM Servers WHERE serverID = :delServerID;
+
+-- Delete a User From a Server given a userID and serverID
+DELETE FROM UserServers WHERE serverID = :delServerID AND userID = :userID;
 
 -- --------------------------------------------------------------------------------------
 -- Invites
