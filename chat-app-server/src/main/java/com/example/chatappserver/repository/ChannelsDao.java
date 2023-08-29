@@ -104,6 +104,22 @@ public class ChannelsDao {
         return count != null && count > 0;
     }
 
+    // Check if a user is in a Channel using either UserChannels or compares UserServers.roleID and Channels.roleID
+    public boolean inChannel(int userID, int channelID) {
+        String sql = """
+                SELECT COUNT(*) FROM UserChannels
+                WHERE userID = ? AND channelID = ?
+                UNION
+                SELECT COUNT(*) FROM UserServers us
+                INNER JOIN Channels c ON us.serverID = c.serverID
+                WHERE us.userID = ? AND c.channelID = ?
+                  AND us.roleID <= c.roleID;
+                """;
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, userID, channelID, userID, channelID);
+        return count != null && count > 0;
+
+    }
+
     // Edit the roleID using the channelID
     public void updateRole(int roleID, int channelID) {
         String sql = "UPDATE Channels SET roleID = ? WHERE channelID = ?";

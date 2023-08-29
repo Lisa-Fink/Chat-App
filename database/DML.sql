@@ -63,6 +63,18 @@ SELECT channelTypeID, channelType FROM ChannelTypes;
 -- Get all Channels in a particular server
 SELECT channelID, channelName FROM Channels WHERE serverID = :serverID;
 
+-- Check if there is already a Channel in the Server with the same name
+SELECT COUNT(*) FROM Channels WHERE serverID = :serverID AND channelName = :channelName
+
+-- Check if a User is in a Channel using both UserChannels and UserServers.roleID
+SELECT COUNT(*) FROM UserChannels
+WHERE userID = :userID AND channelID = :channelID
+UNION
+SELECT COUNT(*) FROM UserServers us
+INNER JOIN Channels c ON us.serverID = c.serverID
+WHERE us.userID = :userID AND c.channelID = :channelID
+  AND us.roleID <= c.roleID;
+
 -- Add a channel using a given serverID, roleID, channelTypeID, and channelName
 INSERT INTO Channels (serverID, roleID, channelTypeID, channelName) VALUES (:newServerID, :newRoleID, :newChannelTypeID, :newChannelName);
 
@@ -98,6 +110,9 @@ LEFT JOIN Reactions r ON m.messageID = r.messageID
 LEFT JOIN Emojis e ON r.emojiID = e.emojiID
 LEFT JOIN Attachments a ON m.messageID = a.messageID
 WHERE m.channelID = :channelID;
+
+-- Checks if a message with the messageID and userID exists
+SELECT COUNT(*) FROM Messages WHERE messageID = :messageID AND userID = :userID;
 
 -- Get all Emojis, including its emojiID, emojiCode, and emojiName
 SELECT emojiID, emojiCode, emojiName FROM Emojis;
