@@ -3,6 +3,7 @@ package com.example.chatappserver.repository;
 import com.example.chatappserver.model.Channel;
 import com.example.chatappserver.model.Server;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -72,11 +73,18 @@ public class ChannelsDao {
         jdbcTemplate.update(sql, userID, channelID);
     }
 
-    // Get all channels in a server
-    public List<Channel> getChannelsInServer(int serverID) {
-        String sql = "SELECT channelID, roleID, channelTypeID, channelName " +
-                "FROM Channels WHERE serverID = ?";
-        return jdbcTemplate.query(sql, channelRowMapper(serverID), serverID);
+    // Get all channels in a server for a userID
+    public List<Channel> getChannelsInServer(int serverID, int userID) {
+        String sql = """
+            SELECT c.channelID, c.roleID, c.channelTypeID, c.channelName
+            FROM Channels c
+            LEFT JOIN UserChannels uc ON c.channelID = uc.channelID AND uc.userID = ?
+            LEFT JOIN UserServers us ON us.serverID = c.serverID AND us.userID = ?
+            WHERE uc.channelID IS NOT NULL OR us.roleID <= c.roleID AND
+                c.serverID = ?
+""";
+        return jdbcTemplate.query(sql, channelRowMapper(serverID),
+                userID, userID, serverID);
     }
 
     // Edit the roleID using the channelID
@@ -120,5 +128,4 @@ public class ChannelsDao {
         String sql = "DELETE FROM UserChannels WHERE userID = ? and channelID = ?";
         jdbcTemplate.update(sql, userID, channelID);
     }
-
 }

@@ -14,7 +14,7 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 
 ## Channels
 ### Create Channel/UserChannel
-- `POST /channels`: Create a new channel.
+- `POST /servers/{serverID}/channels`: Create a new channel.
     - Request:
       ```json
       {
@@ -30,13 +30,17 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
           { "channelID": 123 }
           ```
 
-- `POST /channels/{channelID}/users/{userID}`: Add a user to a channel.
-- `POST /channels/{channelID}/users`: Add multiple users to a channel
+- `POST /servers/{serverID}/channels/{channelID}/users/{userID}`: 
+  Add a user to a channel.
+  (User sending request must be an admin in the Server)
+- `POST /servers/{serverID}/channels/{channelID}/users`: 
+Add multiple users to a channel
+  (User sending request must be an admin in the Server)
   - Request (list of usersIDs):
     ```json
     [1,3,6,2,]
 ### Get Channels
-- `GET /channels/{serverID}`: Get all channels in a server.
+- `GET /servers/{serverID}/channels/`: Get all channels in a server for the user sending the request.
     - Response:
       ```json
       [
@@ -50,15 +54,16 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
       ]
       ```
 ### Update Channel
-(Request json string/int)
-- `PUT /channels/{channelID}/role`: Update the channel's role.
-- `PUT /channels/{channelID}/name`: Update the channel's name.
-- `PUT /channels/{channelID}`: Update the channel's role and name.
+(User sending request must be an admin in the Server)
+- `PUT /servers/{serverID}/channels/{channelID}/role`: Update the channel's role. (Request text)
+- `PUT /servers/{serverID}/channels/{channelID}/name`: Update the channel's name. (Request text)
+- `PUT /servers/{serverID}/channels/{channelID}`: Update the channel's role and name. (Request json with roleID and channelName)
 
 ### Delete Channel/UserChannel
-- `DELETE /channels/{channelID}`: Delete a channel.
-- `DELETE /channels/{channelID}/users`: Remove multiple users from a channel. (Request json list)
-- `DELETE /channels/{channelID}/users/{userID}`: Remove a user from a channel.
+(User sending request must be an admin in the Server)
+- `DELETE /servers/{serverID}/channels/{channelID}`: Delete a channel.
+- `DELETE /servers/{serverID}/channels/{channelID}/users`: Remove multiple users from a channel. (Request json list)
+- `DELETE /servers/{serverID}/channels/{channelID}/users/{userID}`: Remove a user from a channel.
 
 
 ## Emojis

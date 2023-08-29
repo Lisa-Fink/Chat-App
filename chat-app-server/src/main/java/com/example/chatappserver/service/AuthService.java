@@ -33,14 +33,4 @@ public class AuthService {
     public boolean userIsCreator(int userID, int serverID) {
         return userInServer(userID, serverID, CREATOR_ROLE);
     }
-
-    // Channels Auth
-    public boolean inChannelAndAdmin(int userID, int channelID) {
-        // user either has a UserChannel with the userID and channelID, or
-        // a UserServer.roleID <= Channel.roleID
-        // and the UserServer.roleID must be <= 2
-        return channelsDao.isAdminChannel(userID, channelID);
-    }
-
-
 }
