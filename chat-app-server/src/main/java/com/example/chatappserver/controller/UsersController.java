@@ -2,10 +2,12 @@ package com.example.chatappserver.controller;
 
 import com.example.chatappserver.model.*;
 import com.example.chatappserver.repository.UsersDao;
+import com.example.chatappserver.service.AuthService;
 import com.example.chatappserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,11 +18,13 @@ public class UsersController {
 
     private final UsersDao usersDao;
     private final UserService userService;
+    private final AuthService authService;
 
     @Autowired
-    public UsersController(UsersDao usersDao, UserService userService) {
+    public UsersController(UsersDao usersDao, UserService userService, AuthService authService) {
         this.usersDao = usersDao;
         this.userService = userService;
+        this.authService = authService;
     }
 
     // Creates a new user, using the User object, returning the new userID
@@ -55,35 +59,38 @@ public class UsersController {
     // Returns all Users in a channel
     @GetMapping("/{serverID}/{channelID}")
     public ResponseEntity<List<UserChannelResponse>> getUsersInChannel(
-            @PathVariable int serverID, @PathVariable int channelID) {
+            @PathVariable int serverID, @PathVariable int channelID,
+            @AuthenticationPrincipal CustomUserDetails user) {
+        if (!authService.userInChannel(user.getUserId(), channelID)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         List<UserChannelResponse> channelUsers = usersDao.getUsersInChannel(channelID, serverID);
         return ResponseEntity.ok(channelUsers);
     }
 
     // Updates a Users password
-    @PutMapping("/{userID}/password")
-    public ResponseEntity<Void> updateUserPassword(@PathVariable int userID,
-                                                   @RequestBody String password) {
-        // TODO: Authenticate that user sending request has the same userID
-        userService.updateUserPassword(userID, password);
+    @PutMapping("/password")
+    public ResponseEntity<Void> updateUserPassword(
+            @AuthenticationPrincipal CustomUserDetails user,
+            @RequestBody String password) {
+        userService.updateUserPassword(user.getUserId(), password);
         return ResponseEntity.ok().build();
     }
 
     // Updates a Users image
-    @PutMapping("/{userID}/image")
+    @PutMapping("/image")
     public ResponseEntity<Void> updateUserImage(
-            @PathVariable int userID, @RequestBody String imageUrl) {
-        // TODO: Authenticate that user sending request has the same userID
-        usersDao.editUserImage(userID, imageUrl);
+            @AuthenticationPrincipal CustomUserDetails user,
+            @RequestBody String imageUrl) {
+        usersDao.editUserImage(user.getUserId(), imageUrl);
         return ResponseEntity.ok().build();
     }
 
 
     // Delete a User
-    @DeleteMapping("/{userID}")
-   public ResponseEntity<Void> deleteUser(@PathVariable int userID) {
-        // TODO: Authenticate that user sending request has the same userID
-        usersDao.deleteUser(userID);
+    @DeleteMapping("/")
+   public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal CustomUserDetails user) {
+        usersDao.deleteUser(user.getUserId());
         return ResponseEntity.ok().build();
     }
 }
