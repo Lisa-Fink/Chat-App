@@ -56,6 +56,16 @@ public class ChannelsDao {
         channel.setChannelID(channelID);
     }
 
+    // Create a General Channel (used when creating a new server)
+    public void createGeneral(int serverID) {
+        String sql =
+                "INSERT INTO Channels " +
+                        "(serverID, roleID, channelTypeID, channelName) " +
+                "VALUES (?, 4, 1, 'General')";
+
+        jdbcTemplate.update(sql, serverID);
+    }
+
     // Add users to a channel (Create UserChannels)
     public void addUsersToChannel(List<Integer> userIds, int channelId) {
         String sql = "INSERT INTO UserChannels (userID, channelID) VALUES (?, ?)";

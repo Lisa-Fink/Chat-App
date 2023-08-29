@@ -3,6 +3,7 @@ package com.example.chatappserver.controller;
 import com.example.chatappserver.model.CustomUserDetails;
 import com.example.chatappserver.model.Server;
 import com.example.chatappserver.model.User;
+import com.example.chatappserver.repository.ChannelsDao;
 import com.example.chatappserver.repository.ServersDao;
 import com.example.chatappserver.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,14 @@ import java.util.List;
 public class ServersController {
     private final ServersDao serversDao;
     private final AuthService authService;
+    private final ChannelsDao channelsDao;
 
     @Autowired
-    public ServersController(ServersDao serversDao, AuthService authService) {
+    public ServersController(ServersDao serversDao, AuthService authService,
+                             ChannelsDao channelsDao) {
         this.serversDao = serversDao;
         this.authService = authService;
+        this.channelsDao = channelsDao;
     }
 
 
@@ -41,6 +45,9 @@ public class ServersController {
         // add the user to the server with Creator role
         int creatorRole = 1;
         serversDao.addUser(user.getUserId(), server.getServerID(), creatorRole);
+
+        // create a general channel
+        channelsDao.createGeneral(server.getServerID());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(server.getServerID());
     }
