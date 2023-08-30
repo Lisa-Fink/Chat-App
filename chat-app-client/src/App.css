@@ -1,0 +1,14 @@
+#root {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  min-height: 100%;
+}
+
+.container {
+  height: 50vh;
+  display: flex;
+  justify-content: space-between;
+}
