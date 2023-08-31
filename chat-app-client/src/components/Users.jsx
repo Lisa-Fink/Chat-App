@@ -6,31 +6,31 @@ function Users() {
     {
       userID: 1,
       username: "user1",
-      userImageUrl: "./J7R_2006.jpg",
+      userImageUrl: "./images/cat1.jpg",
       roleID: 1,
     },
     {
       userID: 2,
       username: "user2",
-      userImageUrl: "./J7R_2046.jpg",
+      userImageUrl: "./images/cat-drawing.jpg",
       roleID: 4,
     },
     {
       userID: 3,
       username: "user3",
-      userImageUrl: "./JRR_0015_edit.jpg",
+      userImageUrl: "./images/lisa.jpg",
       roleID: 4,
     },
     {
       userID: 4,
       username: "user4",
-      userImageUrl: "./JRX_2667-2.jpg",
+      userImageUrl: "./images/cat2.jpg",
       roleID: 4,
     },
     {
       userID: 5,
       username: "user5",
-      userImageUrl: "./JRZ_0467.jpg",
+      userImageUrl: "./images/dog1.jpg",
       roleID: 4,
     },
   ];

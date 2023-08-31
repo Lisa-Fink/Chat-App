@@ -12,7 +12,31 @@ function Servers() {
       serverID: 2,
       serverName: "The Hangout",
       serverDescription: "Hangout for friends",
-      serverImageUrl: "./JRX_2667-2.jpg",
+      serverImageUrl: "./images/cat2.jpg",
+    },
+    {
+      serverID: 3,
+      serverName: "Magic The Gathering Players",
+      serverDescription: "A Server for Magic",
+      serverImageUrl: null,
+    },
+    {
+      serverID: 1,
+      serverName: "Lisa's Chat",
+      serverDescription: "Test 1",
+      serverImageUrl: null,
+    },
+    {
+      serverID: 2,
+      serverName: "The Hangout",
+      serverDescription: "Hangout for friends",
+      serverImageUrl: "./images/cat2.jpg",
+    },
+    {
+      serverID: 3,
+      serverName: "Magic The Gathering Players",
+      serverDescription: "A Server for Magic",
+      serverImageUrl: null,
     },
     {
       serverID: 3,
