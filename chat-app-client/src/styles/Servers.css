@@ -8,7 +8,15 @@
   justify-content: flex-start;
   gap: 4%;
   grid-area: 2/1/6/2;
-  overflow-y: hidden;
+  overflow-y: scroll;
+  /* no scrollbar */
+  /* Firefox */
+  scrollbar-width: 0px;
+
+  /* WebKit (Chrome, Safari) */
+  &::-webkit-scrollbar {
+    width: 0px;
+  }
 }
 
 .servers li {
@@ -39,4 +47,5 @@
 .add-thumbnail {
   background-color: var(--left-nav-bg);
   border: 1px solid var(--medium-grey2);
+  min-height: 100px;
 }
