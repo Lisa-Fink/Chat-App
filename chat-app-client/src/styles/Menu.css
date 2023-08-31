@@ -1,0 +1,21 @@
+.menu {
+  background-color: var(--menu-bg);
+  grid-area: 2/3/3/5;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--chat-bg);
+  padding: 0.5%;
+  font-size: 1.5em;
+}
+
+.channel-name {
+  text-align: left;
+  font-weight: bold;
+  padding-left: 2%;
+}
+
+#channel-setting-icon {
+  margin-right: 20px;
+}

@@ -2,4 +2,41 @@
   background-color: var(--left-nav-bg);
   padding: 2%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4%;
+  grid-area: 2/1/6/2;
+  overflow-y: hidden;
+}
+
+.servers li {
+  list-style: none;
+}
+
+.server-thumbnail,
+.letter-thumbnail,
+.add-thumbnail {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 100%;
+}
+
+.letter-thumbnail,
+.add-thumbnail {
+  background-color: var(--accent-text);
+  padding: 1%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 2em;
+  color: white;
+}
+
+.add-thumbnail {
+  background-color: var(--left-nav-bg);
+  border: 1px solid var(--chat-bg);
 }

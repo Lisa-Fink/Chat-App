@@ -1,0 +1,35 @@
+.channels {
+  width: 100%;
+  grid-area: 2/2/5/3;
+  background-color: var(--main-bg);
+  color: white;
+  border-top-left-radius: 15px;
+  font-size: 105%;
+  max-width: 200px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.channels li {
+  list-style: none;
+  text-align: left;
+  padding: 10% 2%;
+  font-weight: bold;
+}
+
+.col-head {
+  border-bottom: 2px solid var(--divider);
+  text-align: center;
+  grid-row: 1/2;
+}
+
+.server-menu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0 16px;
+  color: var(--medium-text);
+  font-weight: bold;
+  grid-area: 5/2/6/3;
+  background-color: var(--main-bg);
+}

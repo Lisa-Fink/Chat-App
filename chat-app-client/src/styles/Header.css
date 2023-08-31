@@ -7,6 +7,8 @@
   background-color: var(--header-bg);
   padding: 0 2%;
   font-weight: bold;
+  grid-area: 1/1/2/5;
+  box-sizing: border-box;
 }
 
 .header h1 {

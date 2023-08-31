@@ -8,7 +8,29 @@
 }
 
 .container {
-  height: 50vh;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  height: 880px;
+  background-color: hsl(0, 0%, 6%);
+}
+
+.thin-scroll {
+  /* scrollbar */
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--body-bg) var(--header-bg);
+
+  /* WebKit (Chrome, Safari) */
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--header-bg);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: var(--body-bg);
+    border-radius: 4px;
+  }
 }
