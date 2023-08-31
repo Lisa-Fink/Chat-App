@@ -38,5 +38,5 @@
 
 .add-thumbnail {
   background-color: var(--left-nav-bg);
-  border: 1px solid var(--chat-bg);
+  border: 1px solid var(--medium-grey2);
 }

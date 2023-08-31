@@ -1,9 +1,9 @@
 .channels {
   width: 100%;
   grid-area: 2/2/5/3;
-  background-color: var(--main-bg);
-  color: white;
-  border-top-left-radius: 15px;
+  background-color: var(--medium-grey);
+  color: var(--light-text);
+  border-top-left-radius: 6px;
   font-size: 105%;
   max-width: 200px;
   overflow-x: hidden;
@@ -21,6 +21,7 @@
   border-bottom: 2px solid var(--divider);
   text-align: center;
   grid-row: 1/2;
+  color: white;
 }
 
 .server-menu {
@@ -28,8 +29,8 @@
   justify-content: center;
   align-items: center;
   gap: 0 16px;
-  color: var(--medium-text);
+  color: var(--medium-light-text);
   font-weight: bold;
   grid-area: 5/2/6/3;
-  background-color: var(--main-bg);
+  background-color: var(--medium-grey);
 }

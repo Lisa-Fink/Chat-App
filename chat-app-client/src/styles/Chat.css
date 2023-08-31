@@ -1,13 +1,14 @@
 .chat {
   width: 100%;
-  background-color: var(--chat-bg);
+  background-color: var(--medium-grey2);
   grid-area: 3/3/4/4;
   overflow-y: scroll;
 
+  color: var(--light-text);
   /* scrollbar */
   /* Firefox */
   scrollbar-width: thin;
-  scrollbar-color: var(--body-bg) var(--header-bg);
+  scrollbar-color: var(--medium-grey3) var(--dark-grey);
 
   /* WebKit (Chrome, Safari) */
   &::-webkit-scrollbar {
@@ -15,12 +16,12 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: var(--header-bg);
+    background-color: var(--dark-grey);
     border-radius: 4px;
   }
 
   &::-webkit-scrollbar-track {
-    background-color: var(--body-bg);
+    background-color: var(--medium-grey3);
     border-radius: 4px;
   }
 }
@@ -51,14 +52,15 @@
 
 .message-username {
   font-weight: bold;
-  color: var(--accent-text-dark);
+  color: var(--online-status-color);
 }
 
 .message-time {
-  color: var(--medium-text);
+  color: var(--medium-light-text);
 }
 
 .edited {
+  color: var(--medium-light-text);
   font-style: italic;
   font-size: 90%;
   align-self: center;

@@ -1,24 +1,23 @@
 @import url("https://fonts.googleapis.com/css2?family=Lunasima:wght@400;700&display=swap");
 :root {
-  --header-bg: hsl(0, 0%, 6%);
-  --left-nav-bg: hsl(0, 0%, 6%);
-  --menu-bg: #202020;
-  --main-bg: #585858;
-  --body-bg: hsl(0, 0%, 25%);
-  --chat-bg: hsl(0, 0%, 55%);
-  --input-bg: var(--main-bg);
-  --accent-text: #3f48cc;
-  --accent-text-dark: hsl(236, 58%, 22%);
-  --divider: #202020;
+  --dark-grey: hsl(0, 0%, 6%);
+  --dark-grey2: hsl(0, 0%, 9%);
+  --medium-grey: hsl(0, 0%, 13%);
+  --medium-grey2: hsl(0, 0%, 18%);
+  --medium-grey3: hsl(0, 0%, 25%);
+  --input-bg: var(--medium-grey);
+  --accent-text: hsl(236, 58%, 50%);
+  --divider: var(--dark-grey2);
   --online-status-color: #43b581;
   --offline-status-color: #747f8d;
-  --medium-text: #202020;
   --dark-text: #000000;
-
+  --medium-text: hsl(0, 0%, 35%);
+  --medium-light-text: hsl(0, 0%, 55%);
+  --light-text: hsl(0, 0%, 80%);
   font-family: "Lunasima", sans-serif;
   line-height: 1.5;
 
-  background-color: var(--body-bg);
+  background-color: var(--medium-grey3);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

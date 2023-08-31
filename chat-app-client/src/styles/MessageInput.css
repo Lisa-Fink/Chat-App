@@ -1,6 +1,6 @@
 .message-input {
   grid-area: 4/3/6/4;
-  background-color: var(--chat-bg);
+  background-color: var(--medium-grey2);
   padding: 0 5% 2% 0;
 }
 
@@ -16,5 +16,5 @@
 }
 
 .message-input input::placeholder {
-  color: var(--chat-bg);
+  color: var(--medium-text);
 }
