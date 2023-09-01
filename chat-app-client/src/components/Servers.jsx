@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { fetchServers } from "../redux/serversSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { setServer } from "../redux/currentSlice";
 import "../styles/Servers.css";
@@ -22,6 +23,11 @@ function Servers() {
   const handleServerEndHover = () => {
     setShowServerDetails(0);
   };
+
+  useEffect(() => {
+    const token = import.meta.env.VITE_TOKEN;
+    dispatch(fetchServers(token));
+  }, []);
 
   const thumbnails = servers.map((server) => {
     return (

@@ -1,30 +1,37 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = [
-  {
-    serverID: 1,
-    serverName: "Lisa's Chat",
-    serverDescription: "Test 1",
-    serverImageUrl: null,
-  },
-  {
-    serverID: 2,
-    serverName: "The Hangout",
-    serverDescription: "Hangout for friends",
-    serverImageUrl: "./images/cat2.jpg",
-  },
-  {
-    serverID: 3,
-    serverName: "Magic The Gathering Players",
-    serverDescription: "A Server for Magic",
-    serverImageUrl: null,
-  },
-];
+const initialState = [];
 
 const serversSlice = createSlice({
   name: "servers",
   initialState,
-  reducers: {},
+  reducers: {
+    setServers: (state, action) => {
+      state.splice(0, state.length, ...action.payload);
+    },
+  },
 });
+
+export const { setServers } = serversSlice.actions;
+
+export const fetchServers = (token) => async (dispatch) => {
+  const apiUrl = import.meta.env.VITE_CHAT_API;
+  const url = `${apiUrl}/servers`;
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) {
+      throw new Error("Failed to get servers.");
+    }
+    const data = await res.json();
+    dispatch(setServers(data));
+  } catch (error) {
+    throw error;
+  }
+};
 
 export default serversSlice.reducer;
