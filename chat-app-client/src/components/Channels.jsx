@@ -3,143 +3,60 @@ import "../styles/Channels.css";
 import { MdSettings } from "react-icons/md";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { setChannel } from "../redux/currentSlice";
 
-function Channels({ server, serverName }) {
-  // store channels mapped to serverID
-  const channelsHardcoded = {
-    1: [
-      {
-        channelID: 1,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "General",
-      },
-      {
-        channelID: 2,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Cat Pics",
-      },
-      {
-        channelID: 3,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Leetcode",
-      },
-      {
-        channelID: 4,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Random",
-      },
-      {
-        channelID: 5,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Tech Talk",
-      },
-      {
-        channelID: 6,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Funny Memes",
-      },
-      {
-        channelID: 7,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Music",
-      },
-      {
-        channelID: 8,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Movies",
-      },
-      {
-        channelID: 9,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Books",
-      },
-      {
-        channelID: 10,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Food",
-      },
-      {
-        channelID: 11,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Gaming",
-      },
-      {
-        channelID: 12,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Travel",
-      },
-      {
-        channelID: 13,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Fitness",
-      },
-      {
-        channelID: 14,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Art",
-      },
-      {
-        channelID: 15,
-        serverID: 1,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Science",
-      },
-    ],
-    3: [
-      {
-        channelID: 16,
-        serverID: 3,
-        roleID: 4,
-        channelTypeID: 1,
-        channelName: "Science",
-      },
-    ],
+function Channels() {
+  const dispatch = useDispatch();
+  const { server } = useSelector((state) => state.current);
+  const channels = useSelector((state) => state.channels);
+  const [curChannels, setCurChannels] = useState(
+    server.id in channels ? channels[server.id] : []
+  );
+
+  useEffect(() => {
+    // curChannels to store all channels in the current server
+    if (server.id in channels) {
+      setCurChannels(channels[server.id]);
+      // current.channel updated to first channel in the list of channels
+      const firstChannel = channels[server.id][0];
+      dispatch(
+        setChannel({
+          id: firstChannel.channelID,
+          name: firstChannel.channelName,
+        })
+      );
+    } else {
+      setCurChannels([]);
+      dispatch(setChannel({ id: 0, name: "None" }));
+    }
+  }, [server]);
+
+  const handleChannelClick = (e) => {
+    const newChannelID = e.currentTarget.dataset.id;
+    const newChannelName = e.currentTarget.dataset.name;
+    dispatch(setChannel({ id: newChannelID, name: newChannelName }));
   };
 
-  const [channels, setChannels] = useState(channelsHardcoded[server]);
-  useEffect(() => {
-    setChannels(channelsHardcoded[server]);
-  }, [server]);
-  // if server changes, channels needs to be updated to display the channels of the new server
-
-  const channelList = channels.map((channel) => {
-    return <li key={channel.channelID}># {channel.channelName}</li>;
+  const channelList = curChannels.map((channel) => {
+    return (
+      <li key={channel.channelID}>
+        <button
+          data-id={channel.channelID}
+          data-name={channel.channelName}
+          onClick={handleChannelClick}
+        >
+          # {channel.channelName}
+        </button>
+      </li>
+    );
   });
 
   return (
     <>
       <div className="channels thin-scroll">
         <div className="col-head">
-          <h2>{serverName}</h2>
+          <h2>{server.name}</h2>
         </div>
         <ul>{channelList}</ul>
       </div>

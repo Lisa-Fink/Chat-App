@@ -1,13 +1,17 @@
 import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { setServer } from "../redux/currentSlice";
 import "../styles/Servers.css";
-function Servers({ servers, server, setServer, setServerName }) {
+function Servers() {
+  const dispatch = useDispatch();
+  const servers = useSelector((state) => state.servers);
+
   const [showServerDetails, setShowServerDetails] = useState(0);
 
   const handleServerClick = (e) => {
     const serverID = parseInt(e.currentTarget.dataset.serverId);
     const serverName = e.currentTarget.dataset.serverName;
-    setServer(serverID);
-    setServerName(serverName);
+    dispatch(setServer({ id: serverID, name: serverName }));
   };
 
   const handleServerHover = (e) => {
