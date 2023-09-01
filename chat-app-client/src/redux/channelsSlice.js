@@ -1,135 +1,44 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
-  1: [
-    {
-      channelID: 1,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "General",
-    },
-    {
-      channelID: 2,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Cat Pics",
-    },
-    {
-      channelID: 3,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Leetcode",
-    },
-    {
-      channelID: 4,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Random",
-    },
-    {
-      channelID: 5,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Tech Talk",
-    },
-    {
-      channelID: 6,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Funny Memes",
-    },
-    {
-      channelID: 7,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Music",
-    },
-    {
-      channelID: 8,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Movies",
-    },
-    {
-      channelID: 9,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Books",
-    },
-    {
-      channelID: 10,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Food",
-    },
-    {
-      channelID: 11,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Gaming",
-    },
-    {
-      channelID: 12,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Travel",
-    },
-    {
-      channelID: 13,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Fitness",
-    },
-    {
-      channelID: 14,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Art",
-    },
-    {
-      channelID: 15,
-      serverID: 1,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Science",
-    },
-  ],
-  3: [
-    {
-      channelID: 16,
-      serverID: 3,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "General",
-    },
-    {
-      channelID: 17,
-      serverID: 3,
-      roleID: 4,
-      channelTypeID: 1,
-      channelName: "Strategy",
-    },
-  ],
-};
+const initialState = {};
 
 const channelsSlice = createSlice({
   name: "channels",
   initialState,
-  reducers: {},
+  reducers: {
+    addServerChannels: (state, action) => {
+      const { serverID, data } = action.payload;
+      state[serverID] = data;
+    },
+  },
 });
+
+export const { addServerChannels } = channelsSlice.actions;
+
+export const fetchChannels =
+  (token, serverID) => async (dispatch, getState) => {
+    const { channels } = getState();
+    if (serverID in channels) {
+      return channels[serverID];
+    }
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/servers/${serverID}/channels`;
+    try {
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) {
+        throw new Error("Failed to get channels.");
+      }
+      const data = await res.json();
+      dispatch(addServerChannels({ serverID, data }));
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
 
 export default channelsSlice.reducer;

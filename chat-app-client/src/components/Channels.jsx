@@ -5,6 +5,7 @@ import { AiOutlinePlusCircle } from "react-icons/ai";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setChannel } from "../redux/currentSlice";
+import { fetchChannels } from "../redux/channelsSlice";
 
 function Channels() {
   const dispatch = useDispatch();
@@ -16,21 +17,22 @@ function Channels() {
 
   useEffect(() => {
     // curChannels to store all channels in the current server
-    if (server.id in channels) {
-      setCurChannels(channels[server.id]);
-      // current.channel updated to first channel in the list of channels
-      const firstChannel = channels[server.id][0];
+    if (server && server.id) getChannels();
+  }, [server]);
+
+  const getChannels = async () => {
+    const token = import.meta.env.VITE_TOKEN;
+    dispatch(fetchChannels(token, server.id)).then((res) => {
+      setCurChannels(res);
+      const firstChannel = res[0];
       dispatch(
         setChannel({
           id: firstChannel.channelID,
           name: firstChannel.channelName,
         })
       );
-    } else {
-      setCurChannels([]);
-      dispatch(setChannel({ id: 0, name: "None" }));
-    }
-  }, [server]);
+    });
+  };
 
   const handleChannelClick = (e) => {
     const newChannelID = e.currentTarget.dataset.id;

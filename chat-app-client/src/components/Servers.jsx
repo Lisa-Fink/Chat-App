@@ -27,7 +27,16 @@ function Servers() {
   useEffect(() => {
     const token = import.meta.env.VITE_TOKEN;
     dispatch(fetchServers(token));
+    // set current server to first server
   }, []);
+
+  useEffect(() => {
+    if (servers.length > 0) {
+      dispatch(
+        setServer({ id: servers[0].serverID, name: servers[0].serverName })
+      );
+    }
+  }, [servers]);
 
   const thumbnails = servers.map((server) => {
     return (

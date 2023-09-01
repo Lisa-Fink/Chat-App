@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  server: { id: 1, name: "Lisa" }, // {id, name}
-  channel: { id: 1, name: "General" }, // {id, name}
+  server: {}, // {id, name}
+  channel: {}, // {id, name}
 };
 
 const curSlice = createSlice({
