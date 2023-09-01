@@ -14,7 +14,6 @@
   text-align: left;
   padding: 10% 2%;
   font-weight: bold;
-  max-width: 200px;
 }
 
 .col-head {
@@ -22,7 +21,6 @@
   text-align: center;
   grid-row: 1/2;
   color: white;
-  max-width: 200px;
 }
 
 .server-menu {

@@ -41,3 +41,18 @@ h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
+
+ul {
+  margin: 0;
+  margin-block: 0;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
+button {
+  border: none;
+  background-color: inherit;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
