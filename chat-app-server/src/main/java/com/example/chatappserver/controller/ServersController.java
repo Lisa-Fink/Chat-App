@@ -128,13 +128,15 @@ public class ServersController {
     }
 
     // Remove a user from a server, Deletes UserServers
-    @DeleteMapping("/{serverID}/users")
+    @DeleteMapping("/{serverID}/users/{userID}")
     public ResponseEntity<Void> deleteUserFromServer(
-            @PathVariable int serverID, @AuthenticationPrincipal CustomUserDetails user) {
-        if (!authService.userIsAdmin(user.getUserId(), serverID)) {
+            @PathVariable int serverID, @AuthenticationPrincipal CustomUserDetails user,
+            @PathVariable int userID) {
+        // TODO: cannot remove creator of server, add to README
+        if (user.getUserId() != userID && !authService.userIsAdmin(user.getUserId(), serverID)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        serversDao.deleteUserServer(serverID, user.getUserId());
+        serversDao.deleteUserServer(serverID, userID);
         return ResponseEntity.ok().build();
     }
 }
