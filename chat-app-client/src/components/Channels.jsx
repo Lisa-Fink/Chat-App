@@ -1,38 +1,43 @@
-import React from "react";
+import React, { useMemo } from "react";
 import "../styles/Channels.css";
 import { MdSettings } from "react-icons/md";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setChannel } from "../redux/currentSlice";
-import { fetchChannels } from "../redux/channelsSlice";
+import { fetchChannelsForServer } from "../redux/channelsSlice";
 
 function Channels() {
   const dispatch = useDispatch();
   const { server } = useSelector((state) => state.current);
-  const channels = useSelector((state) => state.channels);
+  const channels = useSelector((state) => state.channels.byServerID);
+  const channelsStatus = useSelector((state) => state.channels.status);
   const [curChannels, setCurChannels] = useState(
     server.id in channels ? channels[server.id] : []
   );
 
+  // When a server is selected, gets the channels for the server
   useEffect(() => {
     // curChannels to store all channels in the current server
-    if (server && server.id) getChannels();
+    if (server && server.id) {
+      const token = import.meta.env.VITE_TOKEN;
+      dispatch(fetchChannelsForServer({ token: token, serverID: server.id }));
+    }
   }, [server]);
 
-  const getChannels = async () => {
-    const token = import.meta.env.VITE_TOKEN;
-    dispatch(fetchChannels(token, server.id)).then((res) => {
-      setCurChannels(res);
-      const firstChannel = res[0];
+  // After the channels are fetched, updates curChannels and current channel
+  useEffect(() => {
+    if (channelsStatus === "succeeded") {
+      setCurChannels(channels[server.id]);
+      const firstChannel = channels[server.id][0];
       dispatch(
         setChannel({
           id: firstChannel.channelID,
           name: firstChannel.channelName,
         })
       );
-    });
-  };
+    }
+  }, [channelsStatus]);
 
   const handleChannelClick = (e) => {
     const newChannelID = e.currentTarget.dataset.id;
@@ -40,19 +45,20 @@ function Channels() {
     dispatch(setChannel({ id: newChannelID, name: newChannelName }));
   };
 
-  const channelList = curChannels.map((channel) => {
-    return (
-      <li key={channel.channelID}>
+  // will only rerender channel list if curChannels changes
+  const channelList = useMemo(() => {
+    return curChannels.map(({ channelID, channelName }) => (
+      <li key={channelID}>
         <button
-          data-id={channel.channelID}
-          data-name={channel.channelName}
+          data-id={channelID}
+          data-name={channelName}
           onClick={handleChannelClick}
         >
-          # {channel.channelName}
+          # {channelName}
         </button>
       </li>
-    );
-  });
+    ));
+  }, [curChannels]);
 
   return (
     <>

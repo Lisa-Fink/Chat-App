@@ -5,7 +5,8 @@ import { setServer } from "../redux/currentSlice";
 import "../styles/Servers.css";
 function Servers() {
   const dispatch = useDispatch();
-  const servers = useSelector((state) => state.servers);
+  const servers = useSelector((state) => state.servers.data);
+  const serversStatus = useSelector((state) => state.servers.status);
 
   const [showServerDetails, setShowServerDetails] = useState(0);
 
@@ -26,17 +27,10 @@ function Servers() {
 
   useEffect(() => {
     const token = import.meta.env.VITE_TOKEN;
-    dispatch(fetchServers(token));
-    // set current server to first server
-  }, []);
-
-  useEffect(() => {
-    if (servers.length > 0) {
-      dispatch(
-        setServer({ id: servers[0].serverID, name: servers[0].serverName })
-      );
+    if (serversStatus === "idle") {
+      dispatch(fetchServers(token));
     }
-  }, [servers]);
+  }, []);
 
   const thumbnails = servers.map((server) => {
     return (

@@ -1,23 +1,37 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-const initialState = [];
+const initialState = {
+  data: [],
+  status: "idle",
+  error: null,
+};
 
 const serversSlice = createSlice({
   name: "servers",
   initialState,
-  reducers: {
-    setServers: (state, action) => {
-      state.splice(0, state.length, ...action.payload);
-    },
+  reducers: {},
+  extraReducers(builder) {
+    builder
+      .addCase(fetchServers.pending, (state, action) => {
+        state.status = "loading";
+      })
+      .addCase(fetchServers.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.data = action.payload;
+      })
+      .addCase(fetchServers.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      });
   },
 });
 
-export const { setServers } = serversSlice.actions;
+export const fetchServers = createAsyncThunk(
+  "servers/fetchServers",
+  async (token) => {
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/servers`;
 
-export const fetchServers = (token) => async (dispatch) => {
-  const apiUrl = import.meta.env.VITE_CHAT_API;
-  const url = `${apiUrl}/servers`;
-  try {
     const res = await fetch(url, {
       method: "GET",
       headers: {
@@ -28,10 +42,8 @@ export const fetchServers = (token) => async (dispatch) => {
       throw new Error("Failed to get servers.");
     }
     const data = await res.json();
-    dispatch(setServers(data));
-  } catch (error) {
-    throw error;
+    return data;
   }
-};
+);
 
 export default serversSlice.reducer;
