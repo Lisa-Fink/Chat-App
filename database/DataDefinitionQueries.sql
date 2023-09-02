@@ -146,9 +146,9 @@ VALUES
 -- Servers
 INSERT INTO Servers (serverName, serverDescription, serverImageUrl)
 VALUES
-    ('server1', 'server 1 description', 'https://example.com/server1.jpg'),
-    ('server2', 'server 2 description', 'https://example.com/server1.jpg'),
-    ('server3', 'server 3 description', 'https://example.com/server1.jpg');
+    ('server1', 'server 1 description', './images/cat-drawing.jpg'),
+    ('server2', 'server 2 description', './images/cat1.jpg'),
+    ('server3', 'server 3 description', './images/cat2.jpg');
 
 -- Roles
 INSERT INTO Roles (roleName)

@@ -67,14 +67,15 @@ SELECT channelID, channelName FROM Channels WHERE serverID = :serverID;
 SELECT COUNT(*) FROM Channels WHERE serverID = :serverID AND channelName = :channelName
 
 -- Check if a User is in a Channel using both UserChannels and UserServers.roleID
-SELECT COUNT(*) FROM UserChannels
-WHERE userID = :userID AND channelID = :channelID
-UNION
-SELECT COUNT(*) FROM UserServers us
-INNER JOIN Channels c ON us.serverID = c.serverID
-WHERE us.userID = :userID AND c.channelID = :channelID
-  AND us.roleID <= c.roleID;
-
+SELECT 1 FROM UserChannels
+                WHERE userID = :userID AND channelID = :channelID
+                UNION ALL
+                SELECT 1 FROM UserServers us
+                INNER JOIN Channels c ON us.serverID = c.serverID
+                WHERE us.userID = :userID AND c.channelID = :channelID
+                  AND us.roleID <= c.roleID
+                LIMIT 1;
+                
 -- Add a channel using a given serverID, roleID, channelTypeID, and channelName
 INSERT INTO Channels (serverID, roleID, channelTypeID, channelName) VALUES (:newServerID, :newRoleID, :newChannelTypeID, :newChannelName);
 
