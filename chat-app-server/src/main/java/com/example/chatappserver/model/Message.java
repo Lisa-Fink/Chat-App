@@ -13,7 +13,7 @@ public class Message {
     private Boolean edited;
     private List<Reaction> reactions;
     private List<Attachment> attachments;
-    private String username;
+
     public Message() {}
 
     // Used when creating new message
@@ -25,6 +25,15 @@ public class Message {
         this.userID = userID;
         this.channelID = channelID;
         this.edited = false;
+    }
+
+    public Message(int messageID, String text, Timestamp time, int userID, int channelID, boolean edited) {
+        this.messageID = messageID;
+        this.text = text;
+        this.time = time;
+        this.userID = userID;
+        this.channelID = channelID;
+        this.edited = edited;
     }
 
     public List<Reaction> getReactions() {
@@ -39,13 +48,6 @@ public class Message {
         this.attachments = attachments;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     // Used when creating new message
     // creating with attachments but no reactions
@@ -67,7 +69,6 @@ public class Message {
         this.text = text;
         this.time = time;
         this.userID = userID;
-        this.username = username;
         this.channelID = channelID;
         this.edited = edited;
     }

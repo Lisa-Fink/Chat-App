@@ -1,9 +1,6 @@
 package com.example.chatappserver.controller;
 
-import com.example.chatappserver.model.CustomUserDetails;
-import com.example.chatappserver.model.Message;
-import com.example.chatappserver.model.Attachment;
-import com.example.chatappserver.model.MessageAttachmentResponse;
+import com.example.chatappserver.model.*;
 import com.example.chatappserver.repository.MessagesDao;
 import com.example.chatappserver.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +27,7 @@ public class MessagesController {
     // Create a message with no attachment
     @PostMapping
     public ResponseEntity<Integer> createMessage(
-            @RequestBody Message message, @PathVariable int channelID,
+            @RequestBody Message message, @PathVariable int serverID, @PathVariable int channelID,
             @AuthenticationPrincipal CustomUserDetails user) {
         if (!authService.userInChannel(user.getUserId(), channelID)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -60,7 +57,7 @@ public class MessagesController {
     // Get all messages in a Channel
     @GetMapping
     public ResponseEntity<List<Message>> getMessagesInChannel(
-            @PathVariable int channelID,
+            @PathVariable int serverID, @PathVariable int channelID,
             @AuthenticationPrincipal CustomUserDetails user) {
         if (!authService.userInChannel(user.getUserId(), channelID)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

@@ -92,7 +92,6 @@ public class MessagesDao {
                 Timestamp time = resultSet.getTimestamp("time");
                 boolean edited = resultSet.getBoolean("edited");
                 int userID = resultSet.getInt("userID");
-                String username = resultSet.getString("username");
 
                 int reactionID = resultSet.getInt("reactionID");
                 String emojiCode = resultSet.getString("emojiCode");
@@ -104,12 +103,12 @@ public class MessagesDao {
 
 
                 if (currentMessage == null || currentMessage.getMessageID() != messageID) {
-                    currentMessage = new Message(messageID, text, time, userID, username, channelID, edited);
+                    currentMessage = new Message(messageID, text, time, userID, channelID, edited);
                     messages.add(currentMessage);
                 }
 
                 if (reactionID != 0) { // Check if reactionID is not null
-                    Reaction reaction = new Reaction(messageID, reactionID, emojiCode, emojiName, userID, username);
+                    Reaction reaction = new Reaction(messageID, reactionID, emojiCode, emojiName, userID);
                     currentMessage.addReaction(reaction);
                 }
 

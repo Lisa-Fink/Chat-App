@@ -5,7 +5,6 @@ public class Reaction {
     private String emojiCode;
     private String emojiName;
     private int userID;
-    private String username;
     private int messageID;
     private int emojiID;
 
@@ -20,13 +19,12 @@ public class Reaction {
     public Reaction() {
     }
 
-    public Reaction(int messageID, int reactionID, String emojiCode, String emojiName, int userID, String username) {
+    public Reaction(int messageID, int reactionID, String emojiCode, String emojiName, int userID) {
         this.messageID = messageID;
         this.reactionID = reactionID;
         this.emojiCode = emojiCode;
         this.emojiName = emojiName;
         this.userID = userID;
-        this.username = username;
     }
 
 
