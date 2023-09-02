@@ -24,9 +24,17 @@
   font-weight: bold;
 }
 
-.users li img {
+.user-thumbnail {
   width: 40px;
   height: 40px;
   object-fit: cover;
   border-radius: 100%;
+}
+
+div .user-thumbnail {
+  background-color: var(--accent-text);
+  color: var(--light-text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

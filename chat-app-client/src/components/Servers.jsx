@@ -7,6 +7,7 @@ function Servers() {
   const dispatch = useDispatch();
   const servers = useSelector((state) => state.servers.data);
   const serversStatus = useSelector((state) => state.servers.status);
+  const token = useSelector((state) => state.auth.token);
 
   const [showServerDetails, setShowServerDetails] = useState(0);
 
@@ -26,7 +27,6 @@ function Servers() {
   };
 
   useEffect(() => {
-    const token = import.meta.env.VITE_TOKEN;
     if (serversStatus === "idle") {
       dispatch(fetchServers(token));
     }

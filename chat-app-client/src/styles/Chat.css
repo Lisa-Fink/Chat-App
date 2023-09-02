@@ -45,6 +45,15 @@
   object-fit: cover;
 }
 
+div .message-thumbnail {
+  background-color: var(--accent-text);
+  color: var(--light-text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+
 .message {
   display: flex;
   padding: 1%;

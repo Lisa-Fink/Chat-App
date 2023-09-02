@@ -1,0 +1,68 @@
+.login-signup {
+  grid-area: 2/1/4/5;
+  color: var(--light-text);
+  padding-bottom: 50px;
+  min-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-signup h2 {
+  color: var(--online-status-color);
+}
+
+.login-signup form label {
+  display: block;
+  margin-top: 25px;
+}
+
+.login-signup form input {
+  outline: none;
+  border: none;
+  padding: 1%;
+  font-size: 101%;
+  border-radius: 15px;
+  width: 30%;
+  box-sizing: border-box;
+  background-color: var(--offline-status-color);
+}
+
+.login-signup form input:focus {
+  background-color: var(--light-text);
+}
+
+.login-signup form input::placeholder {
+  color: var(--medium-grey3);
+}
+
+.login-signup button {
+  background-color: var(--accent-text);
+  border-radius: 15px;
+  padding: 10px 50px;
+  width: 30%;
+  margin-top: 65px;
+}
+
+.login-signup button:hover {
+  background-color: var(--online-status-color);
+  color: var(--medium-grey3);
+}
+
+.login-signup a {
+  color: var(--online-status-color);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.login-signup a:hover {
+  color: var(--accent-text);
+}
+
+.login-signup h1 {
+  color: var(--accent-text);
+}
+
+.error {
+  color: rgb(203, 0, 0);
+}

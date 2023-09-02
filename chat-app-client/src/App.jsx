@@ -5,23 +5,31 @@ import Users from "./components/Users";
 import Channels from "./components/Channels";
 import Menu from "./components/Menu";
 import MessageInput from "./components/MessageInput";
+import Auth from "./components/Auth";
 
 import "./App.css";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 
 function App() {
+  const auth = useSelector((state) => state.auth);
   const [serverName, setServerName] = useState("lisa");
-
   return (
     <>
       <div className="container">
-        <Header />
-        <Menu />
-        <Servers />
-        <Channels />
-        <Chat />
-        <Users />
-        <MessageInput />
+        {!auth.isAuthenticated ? (
+          <Auth />
+        ) : (
+          <>
+            <Header />
+            <Menu />
+            <Servers />
+            <Channels />
+            <Chat />
+            <Users />
+            <MessageInput />
+          </>
+        )}
       </div>
     </>
   );

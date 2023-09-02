@@ -22,7 +22,13 @@ function Users() {
     return userArr.map((user) => {
       return (
         <li className="user-list" key={user.userID}>
-          <img src={user.userImageUrl} />
+          {user.userImageUrl ? (
+            <img className="user-thumbnail" src={user.userImageUrl} />
+          ) : (
+            <div className="user-thumbnail">
+              {user.username.substring(0, 1).toUpperCase()}
+            </div>
+          )}
           <div>{user.username}</div>
         </li>
       );

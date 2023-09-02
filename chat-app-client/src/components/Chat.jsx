@@ -7,6 +7,7 @@ import { fetchUsersForChannel } from "../redux/usersSlice";
 function Chat() {
   const dispatch = useDispatch();
   const { channel, server } = useSelector((state) => state.current);
+  const token = useSelector((state) => state.auth.token);
   const messages = useSelector((state) => state.messages.byChannelID);
   const messagesStatus = useSelector((state) => state.messages.status);
   const usersStatus = useSelector((state) => state.users.status);
@@ -17,7 +18,6 @@ function Chat() {
   );
   useEffect(() => {
     if (channel && channel.id) {
-      const token = import.meta.env.VITE_TOKEN;
       dispatch(
         fetchMessagesForChannel({
           token: token,
@@ -44,10 +44,16 @@ function Chat() {
   const messageList = curMessages.map((message) => {
     return (
       <li className="message" key={message.messageID}>
-        <img
-          className="message-thumbnail"
-          src={users[message.userID].userImageUrl}
-        />
+        {users[message.userID].userImageUrl ? (
+          <img
+            className="message-thumbnail"
+            src={users[message.userID].userImageUrl}
+          />
+        ) : (
+          <div className="message-thumbnail">
+            {users[message.userID].username.substring(0, 1).toUpperCase()}
+          </div>
+        )}
         <div>
           <div className="message-data">
             <div className="message-username">

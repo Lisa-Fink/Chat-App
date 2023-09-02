@@ -10,6 +10,7 @@ import { fetchChannelsForServer } from "../redux/channelsSlice";
 function Channels() {
   const dispatch = useDispatch();
   const { server } = useSelector((state) => state.current);
+  const token = useSelector((state) => state.auth.token);
   const channels = useSelector((state) => state.channels.byServerID);
   const channelsStatus = useSelector((state) => state.channels.status);
   const [curChannels, setCurChannels] = useState(
@@ -20,7 +21,6 @@ function Channels() {
   useEffect(() => {
     // curChannels to store all channels in the current server
     if (server && server.id) {
-      const token = import.meta.env.VITE_TOKEN;
       dispatch(fetchChannelsForServer({ token: token, serverID: server.id }));
     }
   }, [server]);

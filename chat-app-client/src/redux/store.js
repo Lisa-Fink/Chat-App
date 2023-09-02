@@ -4,6 +4,7 @@ import channelsReducer from "./channelsSlice";
 import messagesReducer from "./messagesSlice";
 import usersReducer from "./usersSlice";
 import currentReducer from "./currentSlice";
+import authReducer from "./authSlice";
 
 export default configureStore({
   reducer: {
@@ -12,5 +13,6 @@ export default configureStore({
     messages: messagesReducer,
     users: usersReducer,
     current: currentReducer,
+    auth: authReducer,
   },
 });
