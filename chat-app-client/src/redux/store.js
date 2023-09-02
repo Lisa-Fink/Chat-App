@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import serversReducer from "./serversSlice";
 import channelsReducer from "./channelsSlice";
 import messagesReducer from "./messagesSlice";
-import userChannelsReducer from "./userChannelsSlice";
+import usersReducer from "./usersSlice";
 import currentReducer from "./currentSlice";
 
 export default configureStore({
@@ -10,7 +10,7 @@ export default configureStore({
     servers: serversReducer,
     channels: channelsReducer,
     messages: messagesReducer,
-    userChannels: userChannelsReducer,
+    users: usersReducer,
     current: currentReducer,
   },
 });

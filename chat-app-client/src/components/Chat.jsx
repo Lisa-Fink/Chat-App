@@ -1,46 +1,45 @@
 import React, { useEffect, useState } from "react";
 import "../styles/Chat.css";
 import { useSelector, useDispatch } from "react-redux";
+import { fetchMessagesForChannel } from "../redux/messagesSlice";
+import { fetchUsersForChannel } from "../redux/usersSlice";
 
 function Chat() {
   const dispatch = useDispatch();
-  const { channel } = useSelector((state) => state.current);
-  const messages = useSelector((state) => state.messages);
+  const { channel, server } = useSelector((state) => state.current);
+  const messages = useSelector((state) => state.messages.byChannelID);
+  const messagesStatus = useSelector((state) => state.messages.status);
+  const usersStatus = useSelector((state) => state.users.status);
+  const users = useSelector((state) => state.users.dataByID);
 
   const [curMessages, setCurMessages] = useState(
     channel.id in messages ? messages[channel.id] : []
   );
   useEffect(() => {
-    setCurMessages(channel.id in messages ? messages[channel.id] : []);
+    if (channel && channel.id) {
+      const token = import.meta.env.VITE_TOKEN;
+      dispatch(
+        fetchMessagesForChannel({
+          token: token,
+          serverID: server.id,
+          channelID: channel.id,
+        })
+      );
+      dispatch(
+        fetchUsersForChannel({
+          token: token,
+          serverID: server.id,
+          channelID: channel.id,
+        })
+      );
+    }
   }, [channel]);
 
-  const users = {
-    1: {
-      username: "user1",
-      userImageUrl: "./images/cat1.jpg",
-      roleID: 1,
-    },
-    2: {
-      username: "user2",
-      userImageUrl: "./images/cat-drawing.jpg",
-      roleID: 4,
-    },
-    3: {
-      username: "user3",
-      userImageUrl: "./images/lisa.jpg",
-      roleID: 4,
-    },
-    4: {
-      username: "user4",
-      userImageUrl: "./images/cat2.jpg",
-      roleID: 4,
-    },
-    5: {
-      username: "user5",
-      userImageUrl: "./images/dog1.jpg",
-      roleID: 4,
-    },
-  };
+  useEffect(() => {
+    if (messagesStatus === "succeeded" && usersStatus === "succeeded") {
+      setCurMessages(messages[channel.id]);
+    }
+  }, [messagesStatus, usersStatus]);
 
   const messageList = curMessages.map((message) => {
     return (

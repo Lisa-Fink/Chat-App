@@ -4,16 +4,19 @@ import "../styles/Users.css";
 
 function Users() {
   const { id } = useSelector((state) => state.current.channel);
-  const userChannels = useSelector((state) => state.userChannels);
+  const userChannels = useSelector((state) => state.users.byChannelID);
+  const usersStatus = useSelector((state) => state.users.status);
   const [curUserChannels, setCurUserChannels] = useState(
     id in userChannels ? userChannels[id] : [[], [], [], []]
   );
 
   useEffect(() => {
-    setCurUserChannels(
-      id in userChannels ? userChannels[id] : [[], [], [], []]
-    );
-  }, [id]);
+    if (usersStatus === "succeeded") {
+      setCurUserChannels(
+        id in userChannels ? userChannels[id] : [[], [], [], []]
+      );
+    }
+  }, [usersStatus]);
 
   const userList = (userArr) => {
     return userArr.map((user) => {
