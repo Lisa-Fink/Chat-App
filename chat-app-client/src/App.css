@@ -9,7 +9,7 @@
 
 .container {
   display: grid;
-  height: 880px;
+  max-height: 880px;
   background-color: hsl(0, 0%, 6%);
   align-items: stretch;
   justify-items: stretch;

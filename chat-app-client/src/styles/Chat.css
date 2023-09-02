@@ -4,7 +4,7 @@
   background-color: var(--medium-grey2);
   grid-area: 3/3/4/4;
   overflow-y: auto;
-  min-height: 654px;
+  min-height: 68vh;
   color: var(--light-text);
   text-align: left;
   /* scrollbar */
