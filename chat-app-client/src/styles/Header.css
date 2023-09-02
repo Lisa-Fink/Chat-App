@@ -20,3 +20,28 @@
   background-color: white;
   padding: 2%;
 }
+
+.header-thumbnail {
+  position: relative;
+  text-align: center;
+}
+
+.header-dropdown {
+  position: absolute;
+  background-color: var(--dark-grey);
+  color: var(--light-text);
+  width: 150%;
+  padding: 15px;
+  margin-left: -35px;
+  text-align: left;
+  border: 1px solid var(--medium-grey);
+  border-radius: 15px;
+}
+
+.header-dropdown li {
+  list-style: none;
+}
+
+.header-dropdown button:hover {
+  color: var(--medium-light-text);
+}

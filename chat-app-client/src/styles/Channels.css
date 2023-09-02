@@ -16,6 +16,10 @@
   font-weight: bold;
 }
 
+.channels button:hover {
+  color: var(--medium-light-text);
+}
+
 .col-head {
   border-bottom: 2px solid var(--divider);
   text-align: center;

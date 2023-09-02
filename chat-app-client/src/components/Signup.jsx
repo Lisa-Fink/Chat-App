@@ -29,6 +29,11 @@ function Signup({ toggleMenu }) {
     if (isEmailValid && isPasswordValid && passwordsMatch && isUsernameValid) {
       try {
         dispatch(registerAndLogin({ username, email, password }));
+        // clear the form data
+        setPassword("");
+        setEmail("");
+        setPasswordConfirm("");
+        setUsername("");
       } catch (error) {
         setError(error);
       }

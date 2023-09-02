@@ -45,6 +45,7 @@ public class UsersController {
     }
 
 
+
     // Login using email and password
     @PostMapping("/login")
     public ResponseEntity<?>loginUserWithEmail(@RequestBody UserLoginRequest loginRequest) {
@@ -78,11 +79,22 @@ public class UsersController {
     }
 
     // Updates a Users image
+    public static class UpdateImageReq {
+        private String userImageUrl;
+
+        public String getUserImageUrl() {
+            return userImageUrl;
+        }
+
+        public void setUserImageUrl(String userImageUrl) {
+            this.userImageUrl = userImageUrl;
+        }
+    }
     @PutMapping("/image")
     public ResponseEntity<Void> updateUserImage(
             @AuthenticationPrincipal CustomUserDetails user,
-            @RequestBody String imageUrl) {
-        usersDao.editUserImage(user.getUserId(), imageUrl);
+            @RequestBody UpdateImageReq imageReq) {
+        usersDao.editUserImage(user.getUserId(), imageReq.getUserImageUrl());
         return ResponseEntity.ok().build();
     }
 

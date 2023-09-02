@@ -1,17 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/login-signup.css";
 import { login } from "../redux/authSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 function Login({ toggleMenu }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [validEmail, setValidEmail] = useState(true);
   const [validPassword, setValidPassword] = useState(true);
   const dispatch = useDispatch();
+  const error = useSelector((state) => state.auth.error);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     const emailPattern = /^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$/;
     const isEmailValid = emailPattern.test(email);
@@ -19,23 +19,19 @@ function Login({ toggleMenu }) {
     setValidEmail(isEmailValid);
     setValidPassword(isPasswordValid);
     if (isEmailValid && isPasswordValid) {
-      try {
-        dispatch(login({ email, password }));
-      } catch (error) {
-        setError(error);
-      }
+      dispatch(login({ email, password }));
     }
   };
 
   return (
     <>
       <h2>Login</h2>
-      <p id="error">{error}</p>
+      <p className="error">{error}</p>
       <form>
         <div>
           <div>
             <label htmlFor="email">Email</label>
-            {!validEmail && <span>Enter a valid email</span>}
+            {!validEmail && <span className="error">Enter a valid email</span>}
           </div>
           <input
             name="email"
@@ -51,7 +47,9 @@ function Login({ toggleMenu }) {
           <div>
             <label htmlFor="password">Password</label>
             {!validPassword && (
-              <span>Password must be 6 or more characters</span>
+              <span className="error">
+                Password must be 6 or more characters
+              </span>
             )}
           </div>
           <input
