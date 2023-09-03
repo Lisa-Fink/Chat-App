@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { updatePassword, updateImage } from "../redux/authSlice";
-import "../styles/EditModal.css";
+import "../styles/modal.css";
 
 function EditModal({ closeModal }) {
   const [password, setPassword] = useState("");
@@ -48,10 +48,10 @@ function EditModal({ closeModal }) {
 
   return (
     <div className="modal-container">
-      <div className="edit-modal">
+      <div className="modal">
         <h2>Edit Account</h2>
         <form>
-          <div className="edit-container">
+          <div className="form-field-container">
             Change Password
             <p className="error">{passwordError}</p>
             <div className="flex-row">
@@ -93,7 +93,7 @@ function EditModal({ closeModal }) {
             </div>
           </div>
 
-          <div className="edit-container">
+          <div className="form-field-container">
             Change Profile Image
             <p className="error">{imageError}</p>
             <ul onClick={handleImageClick}>
