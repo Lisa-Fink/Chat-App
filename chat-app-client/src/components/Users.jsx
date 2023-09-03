@@ -5,6 +5,7 @@ import "../styles/Users.css";
 function Users() {
   const { id } = useSelector((state) => state.current.channel);
   const userChannels = useSelector((state) => state.users.byChannelID);
+  const usersByID = useSelector((state) => state.users.dataByID);
   const usersStatus = useSelector((state) => state.users.status);
   const [curUserChannels, setCurUserChannels] = useState(
     id in userChannels ? userChannels[id] : [[], [], [], []]
@@ -19,7 +20,8 @@ function Users() {
   }, [usersStatus]);
 
   const userList = (userArr) => {
-    return userArr.map((user) => {
+    return userArr.map((userID) => {
+      const user = usersByID[userID];
       return (
         <li className="user-list" key={user.userID}>
           {user.userImageUrl ? (

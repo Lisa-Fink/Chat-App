@@ -10,7 +10,22 @@ const initialState = {
 const usersSlice = createSlice({
   name: "users",
   initialState,
-  reducers: {},
+  reducers: {
+    joinGeneralChannel: (state, action) => {
+      const { channelID, user } = action.payload;
+      // make sure the user is in dataByID
+      if (!(user.userID in state.dataByID))
+        state.dataByID[user.userID] = {
+          userID: user.userID,
+          username: user.username,
+          userImageUrl: user.userImageUrl,
+        };
+      if (!(channelID in state.byChannelID)) {
+        state.byChannelID[channelID] = [[], [], [], []];
+      }
+      state.byChannelID[channelID][0].push(user.userID);
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(fetchUsersForChannel.pending, (state, action) => {
@@ -22,7 +37,7 @@ const usersSlice = createSlice({
           state.byChannelID[channelID] = [[], [], [], []];
           for (const user of userChannels) {
             const role = user.roleID;
-            state.byChannelID[channelID][role - 1].push(user);
+            state.byChannelID[channelID][role - 1].push(user.userID);
             state.dataByID[user.userID] = user;
           }
         }
@@ -57,5 +72,5 @@ export const fetchUsersForChannel = createAsyncThunk(
     return { isNew: true, channelID: channelID, userChannels: data };
   }
 );
-
+export const { joinGeneralChannel } = usersSlice.actions;
 export default usersSlice.reducer;

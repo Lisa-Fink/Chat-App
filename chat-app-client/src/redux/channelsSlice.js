@@ -9,7 +9,20 @@ const initialState = {
 const channelsSlice = createSlice({
   name: "channels",
   initialState,
-  reducers: {},
+  reducers: {
+    addGeneralChannel: (state, action) => {
+      const { serverID, channelID } = action.payload;
+
+      const channel = {
+        channelID: channelID,
+        channelName: "General",
+        serverID: serverID,
+        channelTypeID: 1,
+        roleID: 4,
+      };
+      state.byServerID[serverID] = [channel];
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(fetchChannelsForServer.pending, (state, action) => {
@@ -49,5 +62,5 @@ export const fetchChannelsForServer = createAsyncThunk(
     return { isNew: true, serverID: serverID, channels: data };
   }
 );
-
+export const { addGeneralChannel } = channelsSlice.actions;
 export default channelsSlice.reducer;
