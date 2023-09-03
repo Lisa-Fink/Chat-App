@@ -57,3 +57,40 @@ button {
   font: inherit;
   cursor: pointer;
 }
+
+form label {
+  display: block;
+  margin-top: 25px;
+}
+
+input {
+  outline: none;
+  border: none;
+  padding: 1%;
+  font-size: 101%;
+  border-radius: 15px;
+  width: 30%;
+  box-sizing: border-box;
+  background-color: var(--offline-status-color);
+}
+
+form input:focus {
+  background-color: var(--light-text);
+}
+
+input::placeholder {
+  color: var(--medium-grey3);
+}
+
+form button {
+  background-color: var(--accent-text);
+  border-radius: 15px;
+  padding: 10px 50px;
+  width: 30%;
+  margin-top: 65px;
+}
+
+form button:hover {
+  background-color: var(--online-status-color);
+  color: var(--medium-grey3);
+}
