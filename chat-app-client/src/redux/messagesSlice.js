@@ -53,7 +53,6 @@ const messagesSlice = createSlice({
         );
         toEdit.edited = true;
         toEdit.text = action.payload.text;
-        toEdit.time = action.payload.time;
       })
       .addCase(deleteMessage.rejected, (state, action) => {
         state.status = "failed";
@@ -123,10 +122,10 @@ export const createMessage = createAsyncThunk(
 
 export const editMessage = createAsyncThunk(
   "messages/editMessage",
-  async ({ token, text, time, messageID, serverID, channelID }) => {
+  async ({ token, text, messageID, serverID, channelID }) => {
     const apiUrl = import.meta.env.VITE_CHAT_API;
     const url = `${apiUrl}/servers/${serverID}/channels/${channelID}/messages/${messageID}`;
-    const message = { text, time };
+    const message = { text };
 
     const requestBody = JSON.stringify(message);
     const res = await fetch(url, {
@@ -140,7 +139,7 @@ export const editMessage = createAsyncThunk(
     if (!res.ok) {
       throw new Error("Failed to update message.");
     }
-    return { text, time, channelID, messageID };
+    return { text, channelID, messageID };
   }
 );
 

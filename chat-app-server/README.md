@@ -205,7 +205,7 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 - `PUT /servers/{serverID}/channels/{channelID}/messages/{messageID}`: Edit a messages text without changing attachments.
   - Request:
   ```json
-  { "text": "New Text", "time": "2023-08-22T18:38:34.000+00:00" }
+  { "text": "New Text" }
   ```
 - `PUT /servers/{serverID}/channels/{channelID}/messages/attachments/{messageID}`: Edit a message by removing attachment(s).
   - Request (list of attachmentIDs):

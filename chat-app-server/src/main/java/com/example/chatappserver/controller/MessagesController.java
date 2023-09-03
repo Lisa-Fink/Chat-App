@@ -67,15 +67,6 @@ public class MessagesController {
     }
     private static class MessageEditRequest {
         private String text;
-        private Timestamp time;
-
-        public Timestamp getTime() {
-            return time;
-        }
-
-        public void setTime(Timestamp time) {
-            this.time = time;
-        }
 
         public String getText() {
             return text;
@@ -94,7 +85,7 @@ public class MessagesController {
         if (!messagesDao.doesMessageExist(messageID, user.getUserId())) {
             return ResponseEntity.notFound().build();
         }
-        messagesDao.editMessageText(messageID, editMessage.getText(), editMessage.getTime());
+        messagesDao.editMessageText(messageID, editMessage.getText());
         return ResponseEntity.ok().build();
     }
 

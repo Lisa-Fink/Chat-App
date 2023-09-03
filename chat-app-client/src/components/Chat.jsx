@@ -73,7 +73,6 @@ function Chat() {
         editMessage({
           token: token,
           text: editText,
-          time: new Date().toISOString(),
           messageID: editID,
           serverID: server.id,
           channelID: channel.id,

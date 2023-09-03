@@ -130,22 +130,15 @@ public class MessagesDao {
         return count != null && count > 0;
     }
 
-    // Edit a message text, time, set edited to true using a given messageID
-    public void editMessageText(int messageID, String text, Timestamp time) {
-        String sql = "UPDATE Messages SET text = ?, time = ?, edited = true WHERE messageID = ?";
-        jdbcTemplate.update(sql, text, time, messageID);
+    // Edit a message text and set edited to true using a given messageID
+    public void editMessageText(int messageID, String text) {
+        String sql = "UPDATE Messages SET text = ?, edited = true WHERE messageID = ?";
+        jdbcTemplate.update(sql, text, messageID);
     }
 
-    // Edit a message time, set edited to true using a given messageID
-    // (use if deleting an attachment)
-    public void editMessageTime(int messageID, Timestamp time) {
-        String sql = "UPDATE Messages SET time = ?, edited = true WHERE messageID = ?";
-        jdbcTemplate.update(sql, time, messageID);
-    }
 
     // Edit a message by removing attachments
     public void editRemoveAttachments(int messageID, List<Integer> attachmentIDs) {
-        editMessageTime(messageID, new Timestamp(System.currentTimeMillis()));
         attachmentsDao.deleteAttachments(attachmentIDs);
     }
 
