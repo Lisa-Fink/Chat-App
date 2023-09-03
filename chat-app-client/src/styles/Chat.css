@@ -4,7 +4,8 @@
   background-color: var(--medium-grey2);
   grid-area: 3/3/4/4;
   overflow-y: auto;
-  min-height: 68vh;
+  min-height: 60vh;
+  max-height: 65vh;
   color: var(--light-text);
   text-align: left;
   /* scrollbar */
@@ -43,6 +44,7 @@
   max-height: 40px;
   border-radius: 100%;
   object-fit: cover;
+  margin-top: 2px;
 }
 
 div .message-thumbnail {
@@ -57,8 +59,13 @@ div .message-thumbnail {
 .message {
   display: flex;
   padding: 1%;
-  align-items: center;
+  align-items: start;
   justify-items: flex-start;
+  position: relative;
+}
+
+.message p {
+  margin: 0 6px;
 }
 
 .message-data {
@@ -86,4 +93,53 @@ div .message-thumbnail {
   font-style: italic;
   font-size: 90%;
   align-self: center;
+}
+
+.message:hover {
+  background-color: var(--medium-grey3);
+  border-radius: 15px;
+}
+
+.message-options {
+  border: 1px solid var(--dark-grey2);
+  border-radius: 5px;
+  background-color: var(--medium-grey);
+  padding: 0;
+  position: absolute;
+  top: 0;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.message button {
+  font-size: 130%;
+  margin: 2px;
+  border-radius: 5px;
+}
+
+.edit-div,
+.edit-div > div {
+  display: flex;
+  gap: 15px;
+}
+
+.message button:hover {
+  background-color: var(--input-bg);
+}
+.message-options button:hover {
+  background-color: var(--medium-grey3);
+}
+
+.confirm-del {
+  position: absolute;
+  right: 0;
+  background-color: var(--dark-grey);
+  border-radius: 5px;
+  padding: 4px;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }

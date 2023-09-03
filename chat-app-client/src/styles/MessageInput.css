@@ -4,8 +4,8 @@
   padding: 0 5% 2% 0;
 }
 
-.message-input input {
-  padding: 2% 5%;
+textarea {
+  padding: 2%;
   outline: none;
   border: none;
   border-radius: 10px;
@@ -13,6 +13,8 @@
   font-size: 105%;
   background-color: var(--input-bg);
   color: white;
+  font-family: "Lunasima", sans-serif;
+  resize: none;
 }
 
 .message-input input::placeholder {

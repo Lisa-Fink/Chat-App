@@ -19,11 +19,9 @@ const usersSlice = createSlice({
       .addCase(fetchUsersForChannel.fulfilled, (state, action) => {
         const { isNew, channelID, userChannels } = action.payload;
         if (isNew) {
+          state.byChannelID[channelID] = [[], [], [], []];
           for (const user of userChannels) {
             const role = user.roleID;
-            if (!(channelID in state.byChannelID)) {
-              state.byChannelID[channelID] = [[], [], [], []];
-            }
             state.byChannelID[channelID][role - 1].push(user);
             state.dataByID[user.userID] = user;
           }

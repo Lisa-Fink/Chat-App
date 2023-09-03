@@ -126,7 +126,7 @@ public class MessagesDao {
     // will be used to authenticate a message exists when editing
     public boolean doesMessageExist(int messageID, int userID) {
         String sql = "SELECT COUNT(*) FROM Messages WHERE messageID = ? AND userID = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, messageID);
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, messageID, userID);
         return count != null && count > 0;
     }
 
