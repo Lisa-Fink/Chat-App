@@ -2,7 +2,7 @@ package com.example.chatappserver.controller;
 
 import com.example.chatappserver.model.CustomUserDetails;
 import com.example.chatappserver.model.Server;
-import com.example.chatappserver.model.User;
+import com.example.chatappserver.model.ServerResponse;
 import com.example.chatappserver.repository.ChannelsDao;
 import com.example.chatappserver.repository.ServersDao;
 import com.example.chatappserver.service.AuthService;
@@ -85,9 +85,9 @@ public class ServersController {
 
     // Returns a list of the Servers the user belongs to
     @GetMapping
-    public ResponseEntity<List<Server>> getUserServers(
+    public ResponseEntity<List<ServerResponse>> getUserServers(
             @AuthenticationPrincipal CustomUserDetails user) {
-        List<Server> userServers = serversDao.getAllUserServers(user.getUserId());
+        List<ServerResponse> userServers = serversDao.getAllUserServers(user.getUserId());
         return ResponseEntity.ok(userServers);
     }
 

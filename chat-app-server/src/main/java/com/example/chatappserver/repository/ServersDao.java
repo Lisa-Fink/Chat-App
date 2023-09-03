@@ -1,6 +1,7 @@
 package com.example.chatappserver.repository;
 
 import com.example.chatappserver.model.Server;
+import com.example.chatappserver.model.ServerResponse;
 import com.example.chatappserver.model.UserServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -23,12 +24,13 @@ public class ServersDao {
     @Autowired
     public ServersDao(JdbcTemplate jdbcTemplate) {this.jdbcTemplate = jdbcTemplate;}
 
-    private static RowMapper<Server> serverRowMapper() {
-        return (resultSet, rowNum) -> new Server(
+    private static RowMapper<ServerResponse> serverResponseRowMapper() {
+        return (resultSet, rowNum) -> new ServerResponse(
                 resultSet.getInt("serverID"),
                 resultSet.getString("serverName"),
                 resultSet.getString("serverDescription"),
-                resultSet.getString("serverImageUrl")
+                resultSet.getString("serverImageUrl"),
+                resultSet.getInt("roleID")
         );
     }
 
@@ -72,12 +74,12 @@ public class ServersDao {
     }
 
     // Get all Servers that a user belongs to, selecting server name, server image and id
-    public List<Server> getAllUserServers(int userID) {
-        String sql = "SELECT s.serverID, s.serverName, s.serverDescription, s.serverImageUrl FROM Servers s " +
+    public List<ServerResponse> getAllUserServers(int userID) {
+        String sql = "SELECT s.serverID, s.serverName, s.serverDescription, s.serverImageUrl, us.roleID FROM Servers s " +
                 "INNER JOIN UserServers us on s.serverID = us.serverID " +
                 "WHERE us.userID = ?";
 
-        return jdbcTemplate.query(sql, serverRowMapper(), userID);
+        return jdbcTemplate.query(sql, serverResponseRowMapper(), userID);
     }
 
     // Update the server image

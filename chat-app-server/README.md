@@ -230,12 +230,15 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
   - Response:
     - Status: 201 Created
     ```json
-    { "serverID": 456 }
+    { 
+    "serverID": 456,
+    "channelID": 140 
+    }
     ```
 
 ### Get User Servers
 
-- `GET /servers/{userID}`: Get a list of servers that a user belongs to.
+- `GET /servers/`: Get a list of servers that a user belongs to.
   - Response:
     ```json
     [
@@ -243,13 +246,15 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
         "serverID": 456,
         "serverName": "My Server",
         "serverImageUrl": "https://example.com/server-image.png",
-        "serverDescription": "A description of the server"
+        "serverDescription": "A description of the server",
+        "roleID": 1
       },
       {
         "serverID": 457,
         "serverName": "Another Server",
         "serverImageUrl": "https://example.com/another-server-image.png",
-        "serverDescription": "Another server description"
+        "serverDescription": "Another server description",
+        "roleID": 4
       }
     ]
     ```
