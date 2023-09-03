@@ -47,9 +47,21 @@ public class ServersController {
         serversDao.addUser(user.getUserId(), server.getServerID(), creatorRole);
 
         // create a general channel
-        channelsDao.createGeneral(server.getServerID());
+        int channelID = channelsDao.createGeneral(server.getServerID());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(server.getServerID());
+        class CreateServerResponse {
+            public final int serverID;
+            public final int channelID;
+
+            CreateServerResponse(int serverID, int channelID) {
+                this.serverID = serverID;
+                this.channelID = channelID;
+            }
+        }
+
+        CreateServerResponse res = new CreateServerResponse(server.getServerID(), channelID);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
     // Adds a user to a server, create UserServers

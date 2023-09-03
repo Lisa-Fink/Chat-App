@@ -57,13 +57,22 @@ public class ChannelsDao {
     }
 
     // Create a General Channel (used when creating a new server)
-    public void createGeneral(int serverID) {
+    public int createGeneral(int serverID) {
         String sql =
                 "INSERT INTO Channels " +
                         "(serverID, roleID, channelTypeID, channelName) " +
                 "VALUES (?, 4, 1, 'General')";
 
-        jdbcTemplate.update(sql, serverID);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, serverID);
+            return ps;
+        }, keyHolder);
+
+        // Retrieve the generated key
+        return Objects.requireNonNull(keyHolder.getKey()).intValue();
     }
 
     // Add users to a channel (Create UserChannels)

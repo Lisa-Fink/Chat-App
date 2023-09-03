@@ -218,7 +218,7 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 
 ### Create a Server
 
-- `POST /servers`: Create a new server. Also creates a UserServer for the user sending the request, with a role of Creator (1)
+- `POST /servers`: Create a new server. Also creates a UserServer for the user sending the request, with a role of Creator (1) and a General Channel.
   - Request:
     ```json
     {
