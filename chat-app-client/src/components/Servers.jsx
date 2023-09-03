@@ -3,6 +3,7 @@ import { fetchServers } from "../redux/serversSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { setServer } from "../redux/currentSlice";
 import "../styles/Servers.css";
+import AddServerModal from "./AddServerModal";
 function Servers() {
   const dispatch = useDispatch();
   const servers = useSelector((state) => state.servers.data);
@@ -10,20 +11,39 @@ function Servers() {
   const token = useSelector((state) => state.auth.token);
 
   const [showServerDetails, setShowServerDetails] = useState(0);
+  const [showAddServerModal, setShowAddServerModal] = useState(false);
 
-  const handleServerClick = (e) => {
-    const serverID = parseInt(e.currentTarget.dataset.serverId);
-    const serverName = e.currentTarget.dataset.serverName;
+  const handleServerClick = (serverID, serverName) => {
     dispatch(setServer({ id: serverID, name: serverName }));
   };
 
-  const handleServerHover = (e) => {
-    const serverID = parseInt(e.currentTarget.dataset.serverId);
+  const handleServerHover = (serverID) => {
     setShowServerDetails(serverID);
   };
 
-  const handleServerEndHover = () => {
+  const handleServerHoverExit = () => {
     setShowServerDetails(0);
+  };
+
+  const detailsDiv = (serverID, serverName) => {
+    const button = document.getElementById(serverID);
+    const buttonRect = button.getBoundingClientRect();
+    // Calculate the position
+    const top = buttonRect.top + window.scrollY + 10;
+    const left = buttonRect.right + window.scrollX + 10;
+    if (top > 800) {
+      return;
+    }
+    const serverDetails = (
+      <div
+        style={{ top: top + "px", left: left + "px" }}
+        className="server-details"
+        id={serverID + "-details"}
+      >
+        {serverName}
+      </div>
+    );
+    return serverDetails;
   };
 
   useEffect(() => {
@@ -37,11 +57,10 @@ function Servers() {
       <li key={server.serverID}>
         <button
           className="server-thumbnail"
-          data-server-id={server.serverID}
-          data-server-name={server.serverName}
-          onClick={handleServerClick}
-          onMouseEnter={handleServerHover}
-          onMouseLeave={handleServerEndHover}
+          id={server.serverID}
+          onClick={() => handleServerClick(server.serverID, server.serverName)}
+          onMouseEnter={() => handleServerHover(server.serverID)}
+          onMouseLeave={handleServerHoverExit}
         >
           {server.serverImageUrl !== null ? (
             <img className="image-thumbnail" src={server.serverImageUrl} />
@@ -49,9 +68,8 @@ function Servers() {
             server.serverName.substring(0, 1)
           )}
         </button>
-        {showServerDetails === server.serverID && (
-          <div className="server-details">{server.serverName}</div>
-        )}
+        {showServerDetails === server.serverID &&
+          detailsDiv(server.serverID, server.serverName)}
       </li>
     );
   });
@@ -60,8 +78,21 @@ function Servers() {
     <ul className="servers">
       {thumbnails}
       <li>
-        <button className="server-thumbnail add-thumbnail">+</button>
+        <button
+          id="new"
+          className="server-thumbnail add-thumbnail"
+          onMouseEnter={() => handleServerHover("new")}
+          onMouseLeave={handleServerHoverExit}
+          onClick={() => setShowAddServerModal(true)}
+        >
+          +
+        </button>
+        {showServerDetails === "new" &&
+          detailsDiv("new", "Create a new Server")}
       </li>
+      {showAddServerModal && (
+        <AddServerModal closeModal={() => setShowAddServerModal(false)} />
+      )}
     </ul>
   );
 }
