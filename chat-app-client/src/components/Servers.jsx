@@ -4,7 +4,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { setServer } from "../redux/currentSlice";
 import "../styles/Servers.css";
 import AddServerModal from "./AddServerModal";
-function Servers() {
+import ServerSettingsModal from "./modals/ServerSettingsModal";
+function Servers({ showSeverSettingsModal, setShowServerSettingsModal }) {
   const dispatch = useDispatch();
   const servers = useSelector((state) => state.servers.data);
   const serversStatus = useSelector((state) => state.servers.status);
@@ -13,8 +14,14 @@ function Servers() {
   const [showServerDetails, setShowServerDetails] = useState(0);
   const [showAddServerModal, setShowAddServerModal] = useState(false);
 
-  const handleServerClick = (serverID, serverName) => {
-    dispatch(setServer({ id: serverID, name: serverName }));
+  const handleServerClick = (serverID, serverName, roleID) => {
+    dispatch(
+      setServer({
+        id: serverID,
+        name: serverName,
+        roleID: roleID,
+      })
+    );
   };
 
   const handleServerHover = (serverID) => {
@@ -58,7 +65,15 @@ function Servers() {
         <button
           className="server-thumbnail"
           id={server.serverID}
-          onClick={() => handleServerClick(server.serverID, server.serverName)}
+          onClick={() =>
+            handleServerClick(
+              server.serverID,
+              server.serverName,
+              server.roleID,
+              server.serverDescription,
+              server.serverImageUrl
+            )
+          }
           onMouseEnter={() => handleServerHover(server.serverID)}
           onMouseLeave={handleServerHoverExit}
         >
@@ -92,6 +107,11 @@ function Servers() {
       </li>
       {showAddServerModal && (
         <AddServerModal closeModal={() => setShowAddServerModal(false)} />
+      )}
+      {showSeverSettingsModal && (
+        <ServerSettingsModal
+          closeModal={() => setShowServerSettingsModal(false)}
+        />
       )}
     </ul>
   );

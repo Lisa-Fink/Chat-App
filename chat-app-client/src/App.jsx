@@ -13,7 +13,7 @@ import { useSelector } from "react-redux";
 
 function App() {
   const auth = useSelector((state) => state.auth);
-  const [serverName, setServerName] = useState("lisa");
+  const [showSeverSettingsModal, setShowServerSettingsModal] = useState(false);
   return (
     <>
       <div className="container">
@@ -23,8 +23,14 @@ function App() {
           <>
             <Header />
             <Menu />
-            <Servers />
-            <Channels />
+            <Servers
+              showSeverSettingsModal={showSeverSettingsModal}
+              setShowServerSettingsModal={setShowServerSettingsModal}
+            />
+            <Channels
+              showSeverSettingsModal={showSeverSettingsModal}
+              setShowServerSettingsModal={setShowServerSettingsModal}
+            />
             <Chat />
             <Users />
             <MessageInput />

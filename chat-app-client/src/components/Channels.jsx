@@ -1,43 +1,49 @@
 import React, { useMemo } from "react";
 import "../styles/Channels.css";
-import { MdSettings } from "react-icons/md";
+import {
+  MdSettings,
+  MdOutlineExpandMore,
+  MdClose,
+  MdCheck,
+  MdCancel,
+} from "react-icons/md";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setChannel } from "../redux/currentSlice";
 import { fetchChannelsForServer } from "../redux/channelsSlice";
+import { removeCurrentUserFromServer } from "../redux/usersSlice";
 
-function Channels() {
+function Channels({ setShowServerSettingsModal }) {
   const dispatch = useDispatch();
   const { server } = useSelector((state) => state.current);
-  const token = useSelector((state) => state.auth.token);
+  const { token, userID } = useSelector((state) => state.auth);
   const channels = useSelector((state) => state.channels.byServerID);
-  const channelsStatus = useSelector((state) => state.channels.status);
   const [curChannels, setCurChannels] = useState(
-    server.id in channels ? channels[server.id] : []
+    channels && server && server.id in channels ? channels[server.id] : []
   );
+
+  const [showServerDropdown, setShowServerDropdown] = useState(false);
+  const [showLeaveServerConfirm, setShowLeaveServerConfirm] = useState(false);
 
   // When a server is selected, gets the channels for the server
   useEffect(() => {
+    setShowLeaveServerConfirm(false);
+    setShowServerDropdown(false);
     // curChannels to store all channels in the current server
     if (server && server.id) {
-      dispatch(fetchChannelsForServer({ token: token, serverID: server.id }));
-    }
-  }, [server]);
-
-  // After the channels are fetched, updates curChannels and current channel
-  useEffect(() => {
-    if (channelsStatus === "succeeded") {
-      setCurChannels(channels[server.id]);
-      const firstChannel = channels[server.id][0];
       dispatch(
-        setChannel({
-          id: firstChannel.channelID,
-          name: firstChannel.channelName,
+        fetchChannelsForServer({
+          token: token,
+          serverID: server.id,
+          curChannels: setCurChannels,
         })
       );
+    } else {
+      setCurChannels([]);
+      dispatch(setChannel({}));
     }
-  }, [channelsStatus]);
+  }, [server]);
 
   const handleChannelClick = (e) => {
     const newChannelID = e.currentTarget.dataset.id;
@@ -46,27 +52,85 @@ function Channels() {
   };
 
   // will only rerender channel list if curChannels changes
-  const channelList = useMemo(() => {
-    return curChannels.map(({ channelID, channelName }) => (
-      <li key={channelID}>
-        <button
-          data-id={channelID}
-          data-name={channelName}
-          onClick={handleChannelClick}
-        >
-          # {channelName}
-        </button>
-      </li>
-    ));
-  }, [curChannels]);
+  const channelList = curChannels.map(({ channelID, channelName }) => (
+    <li key={channelID}>
+      <button
+        data-id={channelID}
+        data-name={channelName}
+        onClick={handleChannelClick}
+      >
+        # {channelName}
+      </button>
+    </li>
+  ));
+
+  const handleServerSettingsClick = () => {
+    setShowServerSettingsModal(true);
+    setShowServerDropdown(false);
+  };
+
+  const handleConfirmLeave = () => {
+    dispatch(
+      removeCurrentUserFromServer({
+        token: token,
+        serverID: server.id,
+        userID: userID,
+      })
+    );
+    setShowServerDropdown(false);
+    setShowLeaveServerConfirm(false);
+  };
+
+  const handleShowServerMenu = () => {
+    setShowServerDropdown(!showServerDropdown);
+    setShowLeaveServerConfirm(false);
+  };
 
   return (
     <>
       <div className="channels thin-scroll">
         <div className="col-head">
           <h2>{server.name}</h2>
+          {server.name && (
+            <button onClick={handleShowServerMenu}>
+              {!showServerDropdown ? <MdOutlineExpandMore /> : <MdClose />}
+            </button>
+          )}
         </div>
-        <ul>{channelList}</ul>
+        <div className="channel-list-container">
+          <ul>{channelList}</ul>
+          {showServerDropdown && (
+            <ul className="server-dropdown">
+              {/* if the user is an admin+ show edit option */}
+              {server.roleID <= 2 && (
+                <li>
+                  <button onClick={handleServerSettingsClick}>
+                    Edit Server <MdSettings />
+                  </button>
+                </li>
+              )}
+              {/* leave server (creator can't leave) */}
+              {server.roleID > 1 && (
+                <li>
+                  <button onClick={() => setShowLeaveServerConfirm(true)}>
+                    Leave Server
+                  </button>
+                  {showLeaveServerConfirm && (
+                    <div>
+                      Confirm{" "}
+                      <button onClick={handleConfirmLeave}>
+                        <MdCheck />
+                      </button>
+                      <button onClick={() => setShowLeaveServerConfirm(false)}>
+                        <MdCancel />
+                      </button>
+                    </div>
+                  )}
+                </li>
+              )}
+            </ul>
+          )}
+        </div>
       </div>
       <div className="server-menu">
         <div>

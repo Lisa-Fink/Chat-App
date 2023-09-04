@@ -52,6 +52,8 @@ function Chat() {
           channelID: channel.id,
         })
       );
+    } else {
+      setCurMessages([]);
     }
   }, [channel, messages]);
 

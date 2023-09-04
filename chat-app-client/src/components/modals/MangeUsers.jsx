@@ -1,0 +1,166 @@
+import React, { useEffect, useState } from "react";
+import {
+  MdCancel,
+  MdCheck,
+  MdClose,
+  MdOutlineExpandMore,
+} from "react-icons/md";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  fetchUsersForServer,
+  updateUserServerRole,
+} from "../../redux/usersSlice";
+import { removeUserFromServer } from "../../redux/usersSlice";
+
+function MangeUsers({ id }) {
+  const users = useSelector((state) => state.users.dataByID);
+  const auth = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
+  const [showRoleMenu, setShowRoleMenu] = useState(0);
+  const [showKickConfirm, setShowKickConfirm] = useState(0);
+
+  const usersInServer = useSelector((state) => state.users.byServerID[id]);
+
+  useEffect(() => {
+    // gets the users in the server the first time
+    if (usersInServer === null || usersInServer === undefined) {
+      dispatch(fetchUsersForServer({ token: auth.token, serverID: id }));
+    }
+  }, []);
+
+  const handleRoleClick = (userID) => {
+    if (showRoleMenu !== userID) {
+      setShowRoleMenu(userID);
+    } else {
+      setShowRoleMenu(0);
+    }
+  };
+
+  const handleRoleChange = (userID, roleID, oldRoleID) => {
+    if (roleID !== oldRoleID) {
+      dispatch(
+        updateUserServerRole({
+          token: auth.token,
+          serverID: id,
+          userID: userID,
+          roleID: roleID,
+        })
+      );
+    }
+    setShowRoleMenu(0);
+  };
+
+  const handleKickClick = (userID) => {
+    setShowKickConfirm(userID);
+  };
+
+  const handleKickConfirm = (userID) => {
+    dispatch(
+      removeUserFromServer({ token: auth.token, serverID: id, userID: userID })
+    );
+    setShowKickConfirm(0);
+  };
+
+  const changeRoleMenu = (user) => (
+    <ul className="role-menu">
+      <li>
+        <button onClick={() => handleRoleChange(user.userID, 2, user.roleID)}>
+          Admin
+        </button>
+      </li>
+      <li>
+        <button onClick={() => handleRoleChange(user.userID, 3, user.roleID)}>
+          Moderator
+        </button>
+      </li>
+      <li>
+        <button onClick={() => handleRoleChange(user.userID, 4, user.roleID)}>
+          Member
+        </button>
+      </li>
+    </ul>
+  );
+
+  const userServersList =
+    usersInServer &&
+    usersInServer.map((userID) => {
+      const user = users[userID];
+      return (
+        <tr className="user-server" key={userID}>
+          <td className="user-info">
+            <img className="user-thumbnail" src={user.userImageUrl} />
+            {user.username}
+          </td>
+          <td>
+            {user.roleID === 1
+              ? "Creator"
+              : user.roleID === 2
+              ? "Admin"
+              : user.roleID === 3
+              ? "Moderator"
+              : "Member"}
+          </td>
+          <td>
+            {user.roleID != 1 && (
+              <div className="role-container">
+                <button
+                  className="role"
+                  onClick={(e) => handleRoleClick(user.userID)}
+                >
+                  {" "}
+                  Change Role
+                  {showRoleMenu !== user.userID ? (
+                    <MdOutlineExpandMore />
+                  ) : (
+                    <MdClose />
+                  )}
+                </button>
+                {showRoleMenu === user.userID && (
+                  <div>{changeRoleMenu(user)}</div>
+                )}
+              </div>
+            )}
+          </td>
+          <td>
+            {user.roleID !== 1 && (
+              <>
+                <button
+                  className="kick"
+                  onClick={() => handleKickClick(user.userID)}
+                >
+                  Kick
+                </button>
+                {showKickConfirm === user.userID && (
+                  <div className="kick-confirm">
+                    Confirm Kick:{" "}
+                    <button onClick={() => handleKickConfirm(user.userID)}>
+                      <MdCheck />
+                    </button>{" "}
+                    <button onClick={() => setShowKickConfirm(0)}>
+                      <MdCancel />
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </td>
+        </tr>
+      );
+    });
+  return (
+    <table className="user-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Role</th>
+          <th>Update</th>
+          <th>Kick</th>
+        </tr>
+      </thead>
+      <tbody>{userServersList}</tbody>
+    </table>
+  );
+}
+
+export default MangeUsers;

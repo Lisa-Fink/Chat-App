@@ -25,6 +25,23 @@
   text-align: center;
   grid-row: 1/2;
   color: white;
+  display: flex;
+  padding: 5px;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+}
+
+.col-head h2 {
+  font-size: 120%;
+}
+
+.col-head svg {
+  font-size: 140%;
+}
+
+.col-head:hover {
+  background-color: var(--medium-grey3);
 }
 
 .server-menu {
@@ -34,6 +51,24 @@
   gap: 0 16px;
   color: var(--medium-light-text);
   font-weight: bold;
-  grid-area: 5/2/6/3;
   background-color: var(--medium-grey);
+}
+
+.channel-list-container {
+  position: relative;
+}
+
+.server-dropdown {
+  position: absolute;
+  background-color: var(--dark-grey);
+  color: var(--light-text);
+  width: 90%;
+  margin: 0 10px;
+  padding: 15px;
+  border: 1px solid var(--medium-grey);
+  border-radius: 15px;
+  top: 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
 }

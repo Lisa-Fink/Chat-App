@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { addGeneralChannel } from "./channelsSlice";
-import { joinGeneralChannel } from "./usersSlice";
+import { addGeneralChannel, removeServer } from "./channelsSlice";
+import { joinGeneralChannel, removeChannels } from "./usersSlice";
 
 const initialState = {
   data: [],
@@ -11,7 +11,13 @@ const initialState = {
 const serversSlice = createSlice({
   name: "servers",
   initialState,
-  reducers: {},
+  reducers: {
+    removeFromServers: (state, action) => {
+      state.data = state.data.filter(
+        (server) => server.serverID != action.payload.serverID
+      );
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(fetchServers.pending, (state, action) => {
@@ -33,6 +39,41 @@ const serversSlice = createSlice({
         state.status = "succeeded";
         state.error = null;
         state.data.push(action.payload.server);
+      })
+      .addCase(deleteServer.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(deleteServer.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.error = null;
+        state.data = state.data.filter(
+          (server) => server.serverID !== action.payload.serverID
+        );
+      })
+      .addCase(updateServerDescription.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(updateServerDescription.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.error = null;
+        const updateServer = state.data.find(
+          (server) => server.serverID === action.payload.serverID
+        );
+        updateServer.serverDescription = action.payload.serverDescription;
+      })
+      .addCase(updateServerImage.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(updateServerImage.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.error = null;
+        const updateServer = state.data.find(
+          (server) => server.serverID === action.payload.serverID
+        );
+        updateServer.serverImageUrl = action.payload.serverImageUrl;
       });
   },
 });
@@ -96,4 +137,67 @@ export const createServer = createAsyncThunk(
   }
 );
 
+export const deleteServer = createAsyncThunk(
+  "servers/deleteServer",
+  async ({ token, serverID }, { dispatch }) => {
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/servers/${serverID}`;
+
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) {
+      throw new Error("Failed to create server.");
+    }
+    // delete the data associated with the server
+    const channels = dispatch(removeServer({ serverID: serverID })); // removes all channels
+    dispatch(removeChannels(channels));
+  }
+);
+
+export const updateServerImage = createAsyncThunk(
+  "servers/updateServerImage",
+  async ({ token, serverID, serverImageUrl }) => {
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/servers/${serverID}/image`;
+
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "text/plain",
+      },
+      body: serverImageUrl,
+    });
+    if (!res.ok) {
+      throw new Error("Failed to update server image.");
+    }
+    return { serverID: serverID, serverImageUrl: serverImageUrl };
+  }
+);
+
+export const updateServerDescription = createAsyncThunk(
+  "servers/updateServerDescription",
+  async ({ token, serverID, serverDescription }) => {
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/servers/${serverID}/description`;
+
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "text/plain",
+      },
+      body: serverDescription,
+    });
+    if (!res.ok) {
+      throw new Error("Failed to update server description.");
+    }
+    return { serverID: serverID, serverDescription: serverDescription };
+  }
+);
+export const { removeFromServers } = serversSlice.actions;
 export default serversSlice.reducer;

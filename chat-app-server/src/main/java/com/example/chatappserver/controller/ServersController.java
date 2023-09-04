@@ -116,14 +116,17 @@ public class ServersController {
     }
 
     // Updates the Role of a User in the Server
-    @PutMapping("/{serverID}/users/role")
+    @PutMapping("/{serverID}/users/{userID}/role")
     public ResponseEntity<Void> updateServerDescription(
             @PathVariable int serverID, @PathVariable int userID,
-            @RequestBody int roleID, @AuthenticationPrincipal CustomUserDetails user) {
-        if (!authService.userIsAdmin(user.getUserId(), serverID)) {
+            @RequestBody String roleIDStr, @AuthenticationPrincipal CustomUserDetails user) {
+        int roleID = Integer.parseInt(roleIDStr);
+        // role must be 2,3 or 4 and user sending request must be admin, and user getting updated can't be creator
+        if ((roleID != 2 && roleID != 3 && roleID != 4) || !authService.userIsAdmin(user.getUserId(), serverID) || authService.userIsCreator(userID, serverID)) {
+            System.out.println("bad");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        serversDao.updateUserRole(user.getUserId(), roleID, serverID);
+        serversDao.updateUserRole(userID, roleID, serverID);
         return ResponseEntity.ok().build();
     }
 
@@ -144,8 +147,8 @@ public class ServersController {
     public ResponseEntity<Void> deleteUserFromServer(
             @PathVariable int serverID, @AuthenticationPrincipal CustomUserDetails user,
             @PathVariable int userID) {
-        // TODO: cannot remove creator of server, add to README
-        if (user.getUserId() != userID && !authService.userIsAdmin(user.getUserId(), serverID)) {
+        // the user sending the request has to be the user being removed, or an admin, and the creator cannot be removed
+        if ((user.getUserId() != userID && !authService.userIsAdmin(user.getUserId(), serverID))|| authService.userIsCreator(userID, serverID)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         serversDao.deleteUserServer(serverID, userID);

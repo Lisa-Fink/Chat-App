@@ -1,0 +1,113 @@
+.modal textarea {
+  outline: none;
+  border: none;
+  padding: 1%;
+  font-size: 101%;
+  border-radius: 15px;
+  box-sizing: border-box;
+  background-color: var(--offline-status-color);
+  color: var(--dark-grey);
+}
+
+.modal textarea:focus {
+  background-color: var(--light-text);
+}
+
+.modal textarea::placeholder {
+  color: var(--medium-grey3);
+}
+
+.edit-desc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+div#server-description {
+  background-color: var(--medium-grey);
+  border-radius: 5px;
+}
+
+#server-description {
+  padding: 10px;
+  width: 100%;
+  margin: 0;
+}
+
+#edit-desc-btn {
+  padding: 10px;
+  width: auto;
+  margin: 10px;
+}
+
+.modal-view-btn {
+  text-decoration: underline;
+}
+.modal-view-btn:hover {
+  color: var(--medium-text);
+}
+
+.role,
+.kick {
+  padding: 0;
+  margin: 0;
+  width: auto;
+  background-color: var(--dark-grey);
+  border-radius: 0;
+}
+
+.role:hover {
+  background-color: inherit;
+}
+
+.kick {
+  background-color: var(--online-status-color);
+  border-radius: 100%;
+}
+
+.kick:hover {
+  color: var(--dark-grey);
+}
+
+.role-container {
+  position: relative;
+  width: 140px;
+  display: flex;
+  flex-direction: column;
+}
+
+.role-menu {
+  position: absolute;
+  border: 2px solid var(--medium-grey);
+  background-color: var(--dark-grey2);
+  width: 140px;
+  text-align: left;
+  z-index: 100;
+}
+
+.role-menu button {
+  background-color: inherit;
+}
+
+.role-menu button:hover {
+  background-color: inherit;
+  color: var(--medium-text);
+}
+
+.user-info {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.user-table {
+  padding: 5px;
+  margin: 0 auto;
+}
+tr td {
+  vertical-align: middle;
+}
+
+.kick-confirm button:hover {
+  background-color: var(--medium-grey);
+}

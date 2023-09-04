@@ -13,13 +13,35 @@
   position: relative;
   top: 6%;
   background-color: var(--dark-grey);
-  border: 1px solid var(--medium-grey);
+  border: 15px solid var(--dark-grey);
   margin: 0 auto;
   width: 50%;
+  max-height: 80%;
+  overflow-y: auto;
   min-height: 20%;
   padding: 2%;
   border-radius: 15px;
   color: var(--light-text);
+
+  /* scrollbar */
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--medium-grey3) var(--dark-grey2);
+
+  /* WebKit (Chrome, Safari) */
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--dark-grey2);
+    border-radius: 15px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: var(--medium-grey3);
+    border-radius: 15px;
+  }
 }
 
 .modal button {
@@ -79,8 +101,8 @@
   color: white;
   background-color: var(--accent-text);
   cursor: pointer;
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   border-radius: 100%;
   display: flex;
   justify-content: center;
@@ -99,23 +121,4 @@
 
 .selected {
   border-color: var(--online-status-color);
-}
-
-.modal textarea {
-  outline: none;
-  border: none;
-  padding: 1%;
-  font-size: 101%;
-  border-radius: 15px;
-  box-sizing: border-box;
-  background-color: var(--offline-status-color);
-  color: var(--dark-grey);
-}
-
-.modal textarea:focus {
-  background-color: var(--light-text);
-}
-
-.modal textarea::placeholder {
-  color: var(--medium-grey3);
 }
