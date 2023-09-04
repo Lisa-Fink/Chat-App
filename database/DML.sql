@@ -165,6 +165,10 @@ LEFT JOIN Channels c ON c.channelID = :channelID
 LEFT JOIN UserServers us ON u.userID = us.userID
 	WHERE us.serverID = :serverID AND us.roleID <= c.roleID;
 
+-- Get all users in a Server
+SELECT us.userID, u.username, u.userImageUrl, us.roleID FROM UserServers us
+	LEFT JOIN Users u ON us.userID = u.userID
+	WHERE us.serverID = :serverID;
 
 -- Add a user using a given username, email, password, and userImageUrl
 INSERT INTO Users (username, email, password, userImageUrl) VALUES (:newUsername, :newEmail, :newPassword, :newUserImageUrl);

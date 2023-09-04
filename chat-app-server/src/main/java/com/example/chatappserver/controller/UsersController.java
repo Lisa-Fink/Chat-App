@@ -69,6 +69,18 @@ public class UsersController {
         return ResponseEntity.ok(channelUsers);
     }
 
+    // Returns all Users in a server
+    @GetMapping("/{serverID}")
+    public ResponseEntity<List<UserChannelResponse>> getUsersInServer(
+            @PathVariable int serverID,
+            @AuthenticationPrincipal CustomUserDetails user) {
+        if (!authService.userIsAdmin(user.getUserId(), serverID)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        List<UserChannelResponse> channelUsers = usersDao.getUsersInServer(serverID);
+        return ResponseEntity.ok(channelUsers);
+    }
+
     // Updates a Users password
     @PutMapping("/password")
     public ResponseEntity<Void> updateUserPassword(

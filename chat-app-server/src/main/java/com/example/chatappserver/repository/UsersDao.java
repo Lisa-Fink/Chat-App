@@ -117,6 +117,14 @@ public class UsersDao {
         return jdbcTemplate.query(sql, userChannelRowMapper(), channelID, channelID, channelID, serverID);
     }
 
+    // Get a List of all Users in a Server by serverID
+    public List<UserChannelResponse> getUsersInServer(int serverID) {
+        String sql = "SELECT us.userID, u.username, u.userImageUrl, us.roleID FROM UserServers us " +
+                "LEFT JOIN Users u ON us.userID = u.userID " +
+                "WHERE us.serverID = ?";
+        return jdbcTemplate.query(sql, userChannelRowMapper(), serverID);
+    }
+
    // Edit a user password using a given userID
     public void editPassword(int userID, String password) {
         String sql = "UPDATE Users SET password = ? WHERE userID = ?";
