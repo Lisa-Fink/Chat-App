@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import "../styles/modal.css";
+import "./../styles/modal.css";
 import { createServer } from "../redux/serversSlice";
 
 function AddServerModal({ closeModal }) {
@@ -146,7 +146,7 @@ function AddServerModal({ closeModal }) {
                     (image === null || image === undefined ? " selected" : "")
                   }
                 >
-                  {auth.username.substring(0, 1).toUpperCase()}
+                  {serverName.substring(0, 1).toUpperCase()}
                 </button>
               </li>
             </ul>
