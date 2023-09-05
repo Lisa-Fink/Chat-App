@@ -51,7 +51,6 @@ function Channels({ setShowServerSettingsModal }) {
     dispatch(setChannel({ id: newChannelID, name: newChannelName }));
   };
 
-  // will only rerender channel list if curChannels changes
   const channelList = curChannels.map(({ channelID, channelName }) => (
     <li key={channelID}>
       <button

@@ -125,6 +125,7 @@ export const createServer = createAsyncThunk(
     }
     const data = await res.json();
     server.serverID = data.serverID;
+    server.roleID = 1;
     // Add General Channel to channels and this user to its users
     dispatch(
       addGeneralChannel({

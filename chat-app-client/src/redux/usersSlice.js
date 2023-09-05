@@ -25,9 +25,9 @@ const usersSlice = createSlice({
           userImageUrl: user.userImageUrl,
         };
       if (!(channelID in state.byChannelID)) {
-        state.byChannelID[channelID] = [[], [], [], []];
+        state.byChannelID[channelID] = [];
       }
-      state.byChannelID[channelID][0].push(user.userID);
+      state.byChannelID[channelID].push(user.userID);
     },
     removeChannels: (state, action) => {
       const { channelIDs } = action.payload;

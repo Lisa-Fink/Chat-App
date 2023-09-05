@@ -15,11 +15,11 @@ function Users() {
     if (usersStatus === "succeeded") {
       setCurUserChannels(id in userChannels ? userChannels[id] : []);
     }
-  }, [userChannels]);
+  }, [userChannels, id]);
 
-  useEffect(() => {
-    setCurUserChannels(id in userChannels ? userChannels[id] : []);
-  }, [id]);
+  // useEffect(() => {
+  //   setCurUserChannels(id in userChannels ? userChannels[id] : []);
+  // }, [id]);
 
   const creator = [];
   const admins = [];

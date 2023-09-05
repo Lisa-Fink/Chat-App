@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { fetchServers } from "../redux/serversSlice";
 import { useSelector, useDispatch } from "react-redux";
-import { setServer } from "../redux/currentSlice";
+import { setChannel, setServer } from "../redux/currentSlice";
 import "../styles/Servers.css";
 import AddServerModal from "./AddServerModal";
 import ServerSettingsModal from "./modals/ServerSettingsModal";
