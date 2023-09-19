@@ -1,0 +1,15 @@
+.center {
+  align-items: center;
+  justify-content: center;
+}
+
+.center button {
+  font-size: 80%;
+  width: 80px;
+}
+
+.center select {
+  padding: 1%;
+  font-size: 100%;
+  border-radius: 15px;
+}
