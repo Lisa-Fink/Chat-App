@@ -13,10 +13,11 @@ import { useSelector, useDispatch } from "react-redux";
 import { setChannel } from "../redux/currentSlice";
 import { fetchChannelsForServer } from "../redux/channelsSlice";
 import { removeCurrentUserFromServer } from "../redux/usersSlice";
+import { fetchMessagesForChannel } from "../redux/messagesSlice";
 
 function Channels({ setShowServerSettingsModal }) {
   const dispatch = useDispatch();
-  const { server } = useSelector((state) => state.current);
+  const { server, channel } = useSelector((state) => state.current);
   const { token, userID } = useSelector((state) => state.auth);
   const channels = useSelector((state) => state.channels.byServerID);
   const [curChannels, setCurChannels] = useState(
@@ -26,24 +27,37 @@ function Channels({ setShowServerSettingsModal }) {
   const [showServerDropdown, setShowServerDropdown] = useState(false);
   const [showLeaveServerConfirm, setShowLeaveServerConfirm] = useState(false);
 
-  // When a server is selected, gets the channels for the server
+  // When a server is selected clear menus and fetch channels
   useEffect(() => {
     setShowLeaveServerConfirm(false);
     setShowServerDropdown(false);
-    // curChannels to store all channels in the current server
     if (server && server.id) {
       dispatch(
         fetchChannelsForServer({
           token: token,
           serverID: server.id,
-          curChannels: setCurChannels,
         })
       );
-    } else {
-      setCurChannels([]);
-      dispatch(setChannel({}));
     }
   }, [server]);
+
+  // if channels[serverID] changes update the local channels list
+  useEffect(() => {
+    if (server && server.id && channels[server.id]) {
+      setCurChannels(channels[server.id]);
+      const firstChannel = channels[server.id][0];
+      if (firstChannel) {
+        dispatch(
+          setChannel({
+            id: firstChannel.channelID,
+            name: firstChannel.channelName,
+          })
+        );
+      } else {
+        dispatch(setChannel({ id: null, name: null }));
+      }
+    }
+  }, [channels[server.id]]);
 
   const handleChannelClick = (e) => {
     const newChannelID = e.currentTarget.dataset.id;

@@ -48,20 +48,13 @@ const channelsSlice = createSlice({
 
 export const fetchChannelsForServer = createAsyncThunk(
   "channels/fetchChannelsForServer",
-  async ({ token, serverID, curChannels }, { getState, dispatch }) => {
+  async ({ token, serverID }, { getState, dispatch }) => {
     const channels = getState().channels.byServerID;
+    // check if the channels have already been fetched
     if (serverID in channels) {
-      const data = getState().channels.byServerID[serverID];
-      curChannels(data);
-      if (data.length > 0) {
-        dispatch(
-          setChannel({ id: data[0].channelID, name: data[0].channelName })
-        );
-      } else {
-        setChannel({});
-      }
       return { isNew: false };
     }
+
     const apiUrl = import.meta.env.VITE_CHAT_API;
     const url = `${apiUrl}/servers/${serverID}/channels`;
     const res = await fetch(url, {
@@ -74,14 +67,6 @@ export const fetchChannelsForServer = createAsyncThunk(
       throw new Error("Failed to get channels.");
     }
     const data = await res.json();
-    curChannels(data);
-    if (data.length > 0) {
-      dispatch(
-        setChannel({ id: data[0].channelID, name: data[0].channelName })
-      );
-    } else {
-      setChannel({});
-    }
     return { isNew: true, serverID: serverID, channels: data };
   }
 );

@@ -5,6 +5,7 @@ import { setChannel, setServer } from "../redux/currentSlice";
 import "../styles/Servers.css";
 import AddServerModal from "./AddServerModal";
 import ServerSettingsModal from "./modals/ServerSettingsModal";
+import { fetchUsersForServer } from "../redux/usersSlice";
 function Servers({ showSeverSettingsModal, setShowServerSettingsModal }) {
   const dispatch = useDispatch();
   const servers = useSelector((state) => state.servers.data);
@@ -15,6 +16,7 @@ function Servers({ showSeverSettingsModal, setShowServerSettingsModal }) {
   const [showAddServerModal, setShowAddServerModal] = useState(false);
 
   const handleServerClick = (serverID, serverName, roleID) => {
+    // set current server
     dispatch(
       setServer({
         id: serverID,
@@ -22,6 +24,19 @@ function Servers({ showSeverSettingsModal, setShowServerSettingsModal }) {
         roleID: roleID,
       })
     );
+    // get all users in server
+    dispatch(
+      fetchUsersForServer({
+        token: token,
+        serverID: serverID,
+      })
+    );
+
+    // next steps handled in Channels.jsx:
+    // get all channels in server
+    // set current channel to the first channel in the server if there are any channels
+
+    // get all messages for channel (should happen any time a new current channel is set)
   };
 
   const handleServerHover = (serverID) => {
@@ -53,6 +68,7 @@ function Servers({ showSeverSettingsModal, setShowServerSettingsModal }) {
     return serverDetails;
   };
 
+  // fetches the users servers after login
   useEffect(() => {
     if (serversStatus === "idle") {
       dispatch(fetchServers(token));

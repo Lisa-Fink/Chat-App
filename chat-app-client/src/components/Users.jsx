@@ -1,25 +1,39 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import "../styles/Users.css";
 
+import { fetchUsersForChannel } from "../redux/usersSlice";
+
 function Users() {
-  const { id } = useSelector((state) => state.current.channel);
+  const dispatch = useDispatch();
+  const { server, channel } = useSelector((state) => state.current);
   const userChannels = useSelector((state) => state.users.byChannelID);
   const usersByID = useSelector((state) => state.users.dataByID);
   const usersStatus = useSelector((state) => state.users.status);
-  const [curUserChannels, setCurUserChannels] = useState(
-    id in userChannels ? userChannels[id] : []
-  );
+  const { token } = useSelector((state) => state.auth);
+  const [curUserChannels, setCurUserChannels] = useState([]);
+  const id = channel.id;
 
+  // if the channel id changes, fetch the users list for the new channel
+  useEffect(() => {
+    if (channel && channel.id) {
+      dispatch(
+        fetchUsersForChannel({
+          token: token,
+          serverID: server.id,
+          channelID: channel.id,
+        })
+      );
+    }
+  }, [server, channel]);
+  // after fetching the new user list, update the local state
   useEffect(() => {
     if (usersStatus === "succeeded") {
-      setCurUserChannels(id in userChannels ? userChannels[id] : []);
+      setCurUserChannels(
+        channel.id in userChannels ? userChannels[channel.id] : []
+      );
     }
-  }, [userChannels, id]);
-
-  // useEffect(() => {
-  //   setCurUserChannels(id in userChannels ? userChannels[id] : []);
-  // }, [id]);
+  }, [usersStatus, userChannels]);
 
   const creator = [];
   const admins = [];

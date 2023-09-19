@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "../styles/Chat.css";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -6,7 +6,6 @@ import {
   editMessage,
   deleteMessage,
 } from "../redux/messagesSlice";
-import { fetchUsersForChannel } from "../redux/usersSlice";
 import {
   MdEdit,
   MdDelete,
@@ -23,6 +22,7 @@ function Chat() {
   const messagesStatus = useSelector((state) => state.messages.status);
   const usersStatus = useSelector((state) => state.users.status);
   const users = useSelector((state) => state.users.dataByID);
+  const usersInChannel = useSelector((state) => state.users.byChannelID);
 
   const [curMessages, setCurMessages] = useState(
     channel.id in messages ? messages[channel.id] : []
@@ -36,6 +36,9 @@ function Chat() {
 
   const [confirmDelID, setConfirmDelID] = useState(null);
 
+  const chatRef = useRef();
+
+  // if the channel changes, fetch the messages for the new channel
   useEffect(() => {
     if (channel && channel.id) {
       dispatch(
@@ -45,23 +48,29 @@ function Chat() {
           channelID: channel.id,
         })
       );
-      dispatch(
-        fetchUsersForChannel({
-          token: token,
-          serverID: server.id,
-          channelID: channel.id,
-        })
-      );
     } else {
       setCurMessages([]);
     }
-  }, [channel, messages]);
-
+  }, [channel]);
+  // After the messages are fetched, update the local state
   useEffect(() => {
-    if (messagesStatus === "succeeded" && usersStatus === "succeeded") {
-      setCurMessages(messages[channel.id]);
+    if (!messages[channel.id]) return;
+    setCurMessages(messages[channel.id]);
+  }, [messages[channel.id]]);
+
+  useLayoutEffect(() => {
+    // Always scroll to the bottom of the chat container
+    if (
+      chatRef.current &&
+      chatRef.current.lastChild &&
+      chatRef.current.lastChild.lastChild
+    ) {
+      const lastMessage = chatRef.current.lastChild.lastChild;
+      if (lastMessage) {
+        lastMessage.scrollIntoView();
+      }
     }
-  }, [messagesStatus, usersStatus]);
+  }, [chatRef, curMessages]);
 
   const handleEditClick = (id, text) => {
     setEditID(id);
@@ -107,6 +116,10 @@ function Chat() {
   };
 
   const messageList = curMessages.map((message) => {
+    const isUnknown =
+      !message.userID ||
+      !usersInChannel[channel.id] ||
+      !usersInChannel[channel.id].includes(message.userID);
     return (
       <li
         className="message"
@@ -114,7 +127,9 @@ function Chat() {
         onMouseEnter={() => setShowOptions(message.messageID)}
         onMouseLeave={() => setShowOptions(null)}
       >
-        {users[message.userID].userImageUrl ? (
+        {isUnknown ? (
+          <div className="message-thumbnail">U</div>
+        ) : users[message.userID].userImageUrl ? (
           <img
             className="message-thumbnail"
             src={users[message.userID].userImageUrl}
@@ -127,7 +142,7 @@ function Chat() {
         <div>
           <div className="message-data">
             <div className="message-username">
-              {users[message.userID].username}
+              {isUnknown ? "Unknown User" : users[message.userID].username}
             </div>
             <div className="message-time">
               {new Date(message.time).toLocaleString()}
@@ -192,8 +207,10 @@ function Chat() {
   });
 
   return (
-    <div className="chat">
-      <ul className="message-list">{messageList}</ul>
+    <div className="chat" ref={chatRef}>
+      {messagesStatus === "succeeded" && usersStatus === "succeeded" && (
+        <ul className="message-list">{messageList}</ul>
+      )}
     </div>
   );
 }
