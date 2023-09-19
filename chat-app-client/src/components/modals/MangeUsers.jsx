@@ -62,20 +62,20 @@ function MangeUsers({ id }) {
     setShowKickConfirm(0);
   };
 
-  const changeRoleMenu = (user) => (
+  const changeRoleMenu = (user, roleID) => (
     <ul className="role-menu">
       <li>
-        <button onClick={() => handleRoleChange(user.userID, 2, user.roleID)}>
+        <button onClick={() => handleRoleChange(user.userID, 2, roleID)}>
           Admin
         </button>
       </li>
       <li>
-        <button onClick={() => handleRoleChange(user.userID, 3, user.roleID)}>
+        <button onClick={() => handleRoleChange(user.userID, 3, roleID)}>
           Moderator
         </button>
       </li>
       <li>
-        <button onClick={() => handleRoleChange(user.userID, 4, user.roleID)}>
+        <button onClick={() => handleRoleChange(user.userID, 4, roleID)}>
           Member
         </button>
       </li>
@@ -86,6 +86,7 @@ function MangeUsers({ id }) {
     usersInServer &&
     usersInServer.map((userID) => {
       const user = users[userID];
+      const roleID = user.serverRoles[id];
       return (
         <tr className="user-server" key={userID}>
           <td className="user-info">
@@ -93,16 +94,16 @@ function MangeUsers({ id }) {
             {user.username}
           </td>
           <td>
-            {user.roleID === 1
+            {roleID === 1
               ? "Creator"
-              : user.roleID === 2
+              : roleID === 2
               ? "Admin"
-              : user.roleID === 3
+              : roleID === 3
               ? "Moderator"
               : "Member"}
           </td>
           <td>
-            {user.roleID != 1 && (
+            {roleID != 1 && user.userID !== auth.userID && (
               <div className="role-container">
                 <button
                   className="role"
@@ -123,7 +124,7 @@ function MangeUsers({ id }) {
             )}
           </td>
           <td>
-            {user.roleID !== 1 && (
+            {roleID !== 1 && user.userID !== auth.userID && (
               <>
                 <button
                   className="kick"

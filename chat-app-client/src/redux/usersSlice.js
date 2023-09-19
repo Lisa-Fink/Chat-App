@@ -35,10 +35,7 @@ const usersSlice = createSlice({
         delete state.byChannelID[channelID];
       }
     },
-    removeServer: (state, action) => {
-      const serverID = action.payload.serverID;
-      delete state.byServerID[serverID];
-    },
+    removeServer: (state, action) => {},
     removeUserFromChannels: (state, action) => {
       const { channelIDs, removeID } = action.payload;
       for (const channelID of channelIDs) {
@@ -61,7 +58,6 @@ const usersSlice = createSlice({
           state.byChannelID[channelID] = [];
           for (const user of userChannels) {
             state.byChannelID[channelID].push(user.userID);
-            state.dataByID[user.userID] = user;
           }
         }
         state.status = "succeeded";
@@ -81,8 +77,10 @@ const usersSlice = createSlice({
         if (isNew) {
           state.byServerID[serverID] = [];
           for (const user of userServers) {
-            state.byServerID[serverID].push(user.userID);
+            user.serverRoles = {};
+            user.serverRoles[serverID] = user.roleID;
             state.dataByID[user.userID] = user;
+            state.byServerID[serverID].push(user.userID);
           }
         }
       })
@@ -93,7 +91,9 @@ const usersSlice = createSlice({
       .addCase(updateUserServerRole.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.error = null;
-        state.dataByID[action.payload.userID].roleID = action.payload.roleID;
+        state.dataByID[action.payload.userID].serverRoles[
+          action.payload.serverID
+        ] = action.payload.roleID;
       })
       .addCase(removeUserFromServer.rejected, (state, action) => {
         state.status = "failed";
@@ -109,11 +109,6 @@ const usersSlice = createSlice({
               (id) => id !== userID
             );
           }
-        }
-        if (state.byServerID && serverID in state.byServerID) {
-          state.byServerID[serverID] = state.byServerID[serverID].filter(
-            (id) => id !== userID
-          );
         }
         state.status = "succeeded";
       })

@@ -40,7 +40,7 @@ function Users() {
   const mods = [];
   const members = [];
   for (const user of curUserChannels) {
-    const role = usersByID[user].roleID;
+    const role = usersByID[user].serverRoles[server.id];
     if (role === 1) creator.push(user);
     else if (role === 2) admins.push(user);
     else if (role === 3) mods.push(user);
