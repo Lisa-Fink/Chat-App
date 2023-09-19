@@ -55,7 +55,9 @@ function AddServerModal({ closeModal }) {
               <div>
                 <div>
                   <label htmlFor="server-name">Server Name</label>
-                  {!validName && <span class="error">Enter a Server Name</span>}
+                  {!validName && (
+                    <span className="error">Enter a Server Name</span>
+                  )}
                 </div>
                 <input
                   name="server-name"
@@ -71,7 +73,7 @@ function AddServerModal({ closeModal }) {
                 <div>
                   <label htmlFor="server-description">Server Description</label>
                   {!validDescription && (
-                    <span class="error">Enter a Server Description</span>
+                    <span className="error">Enter a Server Description</span>
                   )}
                 </div>
                 <textarea
