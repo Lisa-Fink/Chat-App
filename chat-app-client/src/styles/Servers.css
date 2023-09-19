@@ -58,4 +58,5 @@
   border: 1px solid var(--accent-text);
   border-radius: 70%;
   color: var(--light-text);
+  z-index: 10;
 }
