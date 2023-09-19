@@ -158,7 +158,6 @@ export const deleteMessage = createAsyncThunk(
     if (!res.ok) {
       throw new Error("Failed to delete message.");
     }
-    console.log(res);
     return { channelID, messageID };
   }
 );
