@@ -46,6 +46,10 @@ const usersSlice = createSlice({
         }
       }
     },
+    clearUserChannel: (state, action) => {
+      const { channelID } = action.payload;
+      delete state.byChannelID[channelID];
+    },
   },
   extraReducers(builder) {
     builder
@@ -311,6 +315,10 @@ export const addUserChannel = createAsyncThunk(
   }
 );
 
-export const { joinGeneralChannel, removeChannels, removeUserFromChannels } =
-  usersSlice.actions;
+export const {
+  joinGeneralChannel,
+  removeChannels,
+  removeUserFromChannels,
+  clearUserChannel,
+} = usersSlice.actions;
 export default usersSlice.reducer;
