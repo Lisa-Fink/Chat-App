@@ -13,6 +13,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setChannel } from "../redux/currentSlice";
 import { fetchChannelsForServer } from "../redux/channelsSlice";
 import { removeCurrentUserFromServer } from "../redux/usersSlice";
+import AddChannelModal from "./modals/AddChannelModal";
 
 function Channels({ setShowServerSettingsModal }) {
   const dispatch = useDispatch();
@@ -25,6 +26,8 @@ function Channels({ setShowServerSettingsModal }) {
 
   const [showServerDropdown, setShowServerDropdown] = useState(false);
   const [showLeaveServerConfirm, setShowLeaveServerConfirm] = useState(false);
+
+  const [showAddChannelModal, setShowAddChannelModal] = useState(false);
 
   // When a server is selected clear menus and fetch channels
   useEffect(() => {
@@ -79,6 +82,10 @@ function Channels({ setShowServerSettingsModal }) {
         roleID: newChannelRoleID,
       })
     );
+  };
+
+  const handleAddChannelClick = () => {
+    setShowAddChannelModal(true);
   };
 
   const channelList = curChannels.map(({ channelID, channelName, roleID }) => (
@@ -164,12 +171,17 @@ function Channels({ setShowServerSettingsModal }) {
       </div>
       <div className="server-menu">
         <div>
-          <AiOutlinePlusCircle />
+          <button onClick={handleAddChannelClick}>
+            <AiOutlinePlusCircle />
+          </button>
         </div>
         <div>
           <MdSettings />
         </div>
       </div>
+      {showAddChannelModal && (
+        <AddChannelModal closeModal={() => setShowAddChannelModal(false)} />
+      )}
     </>
   );
 }
