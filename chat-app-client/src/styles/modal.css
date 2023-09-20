@@ -122,3 +122,9 @@
 .selected {
   border-color: var(--online-status-color);
 }
+
+select {
+  padding: 1%;
+  font-size: 100%;
+  border-radius: 15px;
+}
