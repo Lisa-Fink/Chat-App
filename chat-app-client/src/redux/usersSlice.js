@@ -53,11 +53,11 @@ const usersSlice = createSlice({
         state.status = "loading";
       })
       .addCase(fetchUsersForChannel.fulfilled, (state, action) => {
-        const { isNew, channelID, userChannels } = action.payload;
+        const { isNew, channelID, userIDs } = action.payload;
         if (isNew) {
           state.byChannelID[channelID] = [];
-          for (const user of userChannels) {
-            state.byChannelID[channelID].push(user.userID);
+          for (const userID of userIDs) {
+            state.byChannelID[channelID].push(userID);
           }
         }
         state.status = "succeeded";
@@ -142,7 +142,8 @@ export const fetchUsersForChannel = createAsyncThunk(
       throw new Error("Failed to get users in channel.");
     }
     const data = await res.json();
-    return { isNew: true, channelID: channelID, userChannels: data };
+    console.log(data);
+    return { isNew: true, channelID: channelID, userIDs: data };
   }
 );
 

@@ -59,13 +59,13 @@ public class UsersController {
 
     // Returns all Users in a channel
     @GetMapping("/{serverID}/{channelID}")
-    public ResponseEntity<List<UserChannelResponse>> getUsersInChannel(
+    public ResponseEntity<List<Integer>> getUsersInChannel(
             @PathVariable int serverID, @PathVariable int channelID,
             @AuthenticationPrincipal CustomUserDetails user) {
         if (!authService.userInChannel(user.getUserId(), channelID)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        List<UserChannelResponse> channelUsers = usersDao.getUsersInChannel(channelID, serverID);
+        List<Integer> channelUsers = usersDao.getUsersInChannel(channelID, serverID);
         return ResponseEntity.ok(channelUsers);
     }
 

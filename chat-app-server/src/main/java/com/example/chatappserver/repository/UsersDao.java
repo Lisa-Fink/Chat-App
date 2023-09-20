@@ -97,24 +97,15 @@ public class UsersDao {
 
 
     // Get a List of all Users in a channel by channelID
-    public List<UserChannelResponse> getUsersInChannel(int channelID, int serverID) {
-        // First select: User is in UserChannels with a matching channelID
-        // Second select: User is in UserServers with a valid roleID
+    public List<Integer> getUsersInChannel(int channelID, int serverID) {
         String sql = """
-                SELECT DISTINCT u.userID, u.username, u.userImageUrl, us.roleID
-                	FROM Users u
-                LEFT JOIN UserServers us ON us.userID = u.userID
-                LEFT JOIN Channels c ON c.channelID = ?
-                LEFT JOIN UserChannels uc ON u.userID = uc.userID
-                	WHERE uc.channelID = ?
-                UNION
-                SELECT DISTINCT u.userID, u.username, u.userImageUrl, us.roleID
-                	FROM Users u
-                LEFT JOIN Channels c ON c.channelID = ?
-                LEFT JOIN UserServers us ON u.userID = us.userID
-                	WHERE us.serverID = ? AND us.roleID <= c.roleID""";
-
-        return jdbcTemplate.query(sql, userChannelRowMapper(), channelID, channelID, channelID, serverID);
+        
+                SELECT us.userID FROM UserServers us, Channels c
+                    WHERE us.serverID = ? AND c.channelID = ? AND us.roleID <= c.roleID
+                    UNION
+                SELECT uc.userID FROM UserChannels uc WHERE uc.channelID = ?;
+                """;
+        return jdbcTemplate.queryForList(sql, Integer.class, serverID, channelID, channelID);
     }
 
     // Get a List of all Users in a Server by serverID

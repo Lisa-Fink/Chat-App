@@ -152,18 +152,10 @@ SELECT * FROM Users WHERE userID = :userID;
 SELECT * FROM Users WHERE email = :email;
 
 -- Get all Users in a channel, either they are listed in UserChannels or they are listed in UserServers with a high enough roleID
-SELECT DISTINCT u.userID, u.username, u.userImageUrl, us.roleID
-	FROM Users u
-LEFT JOIN UserServers us ON us.userID = u.userID
-LEFT JOIN Channels c ON c.channelID = :channelID
-LEFT JOIN UserChannels uc ON u.userID = uc.userID
-	WHERE uc.channelID = :channelID
-UNION
-SELECT DISTINCT u.userID, u.username, u.userImageUrl, us.roleID
-	FROM Users u
-LEFT JOIN Channels c ON c.channelID = :channelID
-LEFT JOIN UserServers us ON u.userID = us.userID
-	WHERE us.serverID = :serverID AND us.roleID <= c.roleID;
+SELECT us.userID FROM UserServers us, Channels c 
+WHERE us.serverID = :serverID AND c.channelID = :channelID AND us.roleID <= c.roleID
+UNION 
+SELECT uc.userID FROM UserChannels uc WHERE uc.channelID = :channelID;
 
 -- Get all users in a Server
 SELECT us.userID, u.username, u.userImageUrl, us.roleID FROM UserServers us
