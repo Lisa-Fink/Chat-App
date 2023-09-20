@@ -110,6 +110,29 @@ function ChannelSettingsModal({ closeModal }) {
     setEditRole(false);
   };
 
+  const handleDeleteClick = (e) => {
+    e.preventDefault();
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteCancel = (e) => {
+    e.preventDefault();
+    setShowDeleteConfirm(false);
+  };
+
+  const handleDeleteConfirm = (e) => {
+    e.preventDefault();
+    dispatch(
+      deleteChannel({
+        token: auth.token,
+        serverID: server.id,
+        channelID: id,
+      })
+    );
+    setShowDeleteConfirm(false);
+    closeModal();
+  };
+
   return (
     <div className="modal-container">
       <div className="modal">
@@ -213,6 +236,25 @@ function ChannelSettingsModal({ closeModal }) {
                   </div>
                 </div>
               </div>
+              {server.roleID <= 2 && (
+                <div className="form-field-container">
+                  Delete Channel
+                  <div>
+                    <button onClick={handleDeleteClick}>Delete</button>
+                    {showDeleteConfirm && (
+                      <div>
+                        Confirm Delete?{" "}
+                        <button onClick={handleDeleteConfirm}>
+                          <MdCheck />
+                        </button>
+                        <button onClick={handleDeleteCancel}>
+                          <MdCancel />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </>
           </form>
         ) : (

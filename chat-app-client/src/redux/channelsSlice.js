@@ -64,6 +64,24 @@ const channelsSlice = createSlice({
         state.byServerID[serverID].find(
           (chan) => parseInt(chan.channelID) === parseInt(channelID)
         ).roleID = roleID;
+      })
+      .addCase(deleteChannel.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(deleteChannel.fulfilled, (state, action) => {
+        const { serverID, channelID } = action.payload;
+        state.byServerID[serverID] = state.byServerID[serverID].filter(
+          (chan) => parseInt(chan.channelID) !== parseInt(channelID)
+        );
+      })
+      .addCase(createChannel.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(createChannel.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.byServerID[action.payload.serverID].push(action.payload);
       });
   },
 });
@@ -132,6 +150,52 @@ export const updateChannelRole = createAsyncThunk(
       throw new Error("Failed to update channel role.");
     }
     return { serverID, channelID, roleID };
+  }
+);
+
+export const createChannel = createAsyncThunk(
+  "channels/createChannel",
+  async ({ token, serverID, channelName, roleID }) => {
+    const channelTypeID = 1;
+    const requestBody = JSON.stringify({
+      serverID,
+      channelName,
+      roleID,
+      channelTypeID,
+    });
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/servers/${serverID}/channels`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: requestBody,
+    });
+    if (!res.ok) {
+      throw new Error("Failed to delete channel.");
+    }
+    const channelID = await res.json();
+    return { serverID, channelID, channelName, roleID, channelTypeID };
+  }
+);
+
+export const deleteChannel = createAsyncThunk(
+  "channels/deleteChannel",
+  async ({ token, serverID, channelID }) => {
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/servers/${serverID}/channels/${channelID}`;
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) {
+      throw new Error("Failed to delete channel.");
+    }
+    return { serverID, channelID };
   }
 );
 
