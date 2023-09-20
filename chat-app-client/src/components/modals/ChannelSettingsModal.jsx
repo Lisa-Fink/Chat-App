@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import "../../styles/modal.css";
 import "../../styles/ChannelSettingsModal.css";
 import MangeChannelUsers from "./ManageChannelUsers";
 import {
+  deleteChannel,
   updateChannelName,
   updateChannelRole,
 } from "../../redux/channelsSlice";
 import { setChannel } from "../../redux/currentSlice";
+import { MdCancel, MdCheck } from "react-icons/md";
+import { clearUserChannel, fetchUsersForChannel } from "../../redux/usersSlice";
 
 function ChannelSettingsModal({ closeModal }) {
   const dispatch = useDispatch();
@@ -16,13 +19,18 @@ function ChannelSettingsModal({ closeModal }) {
   const { name, id, roleID } = useSelector((state) => state.current.channel);
   const { server } = useSelector((state) => state.current);
 
+  const channels = useSelector((state) => state.channels.byServerID[server.id]);
+
   const [channelName, setChannelName] = useState(name);
   const [channelRole, setChannelRole] = useState(roleID);
   const [validName, setValidName] = useState(true);
   const [editName, setEditName] = useState(false);
   const [editRole, setEditRole] = useState(false);
+  const [updateUsers, setUpdateUsers] = useState(false);
 
   const [view, setView] = useState("details");
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const updateCurChan = () => {
     dispatch(setChannel({ id: id, name: channelName, roleID: channelRole }));
@@ -75,11 +83,27 @@ function ChannelSettingsModal({ closeModal }) {
           roleID: channelRole,
         })
       );
-      console.log(channelRole);
+      setUpdateUsers(true);
       updateCurChan();
     }
     setEditRole(false);
   };
+
+  // after the roleID changes, update user list
+  useEffect(() => {
+    if (updateUsers) {
+      dispatch(clearUserChannel({ channelID: id }));
+      dispatch(
+        fetchUsersForChannel({
+          token: auth.token,
+          serverID: server.id,
+          channelID: id,
+        })
+      );
+      setUpdateUsers(false);
+    }
+  }, [channels]);
+
   const handleRoleCancel = (e) => {
     e.preventDefault();
     setChannelRole(roleID);
