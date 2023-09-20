@@ -87,12 +87,13 @@ public class ChannelsController {
     // Update the channel role
     @PutMapping("/{channelID}/role")
     public ResponseEntity<Object> updateRoleID(
-            @PathVariable int channelID, @RequestBody int roleID,
+            @PathVariable int channelID, @RequestBody String strRoleID,
             @AuthenticationPrincipal CustomUserDetails user,
             @PathVariable int serverID) {
         if (!authService.userIsAdmin(user.getUserId(), serverID)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+        int roleID = Integer.parseInt(strRoleID);
         // RoleID must be >= 2
         if (roleID == 1) {
             return ResponseEntity.badRequest().body("RoleID must be greater than or equal to 2.");
