@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   server: {}, // {id, name}
-  channel: {}, // {id, name}
+  channel: {}, // {id, name, roleID}
 };
 
 const curSlice = createSlice({
