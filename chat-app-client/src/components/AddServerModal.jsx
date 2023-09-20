@@ -47,7 +47,7 @@ function AddServerModal({ closeModal }) {
   return (
     <div className="modal-container">
       <div className="modal">
-        <h2>Edit Account</h2>
+        <h2>Add Server</h2>
         <form>
           <div className="form-field-container">
             Server Details
