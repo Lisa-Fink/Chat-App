@@ -13,7 +13,7 @@ function Menu() {
   return (
     <div className="menu">
       <div className="channel-name"># {channel.name}</div>
-      {server && server.roleID && server.roleID <= 2 && (
+      {channel.id && server && server.roleID && server.roleID <= 2 && (
         <div id="channel-setting-icon">
           <button onClick={() => setSettingsModal(true)}>
             <MdSettings />
