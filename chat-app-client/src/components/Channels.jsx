@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import "../styles/Channels.css";
 import {
   MdSettings,
@@ -13,7 +13,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { setChannel } from "../redux/currentSlice";
 import { fetchChannelsForServer } from "../redux/channelsSlice";
 import { removeCurrentUserFromServer } from "../redux/usersSlice";
-import { fetchMessagesForChannel } from "../redux/messagesSlice";
 
 function Channels({ setShowServerSettingsModal }) {
   const dispatch = useDispatch();
@@ -45,16 +44,26 @@ function Channels({ setShowServerSettingsModal }) {
   useEffect(() => {
     if (server && server.id && channels[server.id]) {
       setCurChannels(channels[server.id]);
+      // if the current channel is in the server continue, otherwise select the first channel
+      if (
+        channel.id &&
+        channels[server.id].find(
+          (chan) => parseInt(chan.channelID) === parseInt(channel.id)
+        )
+      ) {
+        return;
+      }
       const firstChannel = channels[server.id][0];
       if (firstChannel) {
         dispatch(
           setChannel({
             id: firstChannel.channelID,
             name: firstChannel.channelName,
+            roleID: firstChannel.roleID,
           })
         );
       } else {
-        dispatch(setChannel({ id: null, name: null }));
+        dispatch(setChannel({ id: null, name: null, roleID: null }));
       }
     }
   }, [channels[server.id]]);
@@ -62,14 +71,22 @@ function Channels({ setShowServerSettingsModal }) {
   const handleChannelClick = (e) => {
     const newChannelID = e.currentTarget.dataset.id;
     const newChannelName = e.currentTarget.dataset.name;
-    dispatch(setChannel({ id: newChannelID, name: newChannelName }));
+    const newChannelRoleID = e.currentTarget.dataset.roleid;
+    dispatch(
+      setChannel({
+        id: newChannelID,
+        name: newChannelName,
+        roleID: newChannelRoleID,
+      })
+    );
   };
 
-  const channelList = curChannels.map(({ channelID, channelName }) => (
+  const channelList = curChannels.map(({ channelID, channelName, roleID }) => (
     <li key={channelID}>
       <button
         data-id={channelID}
         data-name={channelName}
+        data-roleid={roleID}
         onClick={handleChannelClick}
       >
         # {channelName}
