@@ -4,6 +4,11 @@ import { useSelector, useDispatch } from "react-redux";
 import "../../styles/modal.css";
 import "../../styles/ChannelSettingsModal.css";
 import MangeChannelUsers from "./ManageChannelUsers";
+import {
+  updateChannelName,
+  updateChannelRole,
+} from "../../redux/channelsSlice";
+import { setChannel } from "../../redux/currentSlice";
 
 function ChannelSettingsModal({ closeModal }) {
   const dispatch = useDispatch();
@@ -19,12 +24,33 @@ function ChannelSettingsModal({ closeModal }) {
 
   const [view, setView] = useState("details");
 
+  const updateCurChan = () => {
+    dispatch(setChannel({ id: id, name: channelName, roleID: channelRole }));
+  };
+
   const handleEditNameClick = (e) => {
     e.preventDefault();
     setEditName(true);
   };
   const handleNameSubmit = (e) => {
     e.preventDefault();
+    if (!channelName.trim()) {
+      setValidName(false);
+      return;
+    }
+    setValidName(true);
+    if (channelName !== name) {
+      dispatch(
+        updateChannelName({
+          token: auth.token,
+          serverID: server.id,
+          channelID: id,
+          channelName: channelName,
+        })
+      );
+      updateCurChan();
+    }
+    setEditName(false);
   };
   const handleNameCancel = (e) => {
     e.preventDefault();
@@ -39,10 +65,24 @@ function ChannelSettingsModal({ closeModal }) {
 
   const handleRoleSubmit = (e) => {
     e.preventDefault();
+    if (channelRole < 1 || channelRole > 4) return;
+    if (roleID !== channelRole) {
+      dispatch(
+        updateChannelRole({
+          token: auth.token,
+          serverID: server.id,
+          channelID: id,
+          roleID: channelRole,
+        })
+      );
+      console.log(channelRole);
+      updateCurChan();
+    }
+    setEditRole(false);
   };
   const handleRoleCancel = (e) => {
     e.preventDefault();
-    setChannelRole(channel.roleID);
+    setChannelRole(roleID);
     setEditRole(false);
   };
 
@@ -114,9 +154,9 @@ function ChannelSettingsModal({ closeModal }) {
                   <div className="flex-row center">
                     {!editRole ? (
                       <div id="channel-role">
-                        {roleID === 4
+                        {channelRole == 4
                           ? "Everyone"
-                          : roleID === 3
+                          : channelRole == 3
                           ? "Moderators"
                           : "Admins"}
                       </div>

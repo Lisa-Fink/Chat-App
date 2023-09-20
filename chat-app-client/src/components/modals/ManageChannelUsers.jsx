@@ -92,11 +92,14 @@ function MangeChannelUsers({ id, channelRoleID, channelID }) {
             )}
           </td>
           <td>
-            {inChannel && roleID !== 1 && userID !== curUserID && (
-              <button onClick={() => handleRemoveUser(userID)}>
-                <MdOutlineRemoveCircleOutline />
-              </button>
-            )}
+            {inChannel &&
+              roleID !== 1 &&
+              userID !== curUserID &&
+              parseInt(roleID) > parseInt(channelRoleID) && (
+                <button onClick={() => handleRemoveUser(userID)}>
+                  <MdOutlineRemoveCircleOutline />
+                </button>
+              )}
           </td>
         </tr>
       );

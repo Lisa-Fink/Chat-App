@@ -42,6 +42,28 @@ const channelsSlice = createSlice({
       .addCase(fetchChannelsForServer.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
+      })
+      .addCase(updateChannelName.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(updateChannelName.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        const { serverID, channelID, channelName } = action.payload;
+        state.byServerID[serverID].find(
+          (chan) => chan.channelID === parseInt(channelID)
+        ).channelName = channelName;
+      })
+      .addCase(updateChannelRole.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(updateChannelRole.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        const { serverID, channelID, roleID } = action.payload;
+        state.byServerID[serverID].find(
+          (chan) => parseInt(chan.channelID) === parseInt(channelID)
+        ).roleID = roleID;
       });
   },
 });
@@ -70,5 +92,48 @@ export const fetchChannelsForServer = createAsyncThunk(
     return { isNew: true, serverID: serverID, channels: data };
   }
 );
+
+export const updateChannelName = createAsyncThunk(
+  "channels/updateChannelName",
+  async ({ token, serverID, channelID, channelName }) => {
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/servers/${serverID}/channels/${channelID}/name`;
+
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "text/plain",
+      },
+      body: channelName,
+    });
+    if (!res.ok) {
+      throw new Error("Failed to update channel name.");
+    }
+    return { serverID, channelID, channelName };
+  }
+);
+
+export const updateChannelRole = createAsyncThunk(
+  "channels/updateChannelRole",
+  async ({ token, serverID, channelID, roleID }) => {
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/servers/${serverID}/channels/${channelID}/role`;
+
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "text/plain",
+      },
+      body: roleID,
+    });
+    if (!res.ok) {
+      throw new Error("Failed to update channel role.");
+    }
+    return { serverID, channelID, roleID };
+  }
+);
+
 export const { addGeneralChannel, removeServer } = channelsSlice.actions;
 export default channelsSlice.reducer;
