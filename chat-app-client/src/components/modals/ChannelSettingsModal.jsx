@@ -8,13 +8,11 @@ import MangeChannelUsers from "./ManageChannelUsers";
 function ChannelSettingsModal({ closeModal }) {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
-  const { name, id } = useSelector((state) => state.current.channel);
+  const { name, id, roleID } = useSelector((state) => state.current.channel);
   const { server } = useSelector((state) => state.current);
-  const channels = useSelector((state) => state.channels.byServerID[server.id]);
-  const channel = channels && channels.find((chan) => chan.channelID === id);
 
   const [channelName, setChannelName] = useState(name);
-  const [channelRole, setChannelRole] = useState(channel.roleID);
+  const [channelRole, setChannelRole] = useState(roleID);
   const [validName, setValidName] = useState(true);
   const [editName, setEditName] = useState(false);
   const [editRole, setEditRole] = useState(false);
@@ -116,9 +114,9 @@ function ChannelSettingsModal({ closeModal }) {
                   <div className="flex-row center">
                     {!editRole ? (
                       <div id="channel-role">
-                        {channel.roleID === 4
+                        {roleID === 4
                           ? "Everyone"
-                          : channel.roleID === 3
+                          : roleID === 3
                           ? "Moderators"
                           : "Admins"}
                       </div>
@@ -154,7 +152,11 @@ function ChannelSettingsModal({ closeModal }) {
             </>
           </form>
         ) : (
-          <MangeChannelUsers id={id} />
+          <MangeChannelUsers
+            id={server.id}
+            channelRoleID={roleID}
+            channelID={id}
+          />
         )}
         <button id="close-btn" onClick={closeModal}>
           Close

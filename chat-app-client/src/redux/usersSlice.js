@@ -77,7 +77,11 @@ const usersSlice = createSlice({
         if (isNew) {
           state.byServerID[serverID] = [];
           for (const user of userServers) {
-            user.serverRoles = {};
+            if (user.userID in state.dataByID) {
+              user.serverRoles = state.dataByID[user.userID].serverRoles;
+            } else {
+              user.serverRoles = {};
+            }
             user.serverRoles[serverID] = user.roleID;
             state.dataByID[user.userID] = user;
             state.byServerID[serverID].push(user.userID);
@@ -119,6 +123,26 @@ const usersSlice = createSlice({
       .addCase(removeCurrentUserFromServer.fulfilled, (state, action) => {
         removeChannels(action.payload);
         removeServer(action.payload);
+      })
+      .addCase(removeUserChannel.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(removeUserChannel.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        const { channelID, userID } = action.payload;
+        state.byChannelID[channelID] = state.byChannelID[channelID].filter(
+          (id) => id !== userID
+        );
+      })
+      .addCase(addUserChannel.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(addUserChannel.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        const { channelID, userID } = action.payload;
+        state.byChannelID[channelID].push(userID);
       });
   },
 });
@@ -142,7 +166,6 @@ export const fetchUsersForChannel = createAsyncThunk(
       throw new Error("Failed to get users in channel.");
     }
     const data = await res.json();
-    console.log(data);
     return { isNew: true, channelID: channelID, userIDs: data };
   }
 );
@@ -247,6 +270,44 @@ export const removeCurrentUserFromServer = createAsyncThunk(
       })
     );
     return { channelIDs: channelIDs, serverID: serverID };
+  }
+);
+
+export const removeUserChannel = createAsyncThunk(
+  "users/removeUserChannel",
+  async ({ token, serverID, channelID, userID }) => {
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/servers/${serverID}/channels/${channelID}/users/${userID}`;
+
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) {
+      throw new Error("Failed to remove user from channel.");
+    }
+    return { channelID, userID };
+  }
+);
+
+export const addUserChannel = createAsyncThunk(
+  "users/addUserChannel",
+  async ({ token, serverID, channelID, userID }) => {
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/servers/${serverID}/channels/${channelID}/users/${userID}`;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) {
+      throw new Error("Failed to add user to channel.");
+    }
+    return { channelID, userID };
   }
 );
 
