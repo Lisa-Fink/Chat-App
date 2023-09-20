@@ -90,7 +90,13 @@ function MangeUsers({ id }) {
       return (
         <tr className="user-server" key={userID}>
           <td className="user-info">
-            <img className="user-thumbnail" src={user.userImageUrl} />
+            {user.userImageUrl ? (
+              <img className="user-thumbnail" src={user.userImageUrl} />
+            ) : (
+              <div className="user-thumbnail">
+                {user.username.substring(0, 1).toUpperCase()}
+              </div>
+            )}
             {user.username}
           </td>
           <td>
