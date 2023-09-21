@@ -24,6 +24,8 @@ function Users() {
           channelID: channel.id,
         })
       );
+    } else {
+      setCurUserChannels([]);
     }
   }, [server, channel]);
   // after fetching the new user list, update the local state

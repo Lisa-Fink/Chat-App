@@ -140,7 +140,7 @@ export const createServer = createAsyncThunk(
 
 export const deleteServer = createAsyncThunk(
   "servers/deleteServer",
-  async ({ token, serverID }, { dispatch }) => {
+  async ({ token, serverID }) => {
     const apiUrl = import.meta.env.VITE_CHAT_API;
     const url = `${apiUrl}/servers/${serverID}`;
 
@@ -153,9 +153,8 @@ export const deleteServer = createAsyncThunk(
     if (!res.ok) {
       throw new Error("Failed to create server.");
     }
-    // delete the data associated with the server
-    const channels = dispatch(removeServer({ serverID: serverID })); // removes all channels
-    dispatch(removeChannels(channels));
+    // Leave channel data associated with the server (this shouldn't occur too often within sessions)
+    return { serverID };
   }
 );
 

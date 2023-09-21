@@ -10,10 +10,11 @@ import {
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setChannel } from "../redux/currentSlice";
+import { setChannel, setServer } from "../redux/currentSlice";
 import { fetchChannelsForServer } from "../redux/channelsSlice";
 import { removeCurrentUserFromServer } from "../redux/usersSlice";
 import AddChannelModal from "./modals/AddChannelModal";
+import { deleteServer } from "../redux/serversSlice";
 
 function Channels({ setShowServerSettingsModal }) {
   const dispatch = useDispatch();
@@ -29,6 +30,8 @@ function Channels({ setShowServerSettingsModal }) {
 
   const [showAddChannelModal, setShowAddChannelModal] = useState(false);
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   // When a server is selected clear menus and fetch channels
   useEffect(() => {
     setShowLeaveServerConfirm(false);
@@ -40,6 +43,8 @@ function Channels({ setShowServerSettingsModal }) {
           serverID: server.id,
         })
       );
+    } else {
+      setCurChannels([]);
     }
   }, [server]);
 
@@ -123,6 +128,14 @@ function Channels({ setShowServerSettingsModal }) {
     setShowLeaveServerConfirm(false);
   };
 
+  const handleConfirmDelete = () => {
+    dispatch(deleteServer({ token: token, serverID: server.id }));
+    dispatch(setServer({ id: null, name: null }));
+    dispatch(setChannel({ id: null, name: null, roleID: null }));
+    setShowDeleteConfirm(false);
+    setShowServerDropdown(false);
+  };
+
   return (
     <>
       <div className="channels thin-scroll">
@@ -146,8 +159,26 @@ function Channels({ setShowServerSettingsModal }) {
                   </button>
                 </li>
               )}
-              {/* leave server (creator can't leave) */}
-              {server.roleID > 1 && (
+              {/* can delete if creator otherwise can
+               leave server (creator can't leave) */}
+              {server.roleID === 1 ? (
+                <li>
+                  <button onClick={() => setShowDeleteConfirm(true)}>
+                    Delete Server
+                  </button>
+                  {showDeleteConfirm && (
+                    <div>
+                      Confirm
+                      <button onClick={handleConfirmDelete}>
+                        <MdCheck />
+                      </button>
+                      <button onClick={() => setShowDeleteConfirm(false)}>
+                        <MdCancel />
+                      </button>
+                    </div>
+                  )}
+                </li>
+              ) : (
                 <li>
                   <button onClick={() => setShowLeaveServerConfirm(true)}>
                     Leave Server
