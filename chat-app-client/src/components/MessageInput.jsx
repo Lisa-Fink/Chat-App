@@ -43,7 +43,7 @@ function MessageInput() {
     <div className="message-input">
       {error && <p>{error}</p>}
       <textarea
-        placeholder={`Message # ${channel.name}`}
+        placeholder={channel.name && `Message # ${channel.name}`}
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
