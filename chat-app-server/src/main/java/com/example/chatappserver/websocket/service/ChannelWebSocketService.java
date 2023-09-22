@@ -1,10 +1,7 @@
 package com.example.chatappserver.websocket.service;
 
 import com.example.chatappserver.model.Message;
-import com.example.chatappserver.websocket.model.MessageBroadcast;
-import com.example.chatappserver.websocket.model.MessageDeleteData;
-import com.example.chatappserver.websocket.model.MessageEditData;
-import com.example.chatappserver.websocket.model.MessageType;
+import com.example.chatappserver.websocket.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -40,6 +37,12 @@ public class ChannelWebSocketService {
         System.out.println("sent");
         MessageBroadcast messageBroadcast = new MessageBroadcast(MessageType.MESSAGE_DELETE,
                 new MessageDeleteData(messageID, channelID, userID));
+        messaging.convertAndSend(destination, messageBroadcast);
+    }
+
+    public void sendTypingToSubscribers(int channelID, TypingData typingData) {
+        String destination = "/topic/channels/" + channelID;
+        MessageBroadcast messageBroadcast = new MessageBroadcast(MessageType.TYPING, typingData);
         messaging.convertAndSend(destination, messageBroadcast);
     }
 }

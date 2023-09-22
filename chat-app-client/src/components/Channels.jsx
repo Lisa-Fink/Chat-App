@@ -17,8 +17,10 @@ import AddChannelModal from "./modals/AddChannelModal";
 import { deleteServer } from "../redux/serversSlice";
 import {
   addMessageUpdate,
+  addTyping,
   deleteMessageUpdate,
   editMessageUpdate,
+  rmTyping,
 } from "../redux/messagesSlice";
 
 function Channels({ setShowServerSettingsModal, stomp }) {
@@ -101,8 +103,10 @@ function Channels({ setShowServerSettingsModal, stomp }) {
 
   const subToChannel = (newChannelID) => {
     dispatch(addSub({ channelID: newChannelID }));
-    console.log("sub to ", +newChannelID);
-    stomp.subscribe("/topic/channels/" + newChannelID, handleChannelData);
+    stomp.current.subscribe(
+      "/topic/channels/" + newChannelID,
+      handleChannelData
+    );
   };
 
   const handleChannelData = (res) => {
@@ -110,7 +114,6 @@ function Channels({ setShowServerSettingsModal, stomp }) {
     const updateUserID = parsed.data.userID;
     if (updateUserID === userID) {
       // will be skipping updates from current user
-      console.log("current user");
       return;
     }
     const resType = parsed.type;
@@ -127,6 +130,12 @@ function Channels({ setShowServerSettingsModal, stomp }) {
           channelID: parsed.data.channelID,
         })
       );
+    } else if (resType === "TYPING") {
+      if (parsed.data.status) {
+        dispatch(addTyping(parsed.data));
+      } else {
+        dispatch(rmTyping(parsed.data));
+      }
     }
   };
 

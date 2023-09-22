@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const initialState = {
   byChannelID: {},
+  typingByChannelID: {}, // {channelID: [userIDs]}
   status: "idle",
   error: null,
   errorContext: null,
@@ -32,6 +33,23 @@ const messagesSlice = createSlice({
       state.byChannelID[channelID] = state.byChannelID[channelID].filter(
         (mes) => parseInt(mes.messageID) !== parseInt(deleteID)
       );
+    },
+    addTyping: (state, action) => {
+      const { channelID, userID } = action.payload;
+      // if the channelID isn't initialized, add it with an empty arr
+      if (!state.typingByChannelID[channelID]) {
+        state.typingByChannelID[channelID] = [];
+      }
+      if (!state.typingByChannelID[channelID].includes(userID)) {
+        state.typingByChannelID[channelID].push(userID);
+      }
+    },
+    rmTyping: (state, action) => {
+      const { channelID, userID } = action.payload;
+      if (!state.typingByChannelID[channelID]) return;
+      state.typingByChannelID[channelID] = state.typingByChannelID[
+        channelID
+      ].filter((id) => parseInt(id) !== parseInt(userID));
     },
   },
   extraReducers(builder) {
@@ -186,5 +204,10 @@ export const deleteMessage = createAsyncThunk(
 );
 
 export default messagesSlice.reducer;
-export const { addMessageUpdate, editMessageUpdate, deleteMessageUpdate } =
-  messagesSlice.actions;
+export const {
+  addMessageUpdate,
+  editMessageUpdate,
+  deleteMessageUpdate,
+  addTyping,
+  rmTyping,
+} = messagesSlice.actions;

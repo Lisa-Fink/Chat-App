@@ -4,6 +4,10 @@
   padding: 0 5% 2% 0;
 }
 
+.message-input > div {
+  color: var(--medium-light-text);
+}
+
 textarea {
   padding: 2%;
   outline: none;

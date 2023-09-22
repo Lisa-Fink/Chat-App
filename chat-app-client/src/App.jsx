@@ -50,11 +50,11 @@ function App() {
             <Channels
               showSeverSettingsModal={showSeverSettingsModal}
               setShowServerSettingsModal={setShowServerSettingsModal}
-              stomp={stomp.current}
+              stomp={stomp}
             />
             <Chat />
             <Users />
-            <MessageInput />
+            <MessageInput stomp={stomp} />
           </>
         )}
       </div>
