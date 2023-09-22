@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ChannelWebSocketService {
 
@@ -43,6 +45,13 @@ public class ChannelWebSocketService {
     public void sendTypingToSubscribers(int channelID, TypingData typingData) {
         String destination = "/topic/channels/" + channelID;
         MessageBroadcast messageBroadcast = new MessageBroadcast(MessageType.TYPING, typingData);
+        messaging.convertAndSend(destination, messageBroadcast);
+    }
+
+    public void sendRoleEditToSubscribers(int channelID, int roleID, int serverID, int userID, List<Integer> userIDs) {
+        String destination = "/topic/channels/" + channelID;
+        ChannelRoleEditData data = new ChannelRoleEditData(channelID, roleID, serverID, userID, userIDs);
+        MessageBroadcast messageBroadcast = new MessageBroadcast(MessageType.ROLE_EDIT, data);
         messaging.convertAndSend(destination, messageBroadcast);
     }
 }

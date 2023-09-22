@@ -11,8 +11,15 @@ import { AiOutlinePlusCircle } from "react-icons/ai";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setChannel, setServer } from "../redux/currentSlice";
-import { addSub, fetchChannelsForServer } from "../redux/channelsSlice";
-import { removeCurrentUserFromServer } from "../redux/usersSlice";
+import {
+  addSub,
+  editRole,
+  fetchChannelsForServer,
+} from "../redux/channelsSlice";
+import {
+  removeCurrentUserFromServer,
+  setUserChannel,
+} from "../redux/usersSlice";
 import AddChannelModal from "./modals/AddChannelModal";
 import { deleteServer } from "../redux/serversSlice";
 import {
@@ -135,6 +142,21 @@ function Channels({ setShowServerSettingsModal, stomp }) {
         dispatch(addTyping(parsed.data));
       } else {
         dispatch(rmTyping(parsed.data));
+      }
+    } else if (resType === "ROLE_EDIT") {
+      // update role
+      dispatch(editRole(parsed.data));
+      // update users
+      dispatch(setUserChannel(parsed.data));
+      if (parseInt(parsed.data.channelID) === parseInt(channel.id)) {
+        // if cur channel changed, update it
+        dispatch(
+          setChannel({
+            id: channel.id,
+            name: channel.channelName,
+            roleID: parsed.data.roleID,
+          })
+        );
       }
     }
   };

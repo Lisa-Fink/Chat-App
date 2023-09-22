@@ -50,6 +50,13 @@ const usersSlice = createSlice({
       const { channelID } = action.payload;
       delete state.byChannelID[channelID];
     },
+    setUserChannel: (state, action) => {
+      const { channelID, userIDs } = action.payload;
+      state.byChannelID[channelID] = [];
+      for (const userID of userIDs) {
+        state.byChannelID[channelID].push(userID);
+      }
+    },
   },
   extraReducers(builder) {
     builder
@@ -59,10 +66,9 @@ const usersSlice = createSlice({
       .addCase(fetchUsersForChannel.fulfilled, (state, action) => {
         const { isNew, channelID, userIDs } = action.payload;
         if (isNew) {
-          state.byChannelID[channelID] = [];
-          for (const userID of userIDs) {
-            state.byChannelID[channelID].push(userID);
-          }
+          usersSlice.caseReducers.setUserChannel(state, {
+            payload: { channelID, userIDs },
+          });
         }
         state.status = "succeeded";
       })
@@ -320,5 +326,6 @@ export const {
   removeChannels,
   removeUserFromChannels,
   clearUserChannel,
+  setUserChannel,
 } = usersSlice.actions;
 export default usersSlice.reducer;

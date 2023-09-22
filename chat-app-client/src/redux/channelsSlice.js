@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { setUserChannel } from "./usersSlice";
 
 const initialState = {
   byServerID: {},
@@ -30,6 +31,15 @@ const channelsSlice = createSlice({
     },
     addSub: (state, action) => {
       state.subs.push(action.payload.channelID);
+    },
+    editRole: (state, action) => {
+      const { serverID, channelID, roleID } = action.payload;
+      state.byServerID[serverID] = state.byServerID[serverID].map((chan) => {
+        if (parseInt(chan.channelID) === parseInt(channelID)) {
+          chan.roleID = roleID;
+        }
+        return chan;
+      });
     },
   },
   extraReducers(builder) {
@@ -137,7 +147,7 @@ export const updateChannelName = createAsyncThunk(
 
 export const updateChannelRole = createAsyncThunk(
   "channels/updateChannelRole",
-  async ({ token, serverID, channelID, roleID }) => {
+  async ({ token, serverID, channelID, roleID }, { dispatch }) => {
     const apiUrl = import.meta.env.VITE_CHAT_API;
     const url = `${apiUrl}/servers/${serverID}/channels/${channelID}/role`;
 
@@ -152,6 +162,10 @@ export const updateChannelRole = createAsyncThunk(
     if (!res.ok) {
       throw new Error("Failed to update channel role.");
     }
+    // new user list should be returned
+    const userIDs = await res.json();
+    dispatch(setUserChannel({ channelID: channelID, userIDs: userIDs }));
+
     return { serverID, channelID, roleID };
   }
 );
@@ -202,6 +216,6 @@ export const deleteChannel = createAsyncThunk(
   }
 );
 
-export const { addGeneralChannel, removeServer, addSub } =
+export const { addGeneralChannel, removeServer, addSub, editRole } =
   channelsSlice.actions;
 export default channelsSlice.reducer;

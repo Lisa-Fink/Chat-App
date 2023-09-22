@@ -83,26 +83,25 @@ function ChannelSettingsModal({ closeModal }) {
           roleID: channelRole,
         })
       );
-      setUpdateUsers(true);
       updateCurChan();
     }
     setEditRole(false);
   };
 
-  // after the roleID changes, update user list
-  useEffect(() => {
-    if (updateUsers) {
-      dispatch(clearUserChannel({ channelID: id }));
-      dispatch(
-        fetchUsersForChannel({
-          token: auth.token,
-          serverID: server.id,
-          channelID: id,
-        })
-      );
-      setUpdateUsers(false);
-    }
-  }, [channels]);
+  // // after the roleID changes, update user list
+  // useEffect(() => {
+  //   if (updateUsers) {
+  //     dispatch(clearUserChannel({ channelID: id }));
+  //     dispatch(
+  //       fetchUsersForChannel({
+  //         token: auth.token,
+  //         serverID: server.id,
+  //         channelID: id,
+  //       })
+  //     );
+  //     setUpdateUsers(false);
+  //   }
+  // }, [channels]);
 
   const handleRoleCancel = (e) => {
     e.preventDefault();

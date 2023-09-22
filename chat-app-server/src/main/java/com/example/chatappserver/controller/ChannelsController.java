@@ -4,7 +4,9 @@ import com.example.chatappserver.model.Channel;
 import com.example.chatappserver.model.CustomUserDetails;
 import com.example.chatappserver.model.User;
 import com.example.chatappserver.repository.ChannelsDao;
+import com.example.chatappserver.repository.UsersDao;
 import com.example.chatappserver.service.AuthService;
+import com.example.chatappserver.websocket.service.ChannelWebSocketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,14 +19,22 @@ import java.util.List;
 @RequestMapping("/servers/{serverID}/channels")
 public class ChannelsController {
     private final ChannelsDao channelsDao;
+    private final UsersDao usersDao;
     private final AuthService authService;
+    private final ChannelWebSocketService channelWebSocketService;
 
     @Autowired
-    public ChannelsController(ChannelsDao channelsDao, AuthService authService) {
+    public ChannelsController(
+            ChannelsDao channelsDao,
+            AuthService authService,
+            UsersDao usersDao,
+            ChannelWebSocketService channelWebSocketService
+    ) {
 
         this.channelsDao = channelsDao;
         this.authService = authService;
-
+        this.usersDao = usersDao;
+        this.channelWebSocketService = channelWebSocketService;
     }
 
     // Create a new channel
@@ -99,7 +109,12 @@ public class ChannelsController {
             return ResponseEntity.badRequest().body("RoleID must be greater than or equal to 2.");
         }
         channelsDao.updateRole(roleID, channelID);
-        return ResponseEntity.ok().build();
+        // get the new users in the channel now that the role changed
+        List<Integer> userIDs = usersDao.getUsersInChannel(channelID, serverID);
+        // broadcast the new user list and roleID for the channel
+        channelWebSocketService.sendRoleEditToSubscribers(channelID, roleID, serverID,
+                user.getUserId(), userIDs);
+        return ResponseEntity.ok(userIDs);
     }
 
     // Update the channel name
@@ -115,27 +130,27 @@ public class ChannelsController {
         return ResponseEntity.ok().build();
     }
 
-    // Update the channel role and channel name
-        public record ChannelUpdateReq(int roleID, String channelName) {
-    }
-    @PutMapping("/{channelID}")
-    public ResponseEntity<Object> updateNameAndRoleID(
-            @PathVariable int channelID,
-            @RequestBody ChannelUpdateReq channelUpdateReq,
-            @AuthenticationPrincipal CustomUserDetails user,
-            @PathVariable int serverID) {
-        if (!authService.userIsAdmin(user.getUserId(), serverID)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        // RoleID must be >= 2
-        if (channelUpdateReq.roleID() == 1) {
-            return ResponseEntity.badRequest().body(
-                    "RoleID must be greater than or equal to 2.");
-        }
-        channelsDao.updateRoleAndChannelName(
-                channelUpdateReq.roleID(), channelUpdateReq.channelName(), channelID);
-        return ResponseEntity.ok().build();
-    }
+//    // Update the channel role and channel name
+//        public record ChannelUpdateReq(int roleID, String channelName) {
+//    }
+//    @PutMapping("/{channelID}")
+//    public ResponseEntity<Object> updateNameAndRoleID(
+//            @PathVariable int channelID,
+//            @RequestBody ChannelUpdateReq channelUpdateReq,
+//            @AuthenticationPrincipal CustomUserDetails user,
+//            @PathVariable int serverID) {
+//        if (!authService.userIsAdmin(user.getUserId(), serverID)) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//        }
+//        // RoleID must be >= 2
+//        if (channelUpdateReq.roleID() == 1) {
+//            return ResponseEntity.badRequest().body(
+//                    "RoleID must be greater than or equal to 2.");
+//        }
+//        channelsDao.updateRoleAndChannelName(
+//                channelUpdateReq.roleID(), channelUpdateReq.channelName(), channelID);
+//        return ResponseEntity.ok().build();
+//    }
 
     // Delete a Channel
     @DeleteMapping("/{channelID}")
