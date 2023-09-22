@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { setChannel } from "./currentSlice";
 
 const initialState = {
   byServerID: {},
+  subs: [],
   status: "idle",
   error: null,
 };
@@ -27,6 +27,9 @@ const channelsSlice = createSlice({
       const { serverID } = action.payload;
       delete state.byServerID[serverID];
       state.status = "succeeded";
+    },
+    addSub: (state, action) => {
+      state.subs.push(action.payload.channelID);
     },
   },
   extraReducers(builder) {
@@ -199,5 +202,6 @@ export const deleteChannel = createAsyncThunk(
   }
 );
 
-export const { addGeneralChannel, removeServer } = channelsSlice.actions;
+export const { addGeneralChannel, removeServer, addSub } =
+  channelsSlice.actions;
 export default channelsSlice.reducer;

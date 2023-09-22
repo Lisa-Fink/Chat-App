@@ -11,16 +11,22 @@ import { AiOutlinePlusCircle } from "react-icons/ai";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setChannel, setServer } from "../redux/currentSlice";
-import { fetchChannelsForServer } from "../redux/channelsSlice";
+import { addSub, fetchChannelsForServer } from "../redux/channelsSlice";
 import { removeCurrentUserFromServer } from "../redux/usersSlice";
 import AddChannelModal from "./modals/AddChannelModal";
 import { deleteServer } from "../redux/serversSlice";
+import {
+  addMessageUpdate,
+  deleteMessageUpdate,
+  editMessageUpdate,
+} from "../redux/messagesSlice";
 
-function Channels({ setShowServerSettingsModal }) {
+function Channels({ setShowServerSettingsModal, stomp }) {
   const dispatch = useDispatch();
   const { server, channel } = useSelector((state) => state.current);
   const { token, userID } = useSelector((state) => state.auth);
-  const channels = useSelector((state) => state.channels.byServerID);
+  const channelData = useSelector((state) => state.channels);
+  const channels = channelData.byServerID;
   const [curChannels, setCurChannels] = useState(
     channels && server && server.id in channels ? channels[server.id] : []
   );
@@ -87,6 +93,41 @@ function Channels({ setShowServerSettingsModal }) {
         roleID: newChannelRoleID,
       })
     );
+    // if not already subscribed, subscribe
+    if (!channelData.subs.includes(newChannelID)) {
+      subToChannel(newChannelID);
+    }
+  };
+
+  const subToChannel = (newChannelID) => {
+    dispatch(addSub({ channelID: newChannelID }));
+    console.log("sub to ", +newChannelID);
+    stomp.subscribe("/topic/channels/" + newChannelID, handleChannelData);
+  };
+
+  const handleChannelData = (res) => {
+    const parsed = JSON.parse(res.body);
+    const updateUserID = parsed.data.userID;
+    if (updateUserID === userID) {
+      // will be skipping updates from current user
+      console.log("current user");
+      return;
+    }
+    const resType = parsed.type;
+    if (resType === "MESSAGE_NEW") {
+      // add the new message
+      dispatch(addMessageUpdate({ message: parsed.data }));
+    } else if (resType === "MESSAGE_EDIT") {
+      const data = parsed.data;
+      dispatch(editMessageUpdate(data));
+    } else if (resType === "MESSAGE_DELETE") {
+      dispatch(
+        deleteMessageUpdate({
+          messageID: parsed.data.messageID,
+          channelID: parsed.data.channelID,
+        })
+      );
+    }
   };
 
   const handleAddChannelClick = () => {

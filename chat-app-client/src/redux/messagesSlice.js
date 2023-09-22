@@ -10,7 +10,30 @@ const initialState = {
 const messagesSlice = createSlice({
   name: "messages",
   initialState,
-  reducers: {},
+  reducers: {
+    addMessageUpdate: (state, action) => {
+      const { message } = action.payload;
+      const channelID = message.channelID;
+      state.byChannelID[channelID].push(message);
+    },
+    editMessageUpdate: (state, action) => {
+      const { channelID, messageID, text } = action.payload;
+      state.byChannelID[channelID] = state.byChannelID[channelID].map((mes) => {
+        if (parseInt(mes.messageID) === parseInt(messageID)) {
+          mes.text = text;
+          mes.edited = true;
+        }
+        return mes;
+      });
+    },
+    deleteMessageUpdate: (state, action) => {
+      const deleteID = action.payload.messageID;
+      const channelID = action.payload.channelID;
+      state.byChannelID[channelID] = state.byChannelID[channelID].filter(
+        (mes) => parseInt(mes.messageID) !== parseInt(deleteID)
+      );
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(fetchMessagesForChannel.pending, (state, action) => {
@@ -163,3 +186,5 @@ export const deleteMessage = createAsyncThunk(
 );
 
 export default messagesSlice.reducer;
+export const { addMessageUpdate, editMessageUpdate, deleteMessageUpdate } =
+  messagesSlice.actions;
