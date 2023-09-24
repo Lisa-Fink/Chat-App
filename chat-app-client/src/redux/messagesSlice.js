@@ -15,6 +15,10 @@ const messagesSlice = createSlice({
     addMessageUpdate: (state, action) => {
       const { message } = action.payload;
       const channelID = message.channelID;
+      if (!(channelID in state.byChannelID)) {
+        // don't add the message if the channel messages were never fetched
+        return;
+      }
       state.byChannelID[channelID].push(message);
     },
     editMessageUpdate: (state, action) => {
@@ -33,6 +37,10 @@ const messagesSlice = createSlice({
       state.byChannelID[channelID] = state.byChannelID[channelID].filter(
         (mes) => parseInt(mes.messageID) !== parseInt(deleteID)
       );
+    },
+    deleteMessageChannelUpdate: (state, action) => {
+      const channelID = action.payload.channelID;
+      delete state.byChannelID[channelID];
     },
     addTyping: (state, action) => {
       const { channelID, userID } = action.payload;
@@ -208,6 +216,7 @@ export const {
   addMessageUpdate,
   editMessageUpdate,
   deleteMessageUpdate,
+  deleteMessageChannelUpdate,
   addTyping,
   rmTyping,
 } = messagesSlice.actions;

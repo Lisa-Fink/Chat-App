@@ -28,6 +28,7 @@ import { deleteServer } from "../redux/serversSlice";
 import {
   addMessageUpdate,
   addTyping,
+  deleteMessageChannelUpdate,
   deleteMessageUpdate,
   editMessageUpdate,
   rmTyping,
@@ -221,6 +222,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
         serverID: parsed.data.serverID,
       })
     );
+    dispatch(deleteMessageChannelUpdate({ channelID: parsed.data.channelID }));
     socket.removeChannelSub(parsed.data.channelID);
   };
 
