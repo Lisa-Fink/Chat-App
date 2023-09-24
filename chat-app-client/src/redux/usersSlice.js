@@ -57,6 +57,18 @@ const usersSlice = createSlice({
         state.byChannelID[channelID].push(userID);
       }
     },
+    addUserChannelUpdate: (state, action) => {
+      const { channelID, userID } = action.payload;
+      if (!state.byChannelID[channelID].includes(userID)) {
+        state.byChannelID[channelID].push(userID);
+      }
+    },
+    removeUserChannelUpdate: (state, action) => {
+      const { channelID, userID } = action.payload;
+      state.byChannelID[channelID] = state.byChannelID[channelID].filter(
+        (id) => parseInt(id) !== parseInt(userID)
+      );
+    },
   },
   extraReducers(builder) {
     builder
@@ -327,5 +339,7 @@ export const {
   removeUserFromChannels,
   clearUserChannel,
   setUserChannel,
+  addUserChannelUpdate,
+  removeUserChannelUpdate,
 } = usersSlice.actions;
 export default usersSlice.reducer;

@@ -81,6 +81,7 @@ function ChannelSettingsModal({ closeModal }) {
           serverID: server.id,
           channelID: id,
           roleID: channelRole,
+          oldRoleID: roleID,
         })
       );
       updateCurChan();

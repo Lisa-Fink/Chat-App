@@ -3,7 +3,7 @@ import "../styles/MessageInput.css";
 import { useSelector, useDispatch } from "react-redux";
 import { createMessage } from "../redux/messagesSlice";
 
-function MessageInput({ stomp }) {
+function MessageInput({ socket }) {
   const [message, setMessage] = useState("");
   const userID = useSelector((state) => state.auth.userID);
   const serverID = useSelector((state) => state.current.server.id);
@@ -36,14 +36,7 @@ function MessageInput({ stomp }) {
       if (!isTyping.current) {
         // if starting to type (hitting a key but not submitting with enter),
         // alert channel (websocket) of typing
-        stomp.current.publish({
-          destination: `/topic/channels/${channel.id}/typing`,
-          body: JSON.stringify({
-            userID: userID,
-            status: true,
-            channelID: channel.id,
-          }),
-        });
+        socket.publishTypingStart(userID, channel.id);
       }
       isTyping.current = Date.now();
       if (typingTimeout.current) clearTimeout(typingTimeout.current);
@@ -57,14 +50,7 @@ function MessageInput({ stomp }) {
     if (now - isTyping.current >= 1000) {
       isTyping.current = false;
       if (typingTimeout.current) clearTimeout(typingTimeout.current);
-      stomp.current.publish({
-        destination: `/topic/channels/${channel.id}/typing`,
-        body: JSON.stringify({
-          userID: userID,
-          status: false,
-          channelID: channel.id,
-        }),
-      });
+      socket.publishTypingEnd(userID, channel.id);
     }
   };
 

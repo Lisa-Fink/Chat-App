@@ -1,16 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { fetchServers } from "../redux/serversSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { setChannel, setServer } from "../redux/currentSlice";
 import "../styles/Servers.css";
 import AddServerModal from "./AddServerModal";
 import ServerSettingsModal from "./modals/ServerSettingsModal";
-import { fetchUsersForServer } from "../redux/usersSlice";
-function Servers({ showSeverSettingsModal, setShowServerSettingsModal }) {
+import { fetchUsersForServer, setUserChannel } from "../redux/usersSlice";
+import {
+  addChannelUpdate,
+  fetchChannelsForServer,
+} from "../redux/channelsSlice";
+function Servers({
+  showSeverSettingsModal,
+  setShowServerSettingsModal,
+  socket,
+}) {
   const dispatch = useDispatch();
   const servers = useSelector((state) => state.servers.data);
   const serversStatus = useSelector((state) => state.servers.status);
-  const token = useSelector((state) => state.auth.token);
+  const { token, userID } = useSelector((state) => state.auth);
+  const serverSub = useRef(false);
 
   const [showServerDetails, setShowServerDetails] = useState(0);
   const [showAddServerModal, setShowAddServerModal] = useState(false);
@@ -74,6 +83,59 @@ function Servers({ showSeverSettingsModal, setShowServerSettingsModal }) {
       dispatch(fetchServers(token));
     }
   }, []);
+
+  useEffect(() => {
+    if (!serverSub.current && serversStatus === "succeeded") {
+      console.log("in");
+      // subscribe to servers the first time servers is set
+      for (const server of servers) {
+        socket.addServerSub(
+          server.serverID,
+          server.roleID,
+          handleServerData,
+          handleServerRoleData
+        );
+
+        // fetch all channels for each server
+        dispatch(
+          fetchChannelsForServer({ token: token, serverID: server.serverID })
+        );
+      }
+
+      serverSub.current = true;
+    }
+  }, [servers, serversStatus]);
+
+  const handleServerData = (res) => {
+    const parsed = JSON.parse(res.body);
+    const updateUserID = parsed.data.userID;
+    if (updateUserID === userID) {
+      // will be skipping updates from current user
+      return;
+    }
+    const resType = parsed.type;
+  };
+
+  const handleServerRoleData = (res) => {
+    const parsed = JSON.parse(res.body);
+    const updateUserID = parsed.data.userID;
+    if (updateUserID === userID) {
+      // will be skipping updates from current user
+      return;
+    }
+    const resType = parsed.type;
+    if (resType === "CHANNEL_NEW") {
+      // add new channel to channels slice
+      dispatch(addChannelUpdate({ channel: parsed.data.channel }));
+      // add the users for the channel to users slice by channel id
+      dispatch(
+        setUserChannel({
+          channelID: parsed.data.channel.channelID,
+          userIDs: parsed.data.users,
+        })
+      );
+    }
+  };
 
   const thumbnails = servers.map((server) => {
     return (

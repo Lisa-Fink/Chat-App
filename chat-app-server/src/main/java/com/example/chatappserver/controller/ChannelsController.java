@@ -2,6 +2,7 @@ package com.example.chatappserver.controller;
 
 import com.example.chatappserver.model.Channel;
 import com.example.chatappserver.model.CustomUserDetails;
+import com.example.chatappserver.model.RoleUpdateRequest;
 import com.example.chatappserver.model.User;
 import com.example.chatappserver.repository.ChannelsDao;
 import com.example.chatappserver.repository.UsersDao;
@@ -44,6 +45,7 @@ public class ChannelsController {
             @AuthenticationPrincipal CustomUserDetails user,
             @PathVariable int serverID) {
         if (!authService.userIsAdmin(user.getUserId(), serverID)) {
+            System.out.println("not admin");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         // RoleID must be >= 2
@@ -55,21 +57,26 @@ public class ChannelsController {
             return ResponseEntity.badRequest().body("Channel with the same name already exists.");
         }
         channelsDao.create(channel);
+        // get the users
+        List<Integer> users = usersDao.getUsersInChannel(
+                channel.getChannelID(), serverID);
+        channelWebSocketService.sendRolesNewChannel(
+                user.getUserId(), channel, 0, users);
         return ResponseEntity.status(HttpStatus.CREATED).body(channel.getChannelID());
     }
 
-    // Add multiple users to a channel (Create UserChannels)
-    @PostMapping("/{channelID}/users")
-    public ResponseEntity<Void> addUsersToChannel(
-            @PathVariable int channelID, @RequestBody List<Integer> userIDs,
-            @AuthenticationPrincipal CustomUserDetails user,
-            @PathVariable int serverID) {
-        if (!authService.userIsAdmin(user.getUserId(), serverID)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        channelsDao.addUsersToChannel(userIDs, channelID);
-        return ResponseEntity.ok().build();
-    }
+//    // Add multiple users to a channel (Create UserChannels)
+//    @PostMapping("/{channelID}/users")
+//    public ResponseEntity<Void> addUsersToChannel(
+//            @PathVariable int channelID, @RequestBody List<Integer> userIDs,
+//            @AuthenticationPrincipal CustomUserDetails user,
+//            @PathVariable int serverID) {
+//        if (!authService.userIsAdmin(user.getUserId(), serverID)) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//        }
+//        channelsDao.addUsersToChannel(userIDs, channelID);
+//        return ResponseEntity.ok().build();
+//    }
 
     // Add a user to a channel (Create UserChannel)
     @PostMapping("/{channelID}/users/{userID}")
@@ -81,6 +88,11 @@ public class ChannelsController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         channelsDao.addUserToChannel(userID, channelID);
+        // broadcast user add to all subs
+        channelWebSocketService.sendUserEditToSubscribers(
+                channelID, userID, serverID, user.getUserId(), true);
+        // broadcast user add to new user
+        channelWebSocketService.sendUserNewChannel(userID, channelID, serverID);
         return ResponseEntity.ok().build();
     }
 
@@ -97,13 +109,15 @@ public class ChannelsController {
     // Update the channel role
     @PutMapping("/{channelID}/role")
     public ResponseEntity<Object> updateRoleID(
-            @PathVariable int channelID, @RequestBody String strRoleID,
+            @PathVariable int channelID,
+            @RequestBody RoleUpdateRequest roleUpdateRequest,
             @AuthenticationPrincipal CustomUserDetails user,
             @PathVariable int serverID) {
         if (!authService.userIsAdmin(user.getUserId(), serverID)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        int roleID = Integer.parseInt(strRoleID);
+        int roleID = roleUpdateRequest.getRoleID();
+        int oldRoleID = roleUpdateRequest.getOldRoleID();
         // RoleID must be >= 2
         if (roleID == 1) {
             return ResponseEntity.badRequest().body("RoleID must be greater than or equal to 2.");
@@ -114,6 +128,13 @@ public class ChannelsController {
         // broadcast the new user list and roleID for the channel
         channelWebSocketService.sendRoleEditToSubscribers(channelID, roleID, serverID,
                 user.getUserId(), userIDs);
+        if (oldRoleID < roleID) {
+            // get the channel
+            Channel channel = channelsDao.getChannelByID(serverID, user.getUserId(), channelID);
+            // broadcast the new channel to the new users
+            channelWebSocketService.sendRolesNewChannel(user.getUserId(),
+                    channel, oldRoleID, userIDs);
+        }
         return ResponseEntity.ok(userIDs);
     }
 
@@ -127,6 +148,7 @@ public class ChannelsController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         channelsDao.updateChannelName(channelName, channelID);
+        channelWebSocketService.sendNameEditToSubscribers(channelID, serverID, user.getUserId(), channelName);
         return ResponseEntity.ok().build();
     }
 
@@ -158,25 +180,26 @@ public class ChannelsController {
             @PathVariable int channelID,
             @AuthenticationPrincipal CustomUserDetails user,
             @PathVariable int serverID) {
-        if (!authService.userIsCreator(user.getUserId(), serverID)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        channelsDao.deleteChannel(channelID);
-        return ResponseEntity.ok().build();
-    }
-
-    // Remove multiple users from a channel (Delete UserChannel)
-    @DeleteMapping("/{channelID}/users")
-    public ResponseEntity<Void> deleteUserChannels(
-            @PathVariable int channelID, @RequestBody List<Integer> userIDs,
-            @AuthenticationPrincipal CustomUserDetails user,
-            @PathVariable int serverID) {
         if (!authService.userIsAdmin(user.getUserId(), serverID)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        channelsDao.removeUsersFromChannel(userIDs, channelID);
+        channelsDao.deleteChannel(channelID);
+        channelWebSocketService.sendChannelDeleteToSubscribers(channelID, serverID, user.getUserId());
         return ResponseEntity.ok().build();
     }
+
+//    // Remove multiple users from a channel (Delete UserChannel)
+//    @DeleteMapping("/{channelID}/users")
+//    public ResponseEntity<Void> deleteUserChannels(
+//            @PathVariable int channelID, @RequestBody List<Integer> userIDs,
+//            @AuthenticationPrincipal CustomUserDetails user,
+//            @PathVariable int serverID) {
+//        if (!authService.userIsAdmin(user.getUserId(), serverID)) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//        }
+//        channelsDao.removeUsersFromChannel(userIDs, channelID);
+//        return ResponseEntity.ok().build();
+//    }
 
     // Remove a user from a channel (Delete UserChannel)
     @DeleteMapping("/{channelID}/users/{userID}")
@@ -188,6 +211,9 @@ public class ChannelsController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         channelsDao.removeUserFromChannel(userID, channelID);
+        // broadcast the removal
+        channelWebSocketService.sendUserEditToSubscribers(
+                channelID, userID, serverID, user.getUserId(), false);
         return ResponseEntity.ok().build();
     }
 }

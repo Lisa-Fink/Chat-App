@@ -5,5 +5,10 @@ public enum MessageType {
     MESSAGE_EDIT,
     MESSAGE_DELETE,
     TYPING,
-    ROLE_EDIT
+    ROLE_EDIT,
+    NAME_EDIT,
+    USER_EDIT,
+    CHANNEL_NEW,
+    CHANNEL_DELETE
+
 }

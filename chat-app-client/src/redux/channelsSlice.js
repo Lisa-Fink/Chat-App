@@ -3,7 +3,6 @@ import { setUserChannel } from "./usersSlice";
 
 const initialState = {
   byServerID: {},
-  subs: [],
   status: "idle",
   error: null,
 };
@@ -26,11 +25,8 @@ const channelsSlice = createSlice({
     },
     removeServer: (state, action) => {
       const { serverID } = action.payload;
-      delete state.byServerID[serverID];
+      state.byServerID[serverID] = [];
       state.status = "succeeded";
-    },
-    addSub: (state, action) => {
-      state.subs.push(action.payload.channelID);
     },
     editRole: (state, action) => {
       const { serverID, channelID, roleID } = action.payload;
@@ -40,6 +36,31 @@ const channelsSlice = createSlice({
         }
         return chan;
       });
+    },
+    editName: (state, action) => {
+      const { serverID, channelID, name } = action.payload;
+      state.byServerID[serverID] = state.byServerID[serverID].map((chan) => {
+        if (parseInt(chan.channelID) === parseInt(channelID)) {
+          chan.channelName = name;
+        }
+        return chan;
+      });
+    },
+    deleteChannelUpdate: (state, action) => {
+      const { serverID, channelID } = action.payload;
+      state.byServerID[serverID] = state.byServerID[serverID].filter(
+        (chan) => parseInt(chan.channelID) !== parseInt(channelID)
+      );
+    },
+    addChannelUpdate: (state, action) => {
+      const { channel } = action.payload;
+      const { serverID } = channel;
+      if (
+        serverID in state.byServerID &&
+        !state.byServerID[serverID].includes(channel.channelID)
+      ) {
+        state.byServerID[serverID].push(channel);
+      }
     },
   },
   extraReducers(builder) {
@@ -101,7 +122,7 @@ const channelsSlice = createSlice({
 
 export const fetchChannelsForServer = createAsyncThunk(
   "channels/fetchChannelsForServer",
-  async ({ token, serverID }, { getState, dispatch }) => {
+  async ({ token, serverID }, { getState }) => {
     const channels = getState().channels.byServerID;
     // check if the channels have already been fetched
     if (serverID in channels) {
@@ -147,7 +168,7 @@ export const updateChannelName = createAsyncThunk(
 
 export const updateChannelRole = createAsyncThunk(
   "channels/updateChannelRole",
-  async ({ token, serverID, channelID, roleID }, { dispatch }) => {
+  async ({ token, serverID, channelID, roleID, oldRoleID }, { dispatch }) => {
     const apiUrl = import.meta.env.VITE_CHAT_API;
     const url = `${apiUrl}/servers/${serverID}/channels/${channelID}/role`;
 
@@ -155,9 +176,12 @@ export const updateChannelRole = createAsyncThunk(
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "text/plain",
+        "Content-Type": "application/json",
       },
-      body: roleID,
+      body: JSON.stringify({
+        roleID: parseInt(roleID),
+        oldRoleID: parseInt(oldRoleID),
+      }),
     });
     if (!res.ok) {
       throw new Error("Failed to update channel role.");
@@ -216,6 +240,12 @@ export const deleteChannel = createAsyncThunk(
   }
 );
 
-export const { addGeneralChannel, removeServer, addSub, editRole } =
-  channelsSlice.actions;
+export const {
+  addGeneralChannel,
+  removeServer,
+  editRole,
+  deleteChannelUpdate,
+  addChannelUpdate,
+  editName,
+} = channelsSlice.actions;
 export default channelsSlice.reducer;
