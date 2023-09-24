@@ -17,7 +17,6 @@ class WebSocketManager {
     });
     this.socket.activate();
     this.active = true;
-    console.log(this.socket);
   }
 
   deactivate() {
@@ -31,13 +30,12 @@ class WebSocketManager {
 
   addChannelSub(channelID, callback) {
     const sub = this.socket.subscribe("/topic/channels/" + channelID, callback);
-    console.log("subbed to ", channelID);
     this.subscriptions.channels[channelID] = sub;
   }
 
   removeChannelSub(channelID) {
     const sub = this.subscriptions.channels[channelID];
-    this.socket.unsubscribe(sub);
+    sub.unsubscribe();
     delete this.subscriptions.channels[channelID];
   }
 
@@ -46,7 +44,6 @@ class WebSocketManager {
   }
 
   addServerSub(serverID, roleID, callbackServer, callbackRole) {
-    console.log("server sub ", serverID);
     const sub = this.socket.subscribe(
       "/topic/servers/" + serverID,
       callbackServer
@@ -60,7 +57,7 @@ class WebSocketManager {
 
   removeServerSub(serverID) {
     const sub = this.subscriptions.servers[serverID];
-    this.socket.unsubscribe(sub);
+    sub.unsubscribe();
     delete this.subscriptions.servers[serverID];
   }
 
