@@ -60,9 +60,23 @@ SELECT channelTypeID, channelType FROM ChannelTypes;
 -- --------------------------------------------------------------------------------------
 -- Channels
 
--- Get all Channels in a particular server
-SELECT channelID, channelName FROM Channels WHERE serverID = :serverID;
+-- Get all Channels in a particular server for a user
+SELECT c.channelID, c.roleID, c.channelTypeID, c.channelName
+            FROM Channels c
+            LEFT JOIN UserChannels uc ON c.channelID = uc.channelID AND uc.userID = ?
+            LEFT JOIN UserServers us ON us.serverID = c.serverID AND us.userID = ?
+            WHERE (uc.channelID IS NOT NULL OR us.roleID <= c.roleID) AND
+                c.serverID = ?;
 
+-- Get data for a Channel by id, only if the user has the correct user channel or role
+SELECT c.channelID, c.roleID, c.channelTypeID, c.channelName
+            FROM Channels c
+            LEFT JOIN UserChannels uc ON c.channelID = uc.channelID AND uc.userID = ?
+            LEFT JOIN UserServers us ON us.serverID = c.serverID AND us.userID = ?
+            WHERE c.channelID = ?
+                AND ((uc.channelID IS NOT NULL OR us.roleID <= c.roleID)
+                AND c.serverID = ?)
+                
 -- Check if there is already a Channel in the Server with the same name
 SELECT COUNT(*) FROM Channels WHERE serverID = :serverID AND channelName = :channelName
 

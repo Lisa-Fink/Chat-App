@@ -99,11 +99,24 @@ public class ChannelsDao {
             FROM Channels c
             LEFT JOIN UserChannels uc ON c.channelID = uc.channelID AND uc.userID = ?
             LEFT JOIN UserServers us ON us.serverID = c.serverID AND us.userID = ?
-            WHERE uc.channelID IS NOT NULL OR us.roleID <= c.roleID AND
+            WHERE (uc.channelID IS NOT NULL OR us.roleID <= c.roleID) AND
                 c.serverID = ?
 """;
         return jdbcTemplate.query(sql, channelRowMapper(serverID),
                 userID, userID, serverID);
+    }
+
+    public Channel getChannelByID(int serverID, int userID, int channelID) {
+        String sql = """
+                SELECT c.channelID, c.roleID, c.channelTypeID, c.channelName
+            FROM Channels c
+            LEFT JOIN UserChannels uc ON c.channelID = uc.channelID AND uc.userID = ?
+            LEFT JOIN UserServers us ON us.serverID = c.serverID AND us.userID = ?
+            WHERE c.channelID = ?
+                AND ((uc.channelID IS NOT NULL OR us.roleID <= c.roleID)
+                AND c.serverID = ?)
+                """;
+        return jdbcTemplate.queryForObject(sql, channelRowMapper(serverID), userID, userID, channelID, serverID);
     }
 
     // Check if a Channel with the serverID and channelName exists
