@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "../styles/login-signup.css";
 import { login } from "../redux/authSlice";
 import { useDispatch, useSelector } from "react-redux";

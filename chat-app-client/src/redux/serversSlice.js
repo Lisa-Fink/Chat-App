@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { addGeneralChannel, removeServer } from "./channelsSlice";
-import { joinGeneralChannel, removeChannels } from "./usersSlice";
+import { addGeneralChannel } from "./channelsSlice";
+import { joinGeneralChannel } from "./usersSlice";
 
 const initialState = {
   data: [],

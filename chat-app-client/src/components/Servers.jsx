@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { fetchServers } from "../redux/serversSlice";
 import { useSelector, useDispatch } from "react-redux";
-import { setChannel, setServer } from "../redux/currentSlice";
+import { setServer } from "../redux/currentSlice";
 import "../styles/Servers.css";
 import AddServerModal from "./AddServerModal";
 import ServerSettingsModal from "./modals/ServerSettingsModal";
@@ -86,7 +86,6 @@ function Servers({
 
   useEffect(() => {
     if (!serverSub.current && serversStatus === "succeeded") {
-      console.log("in");
       // subscribe to servers the first time servers is set
       for (const server of servers) {
         socket.addServerSub(

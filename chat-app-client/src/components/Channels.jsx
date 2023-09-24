@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import "../styles/Channels.css";
 import {
   MdSettings,
@@ -188,7 +188,6 @@ function Channels({ setShowServerSettingsModal, socket }) {
     } else if (resType === "NAME_EDIT") {
       dispatch(editName(parsed.data));
     } else if (resType === "USER_EDIT") {
-      console.log(parsed.data);
       if (parsed.data.add) {
         // Adding a user
         dispatch(

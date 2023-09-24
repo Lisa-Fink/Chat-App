@@ -8,7 +8,7 @@ import MessageInput from "./components/MessageInput";
 import Auth from "./components/Auth";
 
 import "./App.css";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { addChannelUpdate } from "./redux/channelsSlice";
 import WebSocketManager from "./WebSocketManager";
@@ -30,7 +30,6 @@ function App() {
   const socket = new WebSocketManager();
   useEffect(() => {
     if (auth.isAuthenticated && !socket.isActive()) {
-      console.log("activating");
       socket.activate(auth.userID, handleUserData);
     }
     if (!auth.isAuthenticated && socket.isActive()) {

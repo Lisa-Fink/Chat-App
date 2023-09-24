@@ -9,7 +9,6 @@ function MessageInput({ socket }) {
   const serverID = useSelector((state) => state.current.server.id);
   const token = useSelector((state) => state.auth.token);
   const channel = useSelector((state) => state.current.channel);
-  const errorContext = useSelector((state) => state.messages.errorContext);
   const error = useSelector((state) => state.messages.error);
   const channelData = useSelector((state) => state.messages.typingByChannelID);
   const users = useSelector((state) => state.users.dataByID);

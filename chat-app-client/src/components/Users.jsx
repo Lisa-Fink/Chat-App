@@ -12,7 +12,6 @@ function Users() {
   const usersStatus = useSelector((state) => state.users.status);
   const { token } = useSelector((state) => state.auth);
   const [curUserChannels, setCurUserChannels] = useState([]);
-  const id = channel.id;
 
   // if the channel id changes, fetch the users list for the new channel
   useEffect(() => {
