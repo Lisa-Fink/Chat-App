@@ -57,7 +57,9 @@ const channelsSlice = createSlice({
       const { serverID } = channel;
       if (
         serverID in state.byServerID &&
-        !state.byServerID[serverID].includes(channel.channelID)
+        !state.byServerID[serverID].find(
+          (chan) => parseInt(chan.channelID) === parseInt(channel.channelID)
+        )
       ) {
         state.byServerID[serverID].push(channel);
       }
