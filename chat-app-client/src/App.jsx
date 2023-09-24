@@ -6,31 +6,35 @@ import Channels from "./components/Channels";
 import Menu from "./components/Menu";
 import MessageInput from "./components/MessageInput";
 import Auth from "./components/Auth";
-import { Stomp } from "@stomp/stompjs";
 
 import "./App.css";
 import { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { addChannelUpdate } from "./redux/channelsSlice";
+import WebSocketManager from "./WebSocketManager";
 
 function App() {
   const auth = useSelector((state) => state.auth);
   const [showSeverSettingsModal, setShowServerSettingsModal] = useState(false);
-  const stomp = useRef(null);
+  const dispatch = useDispatch();
 
-  const connect = () => {
-    const url = "ws://localhost:8080/ws";
-    const client = Stomp.client(url);
-    client.connect(null, null);
-    stomp.current = client;
+  const handleUserData = (res) => {
+    const parsed = JSON.parse(res.body);
+    const resType = parsed.type;
+    if (resType === "CHANNEL_NEW") {
+      // user has a new channel
+      dispatch(addChannelUpdate({ channel: parsed.data }));
+    }
   };
 
+  const socket = new WebSocketManager();
   useEffect(() => {
-    if (auth.isAuthenticated && !stomp.current) {
-      connect();
+    if (auth.isAuthenticated && !socket.isActive()) {
+      console.log("activating");
+      socket.activate(auth.userID, handleUserData);
     }
-    if (!auth.isAuthenticated && stomp.current) {
-      stomp.current.deactivate();
-      stomp.current = null;
+    if (!auth.isAuthenticated && socket.isActive()) {
+      socket.deactivate();
     }
   }, [auth]);
 
@@ -46,15 +50,16 @@ function App() {
             <Servers
               showSeverSettingsModal={showSeverSettingsModal}
               setShowServerSettingsModal={setShowServerSettingsModal}
+              socket={socket}
             />
             <Channels
               showSeverSettingsModal={showSeverSettingsModal}
               setShowServerSettingsModal={setShowServerSettingsModal}
-              stomp={stomp}
+              socket={socket}
             />
             <Chat />
             <Users />
-            <MessageInput stomp={stomp} />
+            <MessageInput socket={socket} />
           </>
         )}
       </div>
