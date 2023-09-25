@@ -1,4 +1,4 @@
-package com.example.chatappserver.websocket.model;
+package com.example.chatappserver.websocket.model.server;
 
 public class ServerDeleteData {
     private int serverID;

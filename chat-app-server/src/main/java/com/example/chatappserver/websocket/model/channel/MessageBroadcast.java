@@ -1,7 +1,7 @@
-package com.example.chatappserver.websocket.model;
+package com.example.chatappserver.websocket.model.channel;
 
 
-import com.example.chatappserver.model.Message;
+import com.example.chatappserver.websocket.model.MessageType;
 
 public class MessageBroadcast {
     private MessageType type;

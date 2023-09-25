@@ -1,4 +1,4 @@
-package com.example.chatappserver.websocket.model;
+package com.example.chatappserver.websocket.model.channel;
 
 import java.util.List;
 

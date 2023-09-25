@@ -1,6 +1,5 @@
 package com.example.chatappserver.websocket.controller;
-import com.example.chatappserver.model.CustomUserDetails;
-import com.example.chatappserver.websocket.model.TypingData;
+import com.example.chatappserver.websocket.model.channel.TypingData;
 import com.example.chatappserver.websocket.service.ChannelWebSocketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -9,8 +8,6 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 
 import java.security.Principal;
 

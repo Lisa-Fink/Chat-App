@@ -4,6 +4,7 @@ import com.example.chatappserver.model.Channel;
 import com.example.chatappserver.model.Message;
 import com.example.chatappserver.repository.ChannelsDao;
 import com.example.chatappserver.websocket.model.*;
+import com.example.chatappserver.websocket.model.channel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;

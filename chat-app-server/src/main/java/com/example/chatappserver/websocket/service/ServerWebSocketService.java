@@ -43,4 +43,26 @@ public class ServerWebSocketService {
                 MessageType.SERVER_NEW_USER, data);
         messaging.convertAndSend(destination, messageBroadcast);
     }
+
+    public void sendServerDescriptionUpdateToSubscribers(
+            int serverID, int userID, String serverDescription
+    ) {
+        String destination = "/topic/servers/" + serverID;
+        ServerEditData data = new ServerEditData(serverDescription,
+                serverID, userID);
+        MessageBroadcast messageBroadcast = new MessageBroadcast(
+                MessageType.DESCRIPTION_EDIT, data);
+        messaging.convertAndSend(destination, messageBroadcast);
+    }
+
+    public void sendServerImageUpdateToSubscribers(
+            int serverID, int userID, String serverImageUrl
+    ) {
+        String destination = "/topic/servers/" + serverID;
+        ServerEditData data = new ServerEditData(serverImageUrl,
+                serverID, userID);
+        MessageBroadcast messageBroadcast = new MessageBroadcast(
+                MessageType.IMAGE_EDIT, data);
+        messaging.convertAndSend(destination, messageBroadcast);
+    }
 }

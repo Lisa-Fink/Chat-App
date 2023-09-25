@@ -104,6 +104,10 @@ public class ServersController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         serversDao.updateImage(serverID, serverImageUrl);
+        // Broadcast the update
+        serverWebSocketService.sendServerImageUpdateToSubscribers(
+                serverID, user.getUserId(), serverImageUrl
+        );
         return ResponseEntity.ok().build();
     }
 
@@ -116,6 +120,10 @@ public class ServersController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         serversDao.updateDescription(serverID, serverDescription);
+        // Broadcast the update
+        serverWebSocketService.sendServerDescriptionUpdateToSubscribers(
+                serverID, user.getUserId(), serverDescription
+        );
         return ResponseEntity.ok().build();
     }
 
