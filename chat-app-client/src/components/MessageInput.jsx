@@ -35,7 +35,7 @@ function MessageInput({ socket }) {
       if (!isTyping.current) {
         // if starting to type (hitting a key but not submitting with enter),
         // alert channel (websocket) of typing
-        socket.publishTypingStart(userID, channel.id);
+        socket.current.publishTypingStart(userID, channel.id);
       }
       isTyping.current = Date.now();
       if (typingTimeout.current) clearTimeout(typingTimeout.current);
@@ -49,7 +49,7 @@ function MessageInput({ socket }) {
     if (now - isTyping.current >= 1000) {
       isTyping.current = false;
       if (typingTimeout.current) clearTimeout(typingTimeout.current);
-      socket.publishTypingEnd(userID, channel.id);
+      socket.current.publishTypingEnd(userID, channel.id);
     }
   };
 

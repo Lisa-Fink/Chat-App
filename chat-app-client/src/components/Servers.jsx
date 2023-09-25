@@ -173,7 +173,7 @@ function useServersChange(
     if (!serverSub.current && serversStatus === "succeeded") {
       // subscribe to servers the first time servers is set
       for (const server of servers) {
-        socket.addServerSub(
+        socket.current.addServerSub(
           server.serverID,
           server.roleID,
           handleServerData,
@@ -198,7 +198,7 @@ function useServersChange(
     } else if (serversStatus === "new") {
       const lastServer = servers[servers.length - 1];
       // subscribe to server
-      socket.addServerSub(
+      socket.current.addServerSub(
         lastServer.serverID,
         lastServer.roleID,
         handleServerData,
@@ -222,15 +222,16 @@ function useServersChange(
           name: lastServer.serverName,
         })
       );
+      dispatch(updateStatus());
     } else if (serversStatus === "delete") {
       // unsub from server
-      socket.removeServerSub(lastServerID);
+      socket.current.removeServerSub(lastServerID);
 
       // unsub from each channel in server and delete each channel
       for (const chan of channels[lastServerID]) {
         const channelID = chan.channelID;
         dispatch(deleteMessageChannelUpdate({ channelID: channelID }));
-        socket.removeChannelSub(channelID);
+        socket.current.removeChannelSub(channelID);
       }
       dispatch(removeServer({ serverID: lastServerID }));
 

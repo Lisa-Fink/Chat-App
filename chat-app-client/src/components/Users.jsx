@@ -104,7 +104,7 @@ function useSubToUsers(usersByID, auth, socket) {
   useEffect(() => {
     // if usersByID changes, make sure to sub to all users
     for (const userID in usersByID) {
-      socket.addUserSub(userID, handleOtherUserData);
+      socket.current.addUserSub(userID, handleOtherUserData);
     }
   }, [usersByID]);
 

@@ -249,8 +249,8 @@ function useChannelsChange(socket, channels, dispatch, channel, token, userID) {
       const channelArr = channels[serverID];
       for (const chan of channelArr) {
         // if not already subscribed, subscribe
-        if (!(chan.channelID in socket.getChannelSubs())) {
-          socket.addChannelSub(chan.channelID, handleChannelData);
+        if (!(chan.channelID in socket.current.getChannelSubs())) {
+          socket.current.addChannelSub(chan.channelID, handleChannelData);
         }
         // fetch users for channel
         dispatch(
@@ -353,7 +353,7 @@ function useChannelsChange(socket, channels, dispatch, channel, token, userID) {
     dispatch(clearUserChannel({ channelID: parsed.data.channelID }));
     // remove the channel from message
     dispatch(deleteMessageChannelUpdate({ channelID: parsed.data.channelID }));
-    socket.removeChannelSub(parsed.data.channelID);
+    socket.current.removeChannelSub(parsed.data.channelID);
   };
 }
 
