@@ -47,10 +47,7 @@ const channelsSlice = createSlice({
       });
     },
     deleteChannelUpdate: (state, action) => {
-      const { serverID, channelID } = action.payload;
-      state.byServerID[serverID] = state.byServerID[serverID].filter(
-        (chan) => parseInt(chan.channelID) !== parseInt(channelID)
-      );
+      deleteChannelHelper(state, action);
     },
     addChannelUpdate: (state, action) => {
       const { channel } = action.payload;
@@ -106,10 +103,7 @@ const channelsSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(deleteChannel.fulfilled, (state, action) => {
-        const { serverID, channelID } = action.payload;
-        state.byServerID[serverID] = state.byServerID[serverID].filter(
-          (chan) => parseInt(chan.channelID) !== parseInt(channelID)
-        );
+        deleteChannelHelper(state, action);
       })
       .addCase(createChannel.rejected, (state, action) => {
         state.status = "failed";
@@ -121,6 +115,13 @@ const channelsSlice = createSlice({
       });
   },
 });
+
+function deleteChannelHelper(state, action) {
+  const { serverID, channelID } = action.payload;
+  state.byServerID[serverID] = state.byServerID[serverID].filter(
+    (chan) => parseInt(chan.channelID) !== parseInt(channelID)
+  );
+}
 
 export const fetchChannelsForServer = createAsyncThunk(
   "channels/fetchChannelsForServer",

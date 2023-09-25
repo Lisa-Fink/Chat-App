@@ -23,20 +23,14 @@ const messagesSlice = createSlice({
     },
     editMessageUpdate: (state, action) => {
       const { channelID, messageID, text } = action.payload;
-      state.byChannelID[channelID] = state.byChannelID[channelID].map((mes) => {
-        if (parseInt(mes.messageID) === parseInt(messageID)) {
-          mes.text = text;
-          mes.edited = true;
-        }
-        return mes;
-      });
+      if (!(channelID in state.byChannelID)) {
+        // don't edit the message if the channel messages were never fetched
+        return;
+      }
+      editMessageHelper(channelID, messageID, text);
     },
     deleteMessageUpdate: (state, action) => {
-      const deleteID = action.payload.messageID;
-      const channelID = action.payload.channelID;
-      state.byChannelID[channelID] = state.byChannelID[channelID].filter(
-        (mes) => parseInt(mes.messageID) !== parseInt(deleteID)
-      );
+      deleteMessageHelper(state, action);
     },
     deleteMessageChannelUpdate: (state, action) => {
       const channelID = action.payload.channelID;
@@ -97,11 +91,8 @@ const messagesSlice = createSlice({
         state.error = null;
         state.errorContext = null;
         // update the message
-        const toEdit = state.byChannelID[action.payload.channelID].find(
-          (message) => message.messageID == action.payload.messageID
-        );
-        toEdit.edited = true;
-        toEdit.text = action.payload.text;
+        const { channelID, messageID, text } = action.payload;
+        editMessageHelper(channelID, messageID, text);
       })
       .addCase(deleteMessage.rejected, (state, action) => {
         state.status = "failed";
@@ -113,12 +104,28 @@ const messagesSlice = createSlice({
         state.error = null;
         state.errorContext = null;
         // remove the message
-        state.byChannelID[action.payload.channelID] = state.byChannelID[
-          action.payload.channelID
-        ].filter((message) => message.messageID !== action.payload.messageID);
+        deleteMessageHelper(state, action);
       });
   },
 });
+
+function deleteMessageHelper(state, action) {
+  const deleteID = action.payload.messageID;
+  const channelID = action.payload.channelID;
+  state.byChannelID[channelID] = state.byChannelID[channelID].filter(
+    (mes) => parseInt(mes.messageID) !== parseInt(deleteID)
+  );
+}
+
+function editMessageHelper(channelID, messageID, text) {
+  state.byChannelID[channelID] = state.byChannelID[channelID].map((mes) => {
+    if (parseInt(mes.messageID) === parseInt(messageID)) {
+      mes.text = text;
+      mes.edited = true;
+    }
+    return mes;
+  });
+}
 
 export const fetchMessagesForChannel = createAsyncThunk(
   "messages/fetchMessagesForChannel",

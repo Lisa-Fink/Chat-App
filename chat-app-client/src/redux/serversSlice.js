@@ -14,11 +14,7 @@ const serversSlice = createSlice({
   initialState,
   reducers: {
     removeFromServers: (state, action) => {
-      state.data = state.data.filter(
-        (server) => server.serverID != action.payload.serverID
-      );
-      state.status = "delete";
-      state.lastID = action.payload.serverID;
+      deleteServerHelper(state, action);
     },
     updateStatus: (state, action) => {
       state.status = "succeeded";
@@ -52,12 +48,7 @@ const serversSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(deleteServer.fulfilled, (state, action) => {
-        state.status = "delete";
-        state.lastID = action.payload.serverID;
-        state.error = null;
-        state.data = state.data.filter(
-          (server) => server.serverID !== action.payload.serverID
-        );
+        deleteServerHelper(state, action);
       })
       .addCase(updateServerDescription.rejected, (state, action) => {
         state.status = "failed";
@@ -94,6 +85,15 @@ const serversSlice = createSlice({
       });
   },
 });
+
+function deleteServerHelper(state, action) {
+  state.status = "delete";
+  state.lastID = action.payload.serverID;
+  state.error = null;
+  state.data = state.data.filter(
+    (server) => parseInt(server.serverID) !== parseInt(action.payload.serverID)
+  );
+}
 
 export const fetchServers = createAsyncThunk(
   "servers/fetchServers",
