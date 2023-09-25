@@ -8,6 +8,11 @@
 SELECT s.serverID, s.serverName, s.serverDescription, s.serverImageUrl FROM Servers s
 	INNER JOIN UserServers us on s.serverID = us.serverID
     WHERE us.userID = :userID;
+    
+-- Get a Server for a User using serverID and userID
+SELECT s.serverID, s.serverName, s.serverDescription, s.serverImageUrl, us.roleID FROM Servers s 
+	INNER JOIN UserServers us on s.serverID = us.serverID 
+	WHERE s.serverID = ? AND us.userID = ?;
 
 -- Get UserServer using userID and serverID
 SELECT * FROM UserServers WHERE userID = :userID AND serverID = :serverID

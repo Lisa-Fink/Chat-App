@@ -82,6 +82,14 @@ public class ServersDao {
         return jdbcTemplate.query(sql, serverResponseRowMapper(), userID);
     }
 
+    // Get a Server for User by serverID and userID
+    public Server getServerByID(int serverID, int userID) {
+        String sql = "SELECT s.serverID, s.serverName, s.serverDescription, s.serverImageUrl, us.roleID FROM Servers s " +
+                "INNER JOIN UserServers us on s.serverID = us.serverID " +
+                "WHERE s.serverID = ? AND us.userID = ?";
+        return jdbcTemplate.queryForObject(sql, serverResponseRowMapper(), serverID, userID);
+    }
+
     // Update the server image
     public void updateImage(int serverID, String serverImageUrl) {
         String sql = "UPDATE Servers SET serverImageUrl = ? " +

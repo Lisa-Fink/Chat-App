@@ -91,6 +91,20 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
   ```json
   "invitecode"
   ```
+
+- `POST /invites/{inviteCode}/join`: Use invite code to join a server
+  (invite code must be valid, and user must not be in server)
+  - Response:
+  ```json
+  {
+    "serverID": 15,
+    "serverName": "The Best Server",
+    "serverDescription": "A place for the best server",
+    "serverImageUrl": null,
+    "roleID": 4
+  }
+  ```
+
 - `GET /invites/{inviteCode}`: Get an invite using the invite code.
   - Response:
   ```json
@@ -100,6 +114,7 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
     "expirationTime": "2199-08-17"
   }
   ```
+
 
 ## Messages
 

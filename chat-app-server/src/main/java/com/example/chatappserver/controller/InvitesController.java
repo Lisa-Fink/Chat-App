@@ -1,9 +1,10 @@
 package com.example.chatappserver.controller;
 
-import com.example.chatappserver.model.CustomUserDetails;
-import com.example.chatappserver.model.Invite;
+import com.example.chatappserver.model.*;
 import com.example.chatappserver.repository.InvitesDao;
+import com.example.chatappserver.repository.ServersDao;
 import com.example.chatappserver.service.AuthService;
+import com.example.chatappserver.websocket.service.ServerWebSocketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -19,11 +20,17 @@ import java.util.Random;
 public class InvitesController {
     private final InvitesDao invitesDao;
     private final AuthService authService;
+    private final ServersDao serversDao;
+    private final ServerWebSocketService serverWebSocketService;
 
     @Autowired
-    public InvitesController(InvitesDao invitesDao, AuthService authService) {
+    public InvitesController(InvitesDao invitesDao, AuthService authService,
+                             ServersDao serversDao,
+                             ServerWebSocketService serverWebSocketService) {
         this.invitesDao = invitesDao ;
         this.authService = authService;
+        this.serversDao = serversDao;
+        this.serverWebSocketService = serverWebSocketService;
     }
 
     // Create Invite
@@ -75,6 +82,39 @@ public class InvitesController {
     public ResponseEntity<Invite> getInviteByCode(@PathVariable String inviteCode) {
         Invite invite = invitesDao.getInviteByCode(inviteCode);
         return ResponseEntity.ok(invite);
+    }
+
+    // Join server using invite
+    @PostMapping("/{inviteCode}/join")
+    public ResponseEntity<Object> joinByInviteCode(
+            @PathVariable String inviteCode,
+            @AuthenticationPrincipal CustomUserDetails user) {
+        // Get the invite from the inviteCode
+        Invite invite = invitesDao.getInviteByCode(inviteCode);
+        if (invite == null) {
+            return ResponseEntity.notFound().build();
+        }
+        // join the server
+        int basicUserRole = 4;
+        try {
+            // Add user to server
+            serversDao.addUser(user.getUserId(), invite.getServerID(),
+                    basicUserRole);
+        } catch (DataIntegrityViolationException e) {
+            // Handle user is already in Server
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("User is already a member of this server.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while adding the user to the server.");
+        }
+        // Retrieve the server data
+        Server server = serversDao.getServerByID(invite.getServerID(), user.getUserId());
+        // Broadcast new server user
+        serverWebSocketService.sendServerNewUserToSubscribers(invite.getServerID(),
+                user.getUserId(), user.getDbUsername(), user.getUserImageUrl());
+
+        return ResponseEntity.ok(server);
     }
 
 }
