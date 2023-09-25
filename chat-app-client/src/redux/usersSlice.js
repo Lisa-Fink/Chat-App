@@ -1,13 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { removeServer } from "./channelsSlice";
 import { removeFromServers } from "./serversSlice";
-import { setServer } from "./currentSlice";
 
 const initialState = {
   dataByID: {},
   byChannelID: {},
   byServerID: {},
   status: "idle",
+  newID: null, // [serverID, userID]
   error: null,
 };
 
@@ -35,7 +34,10 @@ const usersSlice = createSlice({
         delete state.byChannelID[channelID];
       }
     },
-    removeServer: (state, action) => {},
+    removeServer: (state, action) => {
+      const { serverID } = action.payload;
+      delete state.byServerID[serverID];
+    },
     removeUserFromChannels: (state, action) => {
       const { channelIDs, removeID } = action.payload;
       for (const channelID of channelIDs) {
@@ -68,6 +70,54 @@ const usersSlice = createSlice({
       state.byChannelID[channelID] = state.byChannelID[channelID].filter(
         (id) => parseInt(id) !== parseInt(userID)
       );
+    },
+    addUserServerUpdate: (state, action) => {
+      const { serverID, userID, username, userImageUrl, serverRoleID } =
+        action.payload.data;
+      const user = { userID, username, userImageUrl };
+      user.serverRoles = {};
+      user.serverRoles[serverID] = serverRoleID;
+      state.dataByID[userID] = user; // add to all users data
+      if (!state.byServerID[serverID].includes(userID)) {
+        state.byServerID[serverID].push(userID); // add to server users
+      }
+      state.status = "new";
+      state.newID = [serverID, userID];
+    },
+    addUserServerChannelUpdate: (state, action) => {
+      // add to any channels that have been fetched
+      const channels = action.payload.channels;
+      const userID = action.payload.newUserID;
+      for (const channel of channels) {
+        const channelID = channel.channelID;
+        if (
+          parseInt(channel.roleID) === 4 &&
+          channelID in state.byChannelID &&
+          !state.byChannelID[channelID].includes(userID)
+        ) {
+          state.byChannelID[channelID].push(userID);
+        }
+      }
+      state.status = "succeeded";
+      state.newID = null;
+    },
+    removeUserServerUpdate: (state, action) => {
+      const { userID, serverID } = action.payload.data;
+      state.byServerID[serverID] = state.byServerID[serverID].filter(
+        (id) => parseInt(id) !== parseInt(userID)
+      );
+      state.status = "delete";
+      state.newID = [serverID, userID];
+    },
+    removeUserServerChannelUpdate: (state, action) => {
+      const { channelIDs, delUserID } = action.payload;
+      for (const channelID of channelIDs) {
+        state.byChannelID[channelID] = state.byChannelID[channelID].filter(
+          (id) => parseInt(id) !== parseInt(delUserID)
+        );
+      }
+      state.status = "succeeded";
+      state.newID = null;
     },
   },
   extraReducers(builder) {
@@ -143,8 +193,11 @@ const usersSlice = createSlice({
         state.status = "failed";
       })
       .addCase(removeCurrentUserFromServer.fulfilled, (state, action) => {
-        removeChannels(action.payload);
-        removeServer(action.payload);
+        const { channelIDs, serverID } = action.payload;
+        for (const channelID of channelIDs) {
+          delete state.byChannelID[channelID];
+        }
+        delete state.byServerID[serverID];
       })
       .addCase(removeUserChannel.rejected, (state, action) => {
         state.status = "failed";
@@ -274,23 +327,12 @@ export const removeCurrentUserFromServer = createAsyncThunk(
       throw new Error("Failed to create server.");
     }
     // remove all channels belonging to the server from channels
-    const channelIDs = getState().channels.byServerID[serverID];
-    dispatch(removeServer({ serverID }));
+    const channelIDs = getState().channels.byServerID[serverID].map(
+      (chan) => chan.channelID
+    );
     // remove server from servers
     dispatch(removeFromServers({ serverID }));
     // remove all message from each channel in the server
-
-    // change to next server
-    const servers = getState().servers.data;
-    const next_server = servers.length > 0 ? servers[0] : {};
-    dispatch(
-      setServer({
-        name: next_server.serverName,
-        id: next_server.serverID,
-        serverDescription: next_server.serverDescription,
-        serverImageUrl: next_server.serverImageUrl,
-      })
-    );
     return { channelIDs: channelIDs, serverID: serverID };
   }
 );
@@ -336,10 +378,15 @@ export const addUserChannel = createAsyncThunk(
 export const {
   joinGeneralChannel,
   removeChannels,
+  removeServer,
   removeUserFromChannels,
   clearUserChannel,
   setUserChannel,
   addUserChannelUpdate,
   removeUserChannelUpdate,
+  addUserServerUpdate,
+  addUserServerChannelUpdate,
+  removeUserServerUpdate,
+  removeUserServerChannelUpdate,
 } = usersSlice.actions;
 export default usersSlice.reducer;

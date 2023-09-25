@@ -6,6 +6,7 @@ import com.example.chatappserver.model.ServerResponse;
 import com.example.chatappserver.repository.ChannelsDao;
 import com.example.chatappserver.repository.ServersDao;
 import com.example.chatappserver.service.AuthService;
+import com.example.chatappserver.websocket.service.ServerWebSocketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -21,13 +22,16 @@ public class ServersController {
     private final ServersDao serversDao;
     private final AuthService authService;
     private final ChannelsDao channelsDao;
+    private final ServerWebSocketService serverWebSocketService;
 
     @Autowired
     public ServersController(ServersDao serversDao, AuthService authService,
-                             ChannelsDao channelsDao) {
+                             ChannelsDao channelsDao,
+                             ServerWebSocketService serverWebSocketService) {
         this.serversDao = serversDao;
         this.authService = authService;
         this.channelsDao = channelsDao;
+        this.serverWebSocketService = serverWebSocketService;
     }
 
 
@@ -139,6 +143,8 @@ public class ServersController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         serversDao.deleteServer(serverID);
+        // broadcast to subs
+        serverWebSocketService.sendServerDeleteToSubscribers(serverID, user.getUserId());
         return ResponseEntity.ok().build();
     }
 
@@ -152,6 +158,7 @@ public class ServersController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         serversDao.deleteUserServer(serverID, userID);
+        serverWebSocketService.sendServerUserLeaveToSubscribers(serverID, userID);
         return ResponseEntity.ok().build();
     }
 }

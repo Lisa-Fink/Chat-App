@@ -25,7 +25,7 @@ const channelsSlice = createSlice({
     },
     removeServer: (state, action) => {
       const { serverID } = action.payload;
-      state.byServerID[serverID] = [];
+      delete state.byServerID[serverID];
       state.status = "succeeded";
     },
     editRole: (state, action) => {

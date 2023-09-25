@@ -29,14 +29,21 @@ class WebSocketManager {
   }
 
   addChannelSub(channelID, callback) {
-    const sub = this.socket.subscribe("/topic/channels/" + channelID, callback);
-    this.subscriptions.channels[channelID] = sub;
+    if (!(channelID in this.subscriptions.channels)) {
+      const sub = this.socket.subscribe(
+        "/topic/channels/" + channelID,
+        callback
+      );
+      this.subscriptions.channels[channelID] = sub;
+    }
   }
 
   removeChannelSub(channelID) {
-    const sub = this.subscriptions.channels[channelID];
-    sub.unsubscribe();
-    delete this.subscriptions.channels[channelID];
+    if (channelID in this.subscriptions.channels) {
+      const sub = this.subscriptions.channels[channelID];
+      sub.unsubscribe();
+      delete this.subscriptions.channels[channelID];
+    }
   }
 
   getChannelSubs() {
@@ -44,21 +51,41 @@ class WebSocketManager {
   }
 
   addServerSub(serverID, roleID, callbackServer, callbackRole) {
-    const sub = this.socket.subscribe(
-      "/topic/servers/" + serverID,
-      callbackServer
-    );
-    const roleSub = this.socket.subscribe(
-      `/topic/servers/${serverID}/roles/${roleID}`,
-      callbackRole
-    );
-    this.subscriptions.servers[serverID] = [sub, roleSub];
+    if (!(serverID in this.subscriptions.servers)) {
+      const sub = this.socket.subscribe(
+        "/topic/servers/" + serverID,
+        callbackServer
+      );
+      const roleSub = this.socket.subscribe(
+        `/topic/servers/${serverID}/roles/${roleID}`,
+        callbackRole
+      );
+      this.subscriptions.servers[serverID] = [sub, roleSub];
+    }
   }
 
   removeServerSub(serverID) {
-    const sub = this.subscriptions.servers[serverID];
-    sub.unsubscribe();
-    delete this.subscriptions.servers[serverID];
+    if (serverID in this.subscriptions.servers) {
+      const [sub, roleSub] = this.subscriptions.servers[serverID];
+      sub.unsubscribe();
+      roleSub.unsubscribe();
+      delete this.subscriptions.servers[serverID];
+    }
+  }
+
+  addUserSub(userID, callback) {
+    if (!(userID in this.subscriptions.users)) {
+      const sub = this.socket.subscribe("/topic/users/" + userID, callback);
+      this.subscriptions.users[userID] = sub;
+    }
+  }
+
+  removeUserSub(userID) {
+    if (userID in this.subscriptions.users) {
+      const sub = this.subscriptions.users[userID];
+      sub.unsubscribe();
+      delete this.subscriptions.users[userID];
+    }
   }
 
   publishTypingStart(userID, channelID) {

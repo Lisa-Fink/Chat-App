@@ -9,6 +9,9 @@ public enum MessageType {
     NAME_EDIT,
     USER_EDIT,
     CHANNEL_NEW,
-    CHANNEL_DELETE
+    CHANNEL_DELETE,
+    SERVER_DELETE,
+    SERVER_NEW_USER,
+    SERVER_DELETE_USER
 
 }

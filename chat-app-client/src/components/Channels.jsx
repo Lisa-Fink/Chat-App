@@ -19,6 +19,7 @@ import {
 } from "../redux/channelsSlice";
 import {
   addUserChannelUpdate,
+  fetchUsersForChannel,
   removeCurrentUserFromServer,
   removeUserChannelUpdate,
   setUserChannel,
@@ -55,6 +56,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
   useEffect(() => {
     setShowLeaveServerConfirm(false);
     setShowServerDropdown(false);
+
     if (server && server.id) {
       dispatch(
         fetchChannelsForServer({
@@ -76,6 +78,14 @@ function Channels({ setShowServerSettingsModal, socket }) {
         if (!(chan.channelID in socket.getChannelSubs())) {
           socket.addChannelSub(chan.channelID, handleChannelData);
         }
+        // fetch users for channel
+        dispatch(
+          fetchUsersForChannel({
+            token: token,
+            serverID: chan.serverID,
+            channelID: chan.channelID,
+          })
+        );
       }
     }
   }, [channels]);
@@ -159,7 +169,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
         })
       );
     } else if (resType === "CHANNEL_DELETE") {
-      dispatch(deleteChannelUpdate(parsed.data));
+      deleteChannel(parsed);
     } else if (resType === "TYPING") {
       if (parsed.data.status) {
         dispatch(addTyping(parsed.data));

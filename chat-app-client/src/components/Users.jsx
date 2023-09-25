@@ -1,52 +1,90 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import "../styles/Users.css";
 
-import { fetchUsersForChannel } from "../redux/usersSlice";
+import {
+  addUserServerChannelUpdate,
+  removeUserChannelUpdate,
+  removeUserServerChannelUpdate,
+} from "../redux/usersSlice";
 
-function Users() {
+function Users({ socket }) {
   const dispatch = useDispatch();
   const { server, channel } = useSelector((state) => state.current);
   const userChannels = useSelector((state) => state.users.byChannelID);
   const usersByID = useSelector((state) => state.users.dataByID);
   const usersStatus = useSelector((state) => state.users.status);
-  const { token } = useSelector((state) => state.auth);
+  const newID = useSelector((state) => state.users.newID);
+  const channelsByServerID = useSelector((state) => state.channels.byServerID);
   const [curUserChannels, setCurUserChannels] = useState([]);
 
-  // if the channel id changes, fetch the users list for the new channel
-  useEffect(() => {
-    if (channel && channel.id) {
-      dispatch(
-        fetchUsersForChannel({
-          token: token,
-          serverID: server.id,
-          channelID: channel.id,
-        })
-      );
-    } else {
-      setCurUserChannels([]);
+  const handleOtherUserData = (res) => {
+    const parsed = JSON.parse(res.body);
+    const otherUserID = parsed.data.userID;
+    if (otherUserID === auth.userID) {
+      return;
     }
-  }, [server, channel]);
-  // after fetching the new user list, update the local state
+    const resType = parsed.type;
+  };
+
   useEffect(() => {
     if (usersStatus === "succeeded") {
       setCurUserChannels(
         channel.id in userChannels ? userChannels[channel.id] : []
       );
     }
-  }, [usersStatus, userChannels]);
+  }, [channel]);
 
-  const creator = [];
-  const admins = [];
-  const mods = [];
-  const members = [];
-  for (const user of curUserChannels) {
-    const role = usersByID[user].serverRoles[server.id];
-    if (role === 1) creator.push(user);
-    else if (role === 2) admins.push(user);
-    else if (role === 3) mods.push(user);
-    else members.push(user);
-  }
+  useEffect(() => {
+    // update users list if userChannels changes
+    setCurUserChannels(
+      channel.id in userChannels ? userChannels[channel.id] : []
+    );
+  }, [userChannels[channel.id]]);
+
+  useEffect(() => {
+    if (usersStatus === "new") {
+      const [serverID, newUserID] = newID;
+      const channels = channelsByServerID[serverID];
+      dispatch(addUserServerChannelUpdate({ channels, newUserID }));
+    } else if (usersStatus === "delete") {
+      const [serverID, delUserID] = newID;
+      const channelIDs = channelsByServerID[serverID].map(
+        (chan) => chan.channelID
+      );
+      dispatch(removeUserServerChannelUpdate({ channelIDs, delUserID }));
+    } else if (usersStatus === "role") {
+      // update incase role change was for current channel
+      setCurUserChannels(
+        channel.id in userChannels ? userChannels[channel.id] : []
+      );
+      return;
+    }
+  }, [usersStatus]);
+
+  useEffect(() => {
+    // if usersByID changes, make sure to sub to all users
+    for (const userID in usersByID) {
+      socket.addUserSub(userID, handleOtherUserData);
+    }
+  }, [usersByID]);
+
+  const { creator, admins, mods, members } = useMemo(() => {
+    const creator = [];
+    const admins = [];
+    const mods = [];
+    const members = [];
+
+    for (const user of curUserChannels) {
+      const role = usersByID[user].serverRoles[server.id];
+      if (role === 1) creator.push(user);
+      else if (role === 2) admins.push(user);
+      else if (role === 3) mods.push(user);
+      else members.push(user);
+    }
+
+    return { creator, admins, mods, members };
+  }, [curUserChannels]);
 
   const userList = (userArr) => {
     return userArr.map((userID) => {

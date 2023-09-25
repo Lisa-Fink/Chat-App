@@ -1,15 +1,26 @@
 import React, { useState, useEffect, useRef } from "react";
-import { fetchServers } from "../redux/serversSlice";
+import {
+  fetchServers,
+  removeFromServers,
+  updateStatus,
+} from "../redux/serversSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { setServer } from "../redux/currentSlice";
 import "../styles/Servers.css";
 import AddServerModal from "./AddServerModal";
 import ServerSettingsModal from "./modals/ServerSettingsModal";
-import { fetchUsersForServer, setUserChannel } from "../redux/usersSlice";
+import {
+  addUserServerUpdate,
+  fetchUsersForServer,
+  removeUserServerUpdate,
+  setUserChannel,
+} from "../redux/usersSlice";
 import {
   addChannelUpdate,
   fetchChannelsForServer,
+  removeServer,
 } from "../redux/channelsSlice";
+import { deleteMessageChannelUpdate } from "../redux/messagesSlice";
 function Servers({
   showSeverSettingsModal,
   setShowServerSettingsModal,
@@ -17,7 +28,9 @@ function Servers({
 }) {
   const dispatch = useDispatch();
   const servers = useSelector((state) => state.servers.data);
+  const channels = useSelector((state) => state.channels.byServerID);
   const serversStatus = useSelector((state) => state.servers.status);
+  const lastServerID = useSelector((state) => state.servers.lastID);
   const { token, userID } = useSelector((state) => state.auth);
   const serverSub = useRef(false);
 
@@ -33,19 +46,6 @@ function Servers({
         roleID: roleID,
       })
     );
-    // get all users in server
-    dispatch(
-      fetchUsersForServer({
-        token: token,
-        serverID: serverID,
-      })
-    );
-
-    // next steps handled in Channels.jsx:
-    // get all channels in server
-    // set current channel to the first channel in the server if there are any channels
-
-    // get all messages for channel (should happen any time a new current channel is set)
   };
 
   const handleServerHover = (serverID) => {
@@ -99,20 +99,85 @@ function Servers({
         dispatch(
           fetchChannelsForServer({ token: token, serverID: server.serverID })
         );
+
+        // fetch all users for each server
+        dispatch(
+          fetchUsersForServer({
+            token: token,
+            serverID: server.serverID,
+          })
+        );
       }
 
       serverSub.current = true;
+    } else if (serversStatus === "new") {
+      const lastServer = servers[servers.length - 1];
+      // subscribe to server
+      socket.addServerSub(
+        lastServer.serverID,
+        lastServer.roleID,
+        handleServerData,
+        handleServerRoleData
+      );
+      // fetch all channels for server
+      dispatch(
+        fetchChannelsForServer({ token: token, serverID: lastServer.serverID })
+      );
+      // set current server
+      dispatch(
+        setServer({
+          id: lastServer.serverID,
+          name: lastServer.serverName,
+        })
+      );
+    } else if (serversStatus === "delete") {
+      // unsub from server
+      socket.removeServerSub(lastServerID);
+
+      // unsub from each channel in server and delete each channel
+      for (const chan of channels[lastServerID]) {
+        const channelID = chan.channelID;
+        dispatch(deleteMessageChannelUpdate({ channelID: channelID }));
+        socket.removeChannelSub(channelID);
+      }
+      dispatch(removeServer({ serverID: lastServerID }));
+
+      // change to next server
+      const next_server = servers.length > 0 ? servers[0] : {};
+      dispatch(
+        setServer({
+          name: next_server.serverName,
+          id: next_server.serverID,
+        })
+      );
+      dispatch(updateStatus()); // change status
     }
   }, [servers, serversStatus]);
 
   const handleServerData = (res) => {
     const parsed = JSON.parse(res.body);
     const updateUserID = parsed.data.userID;
-    if (updateUserID === userID) {
+    if (parseInt(updateUserID) === parseInt(userID)) {
       // will be skipping updates from current user
       return;
     }
     const resType = parsed.type;
+    if (resType === "SERVER_DELETE") {
+      const delServerID = parsed.data.serverID;
+      // remove server from servers data
+      dispatch(removeFromServers({ serverID: delServerID }));
+    } else if (resType === "SERVER_NEW_USER") {
+      // add the user to the userSlice for all categories,
+      // (will sub from useEffect in Users.jsx)
+      dispatch(
+        addUserServerUpdate({
+          data: parsed.data,
+        })
+      );
+    } else if (resType === "SERVER_DELETE_USER") {
+      // will keep the user and user sub incase they are in another common server
+      dispatch(removeUserServerUpdate({ data: parsed.data }));
+    }
   };
 
   const handleServerRoleData = (res) => {
@@ -179,8 +244,7 @@ function Servers({
         >
           +
         </button>
-        {showServerDetails === "new" &&
-          detailsDiv("new", "Create a new Server")}
+        {showServerDetails === "new" && detailsDiv("new", "New Server")}
       </li>
       {showAddServerModal && (
         <AddServerModal closeModal={() => setShowAddServerModal(false)} />

@@ -208,9 +208,12 @@ function Chat() {
 
   return (
     <div className="chat" ref={chatRef}>
-      {messagesStatus === "succeeded" && usersStatus === "succeeded" && (
-        <ul className="message-list">{messageList}</ul>
-      )}
+      {server.id !== null &&
+        channel.id !== null &&
+        messagesStatus === "succeeded" &&
+        usersStatus === "succeeded" && (
+          <ul className="message-list">{messageList}</ul>
+        )}
     </div>
   );
 }

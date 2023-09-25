@@ -5,6 +5,7 @@ import { joinGeneralChannel } from "./usersSlice";
 const initialState = {
   data: [],
   status: "idle",
+  lastID: null,
   error: null,
 };
 
@@ -16,6 +17,12 @@ const serversSlice = createSlice({
       state.data = state.data.filter(
         (server) => server.serverID != action.payload.serverID
       );
+      state.status = "delete";
+      state.lastID = action.payload.serverID;
+    },
+    updateStatus: (state, action) => {
+      state.status = "succeeded";
+      state.lastID = null;
     },
   },
   extraReducers(builder) {
@@ -36,7 +43,7 @@ const serversSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(createServer.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.status = "new";
         state.error = null;
         state.data.push(action.payload.server);
       })
@@ -45,7 +52,8 @@ const serversSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(deleteServer.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.status = "delete";
+        state.lastID = action.payload.serverID;
         state.error = null;
         state.data = state.data.filter(
           (server) => server.serverID !== action.payload.serverID
@@ -74,6 +82,15 @@ const serversSlice = createSlice({
           (server) => server.serverID === action.payload.serverID
         );
         updateServer.serverImageUrl = action.payload.serverImageUrl;
+      })
+      .addCase(joinServerByInviteCode.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(joinServerByInviteCode.fulfilled, (state, action) => {
+        state.status = "new";
+        state.error = null;
+        state.data.push(action.payload.server);
       });
   },
 });
@@ -199,5 +216,26 @@ export const updateServerDescription = createAsyncThunk(
     return { serverID: serverID, serverDescription: serverDescription };
   }
 );
-export const { removeFromServers } = serversSlice.actions;
+
+export const joinServerByInviteCode = createAsyncThunk(
+  "servers/joinServerByInviteCode",
+  async ({ token, inviteCode }) => {
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/invites/${inviteCode}/join`;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) {
+      throw new Error("Failed to join server.");
+    }
+    const server = await res.json();
+    return { server };
+  }
+);
+
+export const { removeFromServers, updateStatus } = serversSlice.actions;
 export default serversSlice.reducer;

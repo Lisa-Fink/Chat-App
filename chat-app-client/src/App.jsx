@@ -57,7 +57,7 @@ function App() {
               socket={socket}
             />
             <Chat />
-            <Users />
+            <Users socket={socket} />
             <MessageInput socket={socket} />
           </>
         )}
