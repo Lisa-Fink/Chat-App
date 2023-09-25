@@ -103,11 +103,7 @@ const usersSlice = createSlice({
     },
     removeUserServerUpdate: (state, action) => {
       const { userID, serverID } = action.payload.data;
-      state.byServerID[serverID] = state.byServerID[serverID].filter(
-        (id) => parseInt(id) !== parseInt(userID)
-      );
-      state.status = "delete";
-      state.newID = [serverID, userID];
+      removeUserServerHelper(userID, serverID, state);
     },
     removeUserServerChannelUpdate: (state, action) => {
       const { channelIDs, delUserID } = action.payload;
@@ -177,16 +173,8 @@ const usersSlice = createSlice({
       })
       .addCase(removeUserFromServer.fulfilled, (state, action) => {
         state.error = null;
-        const { userID, serverID, channelIDs } = action.payload;
-        // remove from channels
-        for (const channelID of channelIDs) {
-          if (state.byChannelID && channelID in state.byChannelID) {
-            state.byChannelID[channelID] = state.byChannelID[channelID].filter(
-              (id) => id !== userID
-            );
-          }
-        }
-        state.status = "succeeded";
+        const { userID, serverID } = action.payload;
+        removeUserServerHelper(userID, serverID, state);
       })
       .addCase(removeCurrentUserFromServer.rejected, (state, action) => {
         state.error = action.error.message;
@@ -221,6 +209,14 @@ const usersSlice = createSlice({
       });
   },
 });
+
+function removeUserServerHelper(userID, serverID, state) {
+  state.byServerID[serverID] = state.byServerID[serverID].filter(
+    (id) => parseInt(id) !== parseInt(userID)
+  );
+  state.status = "delete";
+  state.newID = [serverID, userID];
+}
 
 export const fetchUsersForChannel = createAsyncThunk(
   "users/fetchUsersForChannel",
@@ -303,11 +299,7 @@ export const removeUserFromServer = createAsyncThunk(
     if (!res.ok) {
       throw new Error("Failed to create server.");
     }
-    // delete the user in each userChannel for the server
-    const channels = getState().channels.byServerID[serverID].map(
-      (channel) => channel.channelID
-    );
-    return { userID: userID, channelIDs: channels, serverID: serverID };
+    return { userID: userID, serverID: serverID };
   }
 );
 
