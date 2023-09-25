@@ -249,11 +249,14 @@ function useServersChange(
   const handleServerData = (res) => {
     const parsed = JSON.parse(res.body);
     const updateUserID = parsed.data.userID;
-    if (parseInt(updateUserID) === parseInt(userID)) {
+    const resType = parsed.type;
+    if (
+      resType !== "SERVER_DELETE_USER" &&
+      parseInt(updateUserID) === parseInt(userID)
+    ) {
       // will be skipping updates from current user
       return;
     }
-    const resType = parsed.type;
     if (resType === "SERVER_DELETE") {
       const delServerID = parsed.data.serverID;
       // remove server from servers data
@@ -267,8 +270,13 @@ function useServersChange(
         })
       );
     } else if (resType === "SERVER_DELETE_USER") {
-      // will keep the user and user sub incase they are in another common server
-      dispatch(removeUserServerUpdate({ data: parsed.data }));
+      if (parseInt(updateUserID) === parseInt(userID)) {
+        // if the deleted user is the current user (being kicked)
+        dispatch(removeFromServers({ serverID: parsed.data.serverID }));
+      } else {
+        // will keep the user and user sub incase they are in another common server
+        dispatch(removeUserServerUpdate({ data: parsed.data }));
+      }
     }
   };
 
