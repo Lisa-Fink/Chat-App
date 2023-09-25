@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   MdCancel,
   MdCheck,
@@ -21,13 +21,7 @@ function MangeUsers({ id }) {
   const [showKickConfirm, setShowKickConfirm] = useState(0);
 
   const usersInServer = useSelector((state) => state.users.byServerID[id]);
-
-  useEffect(() => {
-    // gets the users in the server the first time
-    if (usersInServer === null || usersInServer === undefined) {
-      dispatch(fetchUsersForServer({ token: auth.token, serverID: id }));
-    }
-  }, []);
+  useFetchUsersOnMount(usersInServer, dispatch, id, auth);
 
   const handleRoleClick = (userID) => {
     if (showRoleMenu !== userID) {
@@ -82,79 +76,82 @@ function MangeUsers({ id }) {
     </ul>
   );
 
-  const userServersList =
-    usersInServer &&
-    usersInServer.map((userID) => {
-      const user = users[userID];
-      const roleID = user.serverRoles[id];
-      return (
-        <tr className="user-server" key={userID}>
-          <td className="user-info">
-            {user.userImageUrl ? (
-              <img className="user-thumbnail" src={user.userImageUrl} />
-            ) : (
-              <div className="user-thumbnail">
-                {user.username.substring(0, 1).toUpperCase()}
-              </div>
-            )}
-            {user.username}
-          </td>
-          <td>
-            {roleID === 1
-              ? "Creator"
-              : roleID === 2
-              ? "Admin"
-              : roleID === 3
-              ? "Moderator"
-              : "Member"}
-          </td>
-          <td>
-            {roleID != 1 && user.userID !== auth.userID && (
-              <div className="role-container">
-                <button
-                  className="role"
-                  onClick={(e) => handleRoleClick(user.userID)}
-                >
-                  {" "}
-                  Change Role
-                  {showRoleMenu !== user.userID ? (
-                    <MdOutlineExpandMore />
-                  ) : (
-                    <MdClose />
+  const userServersList = useMemo(() => {
+    return (
+      usersInServer &&
+      usersInServer.map((userID) => {
+        const user = users[userID];
+        const roleID = user.serverRoles[id];
+        return (
+          <tr className="user-server" key={userID}>
+            <td className="user-info">
+              {user.userImageUrl ? (
+                <img className="user-thumbnail" src={user.userImageUrl} />
+              ) : (
+                <div className="user-thumbnail">
+                  {user.username.substring(0, 1).toUpperCase()}
+                </div>
+              )}
+              {user.username}
+            </td>
+            <td>
+              {roleID === 1
+                ? "Creator"
+                : roleID === 2
+                ? "Admin"
+                : roleID === 3
+                ? "Moderator"
+                : "Member"}
+            </td>
+            <td>
+              {roleID != 1 && user.userID !== auth.userID && (
+                <div className="role-container">
+                  <button
+                    className="role"
+                    onClick={(e) => handleRoleClick(user.userID)}
+                  >
+                    {" "}
+                    Change Role
+                    {showRoleMenu !== user.userID ? (
+                      <MdOutlineExpandMore />
+                    ) : (
+                      <MdClose />
+                    )}
+                  </button>
+                  {showRoleMenu === user.userID && (
+                    <div>{changeRoleMenu(user)}</div>
                   )}
-                </button>
-                {showRoleMenu === user.userID && (
-                  <div>{changeRoleMenu(user)}</div>
-                )}
-              </div>
-            )}
-          </td>
-          <td>
-            {roleID !== 1 && user.userID !== auth.userID && (
-              <>
-                <button
-                  className="kick"
-                  onClick={() => handleKickClick(user.userID)}
-                >
-                  Kick
-                </button>
-                {showKickConfirm === user.userID && (
-                  <div className="kick-confirm">
-                    Confirm Kick:{" "}
-                    <button onClick={() => handleKickConfirm(user.userID)}>
-                      <MdCheck />
-                    </button>{" "}
-                    <button onClick={() => setShowKickConfirm(0)}>
-                      <MdCancel />
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </td>
-        </tr>
-      );
-    });
+                </div>
+              )}
+            </td>
+            <td>
+              {roleID !== 1 && user.userID !== auth.userID && (
+                <>
+                  <button
+                    className="kick"
+                    onClick={() => handleKickClick(user.userID)}
+                  >
+                    Kick
+                  </button>
+                  {showKickConfirm === user.userID && (
+                    <div className="kick-confirm">
+                      Confirm Kick:{" "}
+                      <button onClick={() => handleKickConfirm(user.userID)}>
+                        <MdCheck />
+                      </button>{" "}
+                      <button onClick={() => setShowKickConfirm(0)}>
+                        <MdCancel />
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </td>
+          </tr>
+        );
+      })
+    );
+  }, [usersInServer, users, showKickConfirm, showRoleMenu]);
   return (
     <table className="user-table">
       <thead>
@@ -168,6 +165,15 @@ function MangeUsers({ id }) {
       <tbody>{userServersList}</tbody>
     </table>
   );
+}
+
+function useFetchUsersOnMount(usersInServer, dispatch, id, auth) {
+  useEffect(() => {
+    // gets the users in the server the first time
+    if (usersInServer === null || usersInServer === undefined) {
+      dispatch(fetchUsersForServer({ token: auth.token, serverID: id }));
+    }
+  }, []);
 }
 
 export default MangeUsers;
