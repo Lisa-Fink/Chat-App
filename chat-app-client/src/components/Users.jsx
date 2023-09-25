@@ -5,6 +5,7 @@ import "../styles/Users.css";
 import {
   addUserServerChannelUpdate,
   removeUserServerChannelUpdate,
+  userChannelRoleUpdate,
 } from "../redux/usersSlice";
 
 function Users({ socket }) {
@@ -18,20 +19,12 @@ function Users({ socket }) {
   const channelsByServerID = useSelector((state) => state.channels.byServerID);
 
   useSubToUsers(usersByID, auth, socket);
-  const [curUserChannels, setCurUserChannels] = useCurUserChannels(
+  const curUserChannels = useCurUserChannels(
     usersStatus,
     channel,
     userChannels
   );
-  useUsersChange(
-    newID,
-    channelsByServerID,
-    usersStatus,
-    dispatch,
-    userChannels,
-    channel,
-    setCurUserChannels
-  );
+  useUsersChange(newID, channelsByServerID, usersStatus, dispatch);
 
   const { creator, admins, mods, members } = useMemo(() => {
     const creator = [];
@@ -48,7 +41,7 @@ function Users({ socket }) {
     }
 
     return { creator, admins, mods, members };
-  }, [curUserChannels]);
+  }, [curUserChannels, usersByID]);
 
   const userList = (userArr) => {
     return userArr.map((userID) => {
@@ -135,18 +128,10 @@ function useCurUserChannels(usersStatus, channel, userChannels) {
     );
   }, [userChannels[channel.id]]);
 
-  return [curUserChannels, setCurUserChannels];
+  return curUserChannels;
 }
 
-function useUsersChange(
-  newID,
-  channelsByServerID,
-  usersStatus,
-  dispatch,
-  userChannels,
-  channel,
-  setCurUserChannels
-) {
+function useUsersChange(newID, channelsByServerID, usersStatus, dispatch) {
   useEffect(() => {
     if (usersStatus === "new") {
       const [serverID, newUserID] = newID;
@@ -158,12 +143,11 @@ function useUsersChange(
         (chan) => chan.channelID
       );
       dispatch(removeUserServerChannelUpdate({ channelIDs, delUserID }));
-    } else if (usersStatus === "role") {
-      // update incase role change was for current channel
-      setCurUserChannels(
-        channel.id in userChannels ? userChannels[channel.id] : []
-      );
-      return;
+    } else if (usersStatus === "serverRole") {
+      // get all channels
+      const [serverID, userID] = newID;
+      const channels = channelsByServerID[serverID];
+      dispatch(userChannelRoleUpdate({ channels, userID, serverID }));
     }
   }, [usersStatus]);
 }

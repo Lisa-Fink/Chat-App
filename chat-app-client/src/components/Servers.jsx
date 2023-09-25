@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
+  currentUserRoleUpdate,
   fetchServers,
   removeFromServers,
+  serverDescriptionUpdate,
+  serverImageUpdate,
   updateStatus,
 } from "../redux/serversSlice";
 import { useSelector, useDispatch } from "react-redux";
@@ -14,6 +17,7 @@ import {
   fetchUsersForServer,
   removeUserServerUpdate,
   setUserChannel,
+  userServerRoleUpdate,
 } from "../redux/usersSlice";
 import {
   addChannelUpdate,
@@ -21,6 +25,7 @@ import {
   removeServer,
 } from "../redux/channelsSlice";
 import { deleteMessageChannelUpdate } from "../redux/messagesSlice";
+
 function Servers({
   showSeverSettingsModal,
   setShowServerSettingsModal,
@@ -169,6 +174,14 @@ function useServersChange(
   lastServerID,
   token
 ) {
+  const clearChannelsForServer = () => {
+    for (const chan of channels[lastServerID]) {
+      const channelID = chan.channelID;
+      dispatch(deleteMessageChannelUpdate({ channelID: channelID }));
+      socket.current.removeChannelSub(channelID);
+    }
+    dispatch(removeServer({ serverID: lastServerID }));
+  };
   useEffect(() => {
     if (!serverSub.current && serversStatus === "succeeded") {
       // subscribe to servers the first time servers is set
@@ -228,13 +241,7 @@ function useServersChange(
       socket.current.removeServerSub(lastServerID);
 
       // unsub from each channel in server and delete each channel
-      for (const chan of channels[lastServerID]) {
-        const channelID = chan.channelID;
-        dispatch(deleteMessageChannelUpdate({ channelID: channelID }));
-        socket.current.removeChannelSub(channelID);
-      }
-      dispatch(removeServer({ serverID: lastServerID }));
-
+      clearChannelsForServer();
       // change to next server
       const next_server = servers.length > 0 ? servers[0] : {};
       dispatch(
@@ -244,6 +251,17 @@ function useServersChange(
         })
       );
       dispatch(updateStatus()); // change status
+    } else if (serversStatus === "update") {
+      // unsub from each channel in server and delete each channel
+      clearChannelsForServer();
+
+      // re fetch the channels for server
+      dispatch(
+        fetchChannelsForServer({
+          token: token,
+          serverID: lastServerID,
+        })
+      );
     }
   }, [servers, serversStatus]);
 
@@ -277,6 +295,54 @@ function useServersChange(
         dispatch(
           removeUserServerUpdate({
             data: { serverID: serverID, userID: delUserID },
+          })
+        );
+      }
+    } else if (resType === "DESCRIPTION_EDIT") {
+      dispatch(
+        serverDescriptionUpdate({
+          serverID: parsed.data.serverID,
+          serverDescription: parsed.data.editData,
+        })
+      );
+    } else if (resType === "IMAGE_EDIT") {
+      dispatch(
+        serverImageUpdate({
+          serverID: parsed.data.serverID,
+          serverImageUrl: parsed.data.editData,
+        })
+      );
+    } else if (resType === "ROLE_EDIT") {
+      if (parseInt(parsed.data.updateUserID) === parseInt(userID)) {
+        // the current users role was changed
+        // update server role sub
+        socket.current.updateServerRoleSub(
+          parsed.data.serverID,
+          parsed.data.roleID,
+          handleServerRoleData
+        );
+        // update in users byUserID
+        dispatch(
+          currentUserRoleUpdate({
+            userID: parsed.data.userID,
+            serverID: parsed.data.serverID,
+            roleID: parsed.data.roleID,
+          })
+        );
+        // update in role servers
+        // triggers clear and refetch all channels/userChannels in server
+        dispatch(
+          currentUserRoleUpdate({
+            serverID: parsed.data.serverID,
+            roleID: parsed.data.roleID,
+          })
+        );
+      } else {
+        dispatch(
+          userServerRoleUpdate({
+            userID: parsed.data.updateUserID,
+            serverID: parsed.data.serverID,
+            roleID: parsed.data.roleID,
           })
         );
       }

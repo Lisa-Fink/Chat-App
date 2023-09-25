@@ -64,6 +64,16 @@ class WebSocketManager {
     }
   }
 
+  updateServerRoleSub(serverID, roleID, callback) {
+    const roleSub = this.subscriptions.servers[serverID][1];
+    roleSub.unsubscribe();
+    const newRoleSub = this.socket.subscribe(
+      `/topic/servers/${serverID}/roles/${roleID}`,
+      callback
+    );
+    this.subscriptions.servers[serverID][1] = newRoleSub;
+  }
+
   removeServerSub(serverID) {
     if (serverID in this.subscriptions.servers) {
       const [sub, roleSub] = this.subscriptions.servers[serverID];

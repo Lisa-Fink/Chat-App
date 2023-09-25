@@ -115,6 +115,37 @@ const usersSlice = createSlice({
       state.status = "succeeded";
       state.newID = null;
     },
+    userServerRoleUpdate: (state, action) => {
+      updateUserServerRoleHelper(
+        action.payload.userID,
+        action.payload.serverID,
+        action.payload.roleID,
+        state
+      );
+    },
+    currentUserServerRoleUpdate: (state, action) => {
+      const { userID, serverID, roleID } = action.payload;
+      updateOnlyRole(userID, serverID, roleID, state);
+    },
+    userChannelRoleUpdate: (state, action) => {
+      const { channels, userID, serverID } = action.payload;
+      const roleID = state.dataByID[userID].serverRoles[serverID];
+      for (const chan of channels) {
+        if (roleID <= chan.roleID) {
+          // if the user should be in the channel, but is not, add the id
+          if (!state.byChannelID[chan.channelID].includes(userID)) {
+            state.byChannelID[chan.channelID].push(userID);
+          }
+        } else {
+          // the user shouldn't be in the channel, so make sure it is not
+          state.byChannelID[chan.channelID] = state.byChannelID[
+            chan.channelID
+          ].filter((id) => parseInt(id) !== parseInt(userID));
+        }
+      }
+      state.newID = null;
+      state.status = "succeeded";
+    },
   },
   extraReducers(builder) {
     builder
@@ -161,11 +192,12 @@ const usersSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(updateUserServerRole.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.error = null;
-        state.dataByID[action.payload.userID].serverRoles[
-          action.payload.serverID
-        ] = action.payload.roleID;
+        updateUserServerRoleHelper(
+          action.payload.userID,
+          action.payload.serverID,
+          action.payload.roleID,
+          state
+        );
       })
       .addCase(removeUserFromServer.rejected, (state, action) => {
         state.status = "failed";
@@ -209,6 +241,17 @@ const usersSlice = createSlice({
       });
   },
 });
+
+function updateUserServerRoleHelper(userID, serverID, roleID, state) {
+  state.status = "serverRole";
+  state.newID = [serverID, userID];
+  state.error = null;
+  updateOnlyRole(userID, serverID, roleID, state);
+}
+
+function updateOnlyRole(userID, serverID, roleID, state) {
+  state.dataByID[userID].serverRoles[serverID] = roleID;
+}
 
 function removeUserServerHelper(userID, serverID, state) {
   state.byServerID[serverID] = state.byServerID[serverID].filter(
@@ -380,5 +423,8 @@ export const {
   addUserServerChannelUpdate,
   removeUserServerUpdate,
   removeUserServerChannelUpdate,
+  userServerRoleUpdate,
+  userChannelRoleUpdate,
+  currentUserServerRoleUpdate,
 } = usersSlice.actions;
 export default usersSlice.reducer;

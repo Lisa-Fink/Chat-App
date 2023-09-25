@@ -1,6 +1,8 @@
 package com.example.chatappserver.websocket.service;
 
-import com.example.chatappserver.websocket.model.*;
+import com.example.chatappserver.websocket.model.channel.MessageBroadcast;
+import com.example.chatappserver.websocket.model.MessageType;
+import com.example.chatappserver.websocket.model.server.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -63,6 +65,18 @@ public class ServerWebSocketService {
                 serverID, userID);
         MessageBroadcast messageBroadcast = new MessageBroadcast(
                 MessageType.IMAGE_EDIT, data);
+        messaging.convertAndSend(destination, messageBroadcast);
+    }
+
+    public void sendServerRoleUpdateToSubscribers(
+            int serverID, int userID, int updateUserID, int roleID
+    ) {
+        String destination = "/topic/servers/" + serverID;
+        ServerUserRoleEditData data = new ServerUserRoleEditData(
+                serverID, userID, updateUserID, roleID
+        );
+        MessageBroadcast messageBroadcast = new MessageBroadcast(
+                MessageType.ROLE_EDIT, data);
         messaging.convertAndSend(destination, messageBroadcast);
     }
 }

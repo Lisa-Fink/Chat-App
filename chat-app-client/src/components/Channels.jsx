@@ -286,7 +286,7 @@ function useChannelsChange(socket, channels, dispatch, channel, token, userID) {
         })
       );
     } else if (resType === "CHANNEL_DELETE") {
-      deleteChannel(parsed);
+      deleteChannel(parsed.data.channelID, parsed.data.serverID, dispatch);
     } else if (resType === "TYPING") {
       if (parsed.data.status) {
         dispatch(addTyping(parsed.data));
@@ -295,7 +295,7 @@ function useChannelsChange(socket, channels, dispatch, channel, token, userID) {
       }
     } else if (resType === "ROLE_EDIT") {
       if (!parsed.data.userIDs.includes(userID)) {
-        deleteChannel(parsed);
+        deleteChannel(parsed.data.channelID, parsed.data.serverID, dispatch);
         return;
       }
       // update role
@@ -327,7 +327,7 @@ function useChannelsChange(socket, channels, dispatch, channel, token, userID) {
         // Remove a user
         if (parseInt(parsed.data.editUserID) === parseInt(userID)) {
           // If the user to remove is this user, delete the channel and unsub
-          deleteChannel(parsed);
+          deleteChannel(parsed.data.channelID, parsed.data.serverID, dispatch);
         } else {
           // The user to remove is not this user, so just remove them from the list
           dispatch(
@@ -340,22 +340,21 @@ function useChannelsChange(socket, channels, dispatch, channel, token, userID) {
       }
     }
   };
-
-  const deleteChannel = (parsed) => {
-    // remove the channel from channels
-    dispatch(
-      deleteChannelUpdate({
-        channelID: parsed.data.channelID,
-        serverID: parsed.data.serverID,
-      })
-    );
-    // remove the channel from UserChannels
-    dispatch(clearUserChannel({ channelID: parsed.data.channelID }));
-    // remove the channel from message
-    dispatch(deleteMessageChannelUpdate({ channelID: parsed.data.channelID }));
-    socket.current.removeChannelSub(parsed.data.channelID);
-  };
 }
+const deleteChannel = (channelID, serverID, dispatch) => {
+  // remove the channel from channels
+  dispatch(
+    deleteChannelUpdate({
+      channelID: channelID,
+      serverID: serverID,
+    })
+  );
+  // remove the channel from UserChannels
+  dispatch(clearUserChannel({ channelID: channelID }));
+  // remove the channel from message
+  dispatch(deleteMessageChannelUpdate({ channelID: channelID }));
+  socket.current.removeChannelSub(channelID);
+};
 
 function useCurrentServerChannelsChange(
   server,

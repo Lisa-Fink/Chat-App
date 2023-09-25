@@ -20,6 +20,31 @@ const serversSlice = createSlice({
       state.status = "succeeded";
       state.lastID = null;
     },
+    serverImageUpdate: (state, action) => {
+      updateServerImageHelper(
+        action.payload.serverID,
+        action.payload.serverImageUrl,
+        state
+      );
+    },
+    serverDescriptionUpdate: (state, action) => {
+      updateServerDescriptionHelper(
+        action.payload.serverID,
+        action.payload.serverDescription,
+        state
+      );
+    },
+    currentUserRoleUpdate: (state, action) => {
+      // update server role
+      state.data = state.data.map((server) => {
+        if (parseInt(server.serverID) === action.payload.serverID) {
+          server.roleID = action.payload.roleID;
+        }
+        return server;
+      });
+      state.status = "update";
+      state.lastID = action.payload.serverID;
+    },
   },
   extraReducers(builder) {
     builder
@@ -57,10 +82,11 @@ const serversSlice = createSlice({
       .addCase(updateServerDescription.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.error = null;
-        const updateServer = state.data.find(
-          (server) => server.serverID === action.payload.serverID
+        updateServerDescriptionHelper(
+          action.payload.serverID,
+          action.payload.serverDescription,
+          state
         );
-        updateServer.serverDescription = action.payload.serverDescription;
       })
       .addCase(updateServerImage.rejected, (state, action) => {
         state.status = "failed";
@@ -69,10 +95,11 @@ const serversSlice = createSlice({
       .addCase(updateServerImage.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.error = null;
-        const updateServer = state.data.find(
-          (server) => server.serverID === action.payload.serverID
+        updateServerImageHelper(
+          action.payload.serverID,
+          action.payload.serverImageUrl,
+          state
         );
-        updateServer.serverImageUrl = action.payload.serverImageUrl;
       })
       .addCase(joinServerByInviteCode.rejected, (state, action) => {
         state.status = "failed";
@@ -85,6 +112,24 @@ const serversSlice = createSlice({
       });
   },
 });
+
+function updateServerDescriptionHelper(serverID, serverDescription, state) {
+  state.data = state.data.map((server) => {
+    if (parseInt(server.serverID) === parseInt(serverID)) {
+      server.serverDescription = serverDescription;
+    }
+    return server;
+  });
+}
+
+function updateServerImageHelper(serverID, serverImageUrl, state) {
+  state.data = state.data.map((server) => {
+    if (parseInt(server.serverID) === parseInt(serverID)) {
+      server.serverImageUrl = serverImageUrl;
+    }
+    return server;
+  });
+}
 
 function deleteServerHelper(state, action) {
   state.status = "delete";
@@ -237,5 +282,11 @@ export const joinServerByInviteCode = createAsyncThunk(
   }
 );
 
-export const { removeFromServers, updateStatus } = serversSlice.actions;
+export const {
+  removeFromServers,
+  updateStatus,
+  serverImageUpdate,
+  serverDescriptionUpdate,
+  currentUserRoleUpdate,
+} = serversSlice.actions;
 export default serversSlice.reducer;

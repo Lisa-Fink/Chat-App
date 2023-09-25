@@ -139,6 +139,10 @@ public class ServersController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         serversDao.updateUserRole(userID, roleID, serverID);
+        // broadcast the role change
+        serverWebSocketService.sendServerRoleUpdateToSubscribers(
+                serverID, user.getUserId(), userID, roleID
+        );
         return ResponseEntity.ok().build();
     }
 
