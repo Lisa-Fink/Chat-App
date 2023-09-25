@@ -4,6 +4,7 @@ import com.example.chatappserver.model.*;
 import com.example.chatappserver.repository.UsersDao;
 import com.example.chatappserver.service.AuthService;
 import com.example.chatappserver.service.UserService;
+import com.example.chatappserver.websocket.service.UserWebSocketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +20,16 @@ public class UsersController {
     private final UsersDao usersDao;
     private final UserService userService;
     private final AuthService authService;
+    private final UserWebSocketService userWebSocketService;
 
     @Autowired
-    public UsersController(UsersDao usersDao, UserService userService, AuthService authService) {
+    public UsersController(
+            UsersDao usersDao, UserService userService,
+            AuthService authService, UserWebSocketService userWebSocketService) {
         this.usersDao = usersDao;
         this.userService = userService;
         this.authService = authService;
+        this.userWebSocketService = userWebSocketService;
     }
 
     // Creates a new user, using the User object, returning the new userID
@@ -104,6 +109,9 @@ public class UsersController {
             @AuthenticationPrincipal CustomUserDetails user,
             @RequestBody UpdateImageReq imageReq) {
         usersDao.editUserImage(user.getUserId(), imageReq.getUserImageUrl());
+        // broadcast image change
+        userWebSocketService.sendUserImageUpdateToSubscribers(user.getUserId(),
+                imageReq.getUserImageUrl());
         return ResponseEntity.ok().build();
     }
 
