@@ -19,6 +19,7 @@ import {
 } from "../redux/channelsSlice";
 import {
   addUserChannelUpdate,
+  clearUserChannel,
   fetchUsersForChannel,
   removeCurrentUserFromServer,
   removeUserChannelUpdate,
@@ -52,87 +53,25 @@ function Channels({ setShowServerSettingsModal, socket }) {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // When a server is selected clear menus and fetch channels
-  useEffect(() => {
-    setShowLeaveServerConfirm(false);
-    setShowServerDropdown(false);
-
-    if (server && server.id) {
-      dispatch(
-        fetchChannelsForServer({
-          token: token,
-          serverID: server.id,
-        })
-      );
-    } else {
-      setCurChannels([]);
-    }
-  }, [server]);
-
-  useEffect(() => {
-    // subscribe to all channels
-    for (const serverID in channels) {
-      const channelArr = channels[serverID];
-      for (const chan of channelArr) {
-        // if not already subscribed, subscribe
-        if (!(chan.channelID in socket.getChannelSubs())) {
-          socket.addChannelSub(chan.channelID, handleChannelData);
-        }
-        // fetch users for channel
-        dispatch(
-          fetchUsersForChannel({
-            token: token,
-            serverID: chan.serverID,
-            channelID: chan.channelID,
-          })
-        );
-      }
-    }
-  }, [channels]);
-
-  // if channels[serverID] changes update the local channels list
-  useEffect(() => {
-    if (server && server.id && channels[server.id]) {
-      setCurChannels(channels[server.id]);
-      // if the changed channel is the current channel, update it
-      if (channel && channel.name) {
-        const curChannel = channels[server.id].find(
-          (chan) => chan.channelID == channel.id
-        );
-        if (curChannel && curChannel.channelName !== channel.name) {
-          dispatch(
-            setChannel({
-              id: curChannel.channelID,
-              name: curChannel.channelName,
-              roleID: curChannel.roleID,
-            })
-          );
-        }
-      }
-
-      // if the current channel is in the server continue, otherwise select the first channel
-      if (
-        channel.id &&
-        channels[server.id].find(
-          (chan) => parseInt(chan.channelID) === parseInt(channel.id)
-        )
-      ) {
-        return;
-      }
-      const firstChannel = channels[server.id][0];
-      if (firstChannel) {
-        dispatch(
-          setChannel({
-            id: firstChannel.channelID,
-            name: firstChannel.channelName,
-            roleID: firstChannel.roleID,
-          })
-        );
-      } else {
-        dispatch(setChannel({ id: null, name: null, roleID: null }));
-      }
-    }
-  }, [channels[server.id]]);
+  useServerSelect(
+    setCurChannels,
+    server,
+    setShowLeaveServerConfirm,
+    setShowServerDropdown,
+    dispatch,
+    token
+  );
+  useChannelsChange(socket, channels, dispatch, channel, token, userID);
+  useCurrentServerChannelsChange(
+    server,
+    channels,
+    channel,
+    setCurChannels,
+    dispatch,
+    channel,
+    token,
+    userID
+  );
 
   const handleChannelClick = (e) => {
     const newChannelID = e.currentTarget.dataset.id;
@@ -145,94 +84,6 @@ function Channels({ setShowServerSettingsModal, socket }) {
         roleID: newChannelRoleID,
       })
     );
-  };
-
-  const handleChannelData = (res) => {
-    const parsed = JSON.parse(res.body);
-    const updateUserID = parsed.data.userID;
-    if (updateUserID === userID) {
-      // will be skipping updates from current user
-      return;
-    }
-    const resType = parsed.type;
-    if (resType === "MESSAGE_NEW") {
-      // add the new message
-      dispatch(addMessageUpdate({ message: parsed.data }));
-    } else if (resType === "MESSAGE_EDIT") {
-      const data = parsed.data;
-      dispatch(editMessageUpdate(data));
-    } else if (resType === "MESSAGE_DELETE") {
-      dispatch(
-        deleteMessageUpdate({
-          messageID: parsed.data.messageID,
-          channelID: parsed.data.channelID,
-        })
-      );
-    } else if (resType === "CHANNEL_DELETE") {
-      deleteChannel(parsed);
-    } else if (resType === "TYPING") {
-      if (parsed.data.status) {
-        dispatch(addTyping(parsed.data));
-      } else {
-        dispatch(rmTyping(parsed.data));
-      }
-    } else if (resType === "ROLE_EDIT") {
-      if (!parsed.data.userIDs.includes(userID)) {
-        deleteChannel(parsed);
-        return;
-      }
-      // update role
-      dispatch(editRole(parsed.data));
-      // update users
-      dispatch(setUserChannel(parsed.data));
-      if (parseInt(parsed.data.channelID) === parseInt(channel.id)) {
-        // if cur channel changed, update it
-        dispatch(
-          setChannel({
-            id: channel.id,
-            name: channel.channelName,
-            roleID: parsed.data.roleID,
-          })
-        );
-      }
-    } else if (resType === "NAME_EDIT") {
-      dispatch(editName(parsed.data));
-    } else if (resType === "USER_EDIT") {
-      if (parsed.data.add) {
-        // Adding a user
-        dispatch(
-          addUserChannelUpdate({
-            channelID: parsed.data.channelID,
-            userID: parsed.data.editUserID,
-          })
-        );
-      } else {
-        // Remove a user
-        if (parseInt(parsed.data.editUserID) === parseInt(userID)) {
-          // If the user to remove is this user, delete the channel and unsub
-          deleteChannel(parsed);
-        } else {
-          // The user to remove is not this user, so just remove them from the list
-          dispatch(
-            removeUserChannelUpdate({
-              channelID: parsed.data.channelID,
-              userID: parsed.data.editUserID,
-            })
-          );
-        }
-      }
-    }
-  };
-
-  const deleteChannel = (parsed) => {
-    dispatch(
-      deleteChannelUpdate({
-        channelID: parsed.data.channelID,
-        serverID: parsed.data.serverID,
-      })
-    );
-    dispatch(deleteMessageChannelUpdate({ channelID: parsed.data.channelID }));
-    socket.removeChannelSub(parsed.data.channelID);
   };
 
   const handleAddChannelClick = () => {
@@ -364,3 +215,196 @@ function Channels({ setShowServerSettingsModal, socket }) {
 }
 
 export default Channels;
+
+function useServerSelect(
+  setCurChannels,
+  server,
+  setShowLeaveServerConfirm,
+  setShowServerDropdown,
+  dispatch,
+  token
+) {
+  // When a server is selected clear menus and fetch channels
+  useEffect(() => {
+    setShowLeaveServerConfirm(false);
+    setShowServerDropdown(false);
+
+    if (server && server.id) {
+      dispatch(
+        fetchChannelsForServer({
+          token: token,
+          serverID: server.id,
+        })
+      );
+    } else {
+      setCurChannels([]);
+    }
+  }, [server]);
+}
+
+function useChannelsChange(socket, channels, dispatch, channel, token, userID) {
+  useEffect(() => {
+    // subscribe to all channels
+    for (const serverID in channels) {
+      const channelArr = channels[serverID];
+      for (const chan of channelArr) {
+        // if not already subscribed, subscribe
+        if (!(chan.channelID in socket.getChannelSubs())) {
+          socket.addChannelSub(chan.channelID, handleChannelData);
+        }
+        // fetch users for channel
+        dispatch(
+          fetchUsersForChannel({
+            token: token,
+            serverID: chan.serverID,
+            channelID: chan.channelID,
+          })
+        );
+      }
+    }
+  }, [channels]);
+
+  const handleChannelData = (res) => {
+    const parsed = JSON.parse(res.body);
+    const updateUserID = parsed.data.userID;
+    if (updateUserID === userID) {
+      // will be skipping updates from current user
+      return;
+    }
+    const resType = parsed.type;
+    if (resType === "MESSAGE_NEW") {
+      // add the new message
+      dispatch(addMessageUpdate({ message: parsed.data }));
+    } else if (resType === "MESSAGE_EDIT") {
+      const data = parsed.data;
+      dispatch(editMessageUpdate(data));
+    } else if (resType === "MESSAGE_DELETE") {
+      dispatch(
+        deleteMessageUpdate({
+          messageID: parsed.data.messageID,
+          channelID: parsed.data.channelID,
+        })
+      );
+    } else if (resType === "CHANNEL_DELETE") {
+      deleteChannel(parsed);
+    } else if (resType === "TYPING") {
+      if (parsed.data.status) {
+        dispatch(addTyping(parsed.data));
+      } else {
+        dispatch(rmTyping(parsed.data));
+      }
+    } else if (resType === "ROLE_EDIT") {
+      if (!parsed.data.userIDs.includes(userID)) {
+        deleteChannel(parsed);
+        return;
+      }
+      // update role
+      dispatch(editRole(parsed.data));
+      // update users
+      dispatch(setUserChannel(parsed.data));
+      if (parseInt(parsed.data.channelID) === parseInt(channel.id)) {
+        // if cur channel changed, update it
+        dispatch(
+          setChannel({
+            id: channel.id,
+            name: channel.channelName,
+            roleID: parsed.data.roleID,
+          })
+        );
+      }
+    } else if (resType === "NAME_EDIT") {
+      dispatch(editName(parsed.data));
+    } else if (resType === "USER_EDIT") {
+      if (parsed.data.add) {
+        // Adding a user
+        dispatch(
+          addUserChannelUpdate({
+            channelID: parsed.data.channelID,
+            userID: parsed.data.editUserID,
+          })
+        );
+      } else {
+        // Remove a user
+        if (parseInt(parsed.data.editUserID) === parseInt(userID)) {
+          // If the user to remove is this user, delete the channel and unsub
+          deleteChannel(parsed);
+        } else {
+          // The user to remove is not this user, so just remove them from the list
+          dispatch(
+            removeUserChannelUpdate({
+              channelID: parsed.data.channelID,
+              userID: parsed.data.editUserID,
+            })
+          );
+        }
+      }
+    }
+  };
+
+  const deleteChannel = (parsed) => {
+    // remove the channel from channels
+    dispatch(
+      deleteChannelUpdate({
+        channelID: parsed.data.channelID,
+        serverID: parsed.data.serverID,
+      })
+    );
+    // remove the channel from UserChannels
+    dispatch(clearUserChannel({ channelID: parsed.data.channelID }));
+    // remove the channel from message
+    dispatch(deleteMessageChannelUpdate({ channelID: parsed.data.channelID }));
+    socket.removeChannelSub(parsed.data.channelID);
+  };
+}
+
+function useCurrentServerChannelsChange(
+  server,
+  channels,
+  channel,
+  setCurChannels,
+  dispatch
+) {
+  // if channels[serverID] changes update the local channels list
+  useEffect(() => {
+    if (server && server.id && channels[server.id]) {
+      setCurChannels(channels[server.id]);
+      // if the changed channel is the current channel, update it
+      if (channel && channel.name) {
+        const curChannel = channels[server.id].find(
+          (chan) => chan.channelID == channel.id
+        );
+        if (curChannel && curChannel.channelName !== channel.name) {
+          dispatch(
+            setChannel({
+              id: curChannel.channelID,
+              name: curChannel.channelName,
+              roleID: curChannel.roleID,
+            })
+          );
+        }
+      }
+
+      // if the current channel is in the server continue, otherwise select the first channel
+      if (
+        channel.id &&
+        channels[server.id].find(
+          (chan) => parseInt(chan.channelID) === parseInt(channel.id)
+        )
+      ) {
+        return;
+      }
+      const firstChannel = channels[server.id][0];
+      if (firstChannel) {
+        dispatch(
+          setChannel({
+            id: firstChannel.channelID,
+            name: firstChannel.channelName,
+            roleID: firstChannel.roleID,
+          })
+        );
+      } else {
+        dispatch(setChannel({ id: null, name: null, roleID: null }));
+      }
+    }
+  }, [channels[server.id]]);
+}

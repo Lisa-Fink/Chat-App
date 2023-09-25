@@ -28,14 +28,29 @@ function Servers({
 }) {
   const dispatch = useDispatch();
   const servers = useSelector((state) => state.servers.data);
-  const channels = useSelector((state) => state.channels.byServerID);
-  const serversStatus = useSelector((state) => state.servers.status);
-  const lastServerID = useSelector((state) => state.servers.lastID);
   const { token, userID } = useSelector((state) => state.auth);
+  const channels = useSelector((state) => state.channels.byServerID);
+  const lastServerID = useSelector((state) => state.servers.lastID);
+  const serversStatus = useSelector((state) => state.servers.status);
   const serverSub = useRef(false);
 
   const [showServerDetails, setShowServerDetails] = useState(0);
   const [showAddServerModal, setShowAddServerModal] = useState(false);
+
+  useFetchServersAtLogin(dispatch, serversStatus, token);
+
+  // fetches all channels and users in servers the first time Servers changes
+  useServersChange(
+    servers,
+    serversStatus,
+    serverSub,
+    socket,
+    dispatch,
+    userID,
+    channels,
+    lastServerID,
+    token
+  );
 
   const handleServerClick = (serverID, serverName, roleID) => {
     // set current server
@@ -77,13 +92,83 @@ function Servers({
     return serverDetails;
   };
 
+  const thumbnails = servers.map((server) => {
+    return (
+      <li key={server.serverID}>
+        <button
+          className="server-thumbnail"
+          id={server.serverID}
+          onClick={() =>
+            handleServerClick(
+              server.serverID,
+              server.serverName,
+              server.roleID,
+              server.serverDescription,
+              server.serverImageUrl
+            )
+          }
+          onMouseEnter={() => handleServerHover(server.serverID)}
+          onMouseLeave={handleServerHoverExit}
+        >
+          {server.serverImageUrl !== null ? (
+            <img className="image-thumbnail" src={server.serverImageUrl} />
+          ) : (
+            server.serverName.substring(0, 1)
+          )}
+        </button>
+        {showServerDetails === server.serverID &&
+          detailsDiv(server.serverID, server.serverName)}
+      </li>
+    );
+  });
+
+  return (
+    <ul className="servers">
+      {thumbnails}
+      <li>
+        <button
+          id="new"
+          className="server-thumbnail add-thumbnail"
+          onMouseEnter={() => handleServerHover("new")}
+          onMouseLeave={handleServerHoverExit}
+          onClick={() => setShowAddServerModal(true)}
+        >
+          +
+        </button>
+        {showServerDetails === "new" && detailsDiv("new", "New Server")}
+      </li>
+      {showAddServerModal && (
+        <AddServerModal closeModal={() => setShowAddServerModal(false)} />
+      )}
+      {showSeverSettingsModal && (
+        <ServerSettingsModal
+          closeModal={() => setShowServerSettingsModal(false)}
+        />
+      )}
+    </ul>
+  );
+}
+
+function useFetchServersAtLogin(dispatch, serversStatus, token) {
   // fetches the users servers after login
   useEffect(() => {
     if (serversStatus === "idle") {
       dispatch(fetchServers(token));
     }
   }, []);
+}
 
+function useServersChange(
+  servers,
+  serversStatus,
+  serverSub,
+  socket,
+  dispatch,
+  userID,
+  channels,
+  lastServerID,
+  token
+) {
   useEffect(() => {
     if (!serverSub.current && serversStatus === "succeeded") {
       // subscribe to servers the first time servers is set
@@ -122,6 +207,13 @@ function Servers({
       // fetch all channels for server
       dispatch(
         fetchChannelsForServer({ token: token, serverID: lastServer.serverID })
+      );
+      // fetch all users for each server
+      dispatch(
+        fetchUsersForServer({
+          token: token,
+          serverID: lastServer.serverID,
+        })
       );
       // set current server
       dispatch(
@@ -200,62 +292,6 @@ function Servers({
       );
     }
   };
-
-  const thumbnails = servers.map((server) => {
-    return (
-      <li key={server.serverID}>
-        <button
-          className="server-thumbnail"
-          id={server.serverID}
-          onClick={() =>
-            handleServerClick(
-              server.serverID,
-              server.serverName,
-              server.roleID,
-              server.serverDescription,
-              server.serverImageUrl
-            )
-          }
-          onMouseEnter={() => handleServerHover(server.serverID)}
-          onMouseLeave={handleServerHoverExit}
-        >
-          {server.serverImageUrl !== null ? (
-            <img className="image-thumbnail" src={server.serverImageUrl} />
-          ) : (
-            server.serverName.substring(0, 1)
-          )}
-        </button>
-        {showServerDetails === server.serverID &&
-          detailsDiv(server.serverID, server.serverName)}
-      </li>
-    );
-  });
-
-  return (
-    <ul className="servers">
-      {thumbnails}
-      <li>
-        <button
-          id="new"
-          className="server-thumbnail add-thumbnail"
-          onMouseEnter={() => handleServerHover("new")}
-          onMouseLeave={handleServerHoverExit}
-          onClick={() => setShowAddServerModal(true)}
-        >
-          +
-        </button>
-        {showServerDetails === "new" && detailsDiv("new", "New Server")}
-      </li>
-      {showAddServerModal && (
-        <AddServerModal closeModal={() => setShowAddServerModal(false)} />
-      )}
-      {showSeverSettingsModal && (
-        <ServerSettingsModal
-          closeModal={() => setShowServerSettingsModal(false)}
-        />
-      )}
-    </ul>
-  );
 }
 
 export default Servers;
