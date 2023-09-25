@@ -1,9 +1,6 @@
 package com.example.chatappserver.websocket.service;
 
-import com.example.chatappserver.websocket.model.MessageBroadcast;
-import com.example.chatappserver.websocket.model.MessageType;
-import com.example.chatappserver.websocket.model.ServerDeleteData;
-import com.example.chatappserver.websocket.model.UserServerData;
+import com.example.chatappserver.websocket.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -27,9 +24,10 @@ public class ServerWebSocketService {
         messaging.convertAndSend(destination, messageBroadcast);
     }
 
-    public void sendServerUserLeaveToSubscribers(int serverID, int userID) {
+    public void sendServerUserLeaveToSubscribers(int serverID, int delUserID,
+                                                    int userID) {
         String destination = "/topic/servers/" + serverID;
-        ServerDeleteData data = new ServerDeleteData(serverID, userID);
+        ServerDeleteUserData data = new ServerDeleteUserData(serverID, delUserID, userID);
         MessageBroadcast messageBroadcast = new MessageBroadcast(
                 MessageType.SERVER_DELETE_USER, data);
         messaging.convertAndSend(destination, messageBroadcast);

@@ -158,7 +158,8 @@ public class ServersController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         serversDao.deleteUserServer(serverID, userID);
-        serverWebSocketService.sendServerUserLeaveToSubscribers(serverID, userID);
+        serverWebSocketService.sendServerUserLeaveToSubscribers(serverID, userID,
+                user.getUserId());
         return ResponseEntity.ok().build();
     }
 }
