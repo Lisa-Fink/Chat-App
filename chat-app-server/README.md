@@ -85,7 +85,7 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 - `POST /invites`: Create an invite.
   - Request:
   ```json
-  { "serverID": 1, "expirationTime": "2199-08-17T14:30:00.000Z" }
+  { "serverID": 1 }
   ```
   - Response:
   ```json
@@ -111,7 +111,7 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
   {
     "serverID": 1,
     "inviteCode": "11911010385761221692637972572",
-    "expirationTime": "2199-08-17"
+    "createdDate": "2199-08-17"
   }
   ```
 
