@@ -5,22 +5,17 @@ public class Invite {
     private int inviteID;
     private int serverID;
     private String inviteCode;
-    private Date expirationTime;
+    private Date createdDate;
 
-    public Invite(int inviteID, int serverID, String inviteCode, Date expirationTime) {
-        this.inviteID = inviteID;
-        this.serverID = serverID;
-        this.inviteCode = inviteCode;
-        this.expirationTime = expirationTime;
-    }
+
 
     public Invite() {
     }
 
-    public Invite(int serverID, String inviteCode, Date expirationTime) {
+    public Invite(int serverID, String inviteCode, Date createdDate) {
         this.serverID = serverID;
         this.inviteCode = inviteCode;
-        this.expirationTime = expirationTime;
+        this.createdDate = createdDate;
     }
 
     public int getInviteID() {
@@ -47,11 +42,11 @@ public class Invite {
         this.inviteCode = inviteCode;
     }
 
-    public Date getExpirationTime() {
-        return expirationTime;
+    public Date getCreatedDate() {
+        return createdDate;
     }
 
-    public void setExpirationTime(Date expirationTime) {
-        this.expirationTime = expirationTime;
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
     }
 }
