@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { updatePassword, updateImage } from "../redux/authSlice";
 import "../styles/modal.css";
+import { updateUserImage } from "../redux/usersSlice";
 
 function EditModal({ closeModal }) {
   const [password, setPassword] = useState("");
@@ -43,6 +44,7 @@ function EditModal({ closeModal }) {
     // check if image changed before sending req
     if (image !== auth.userImageUrl) {
       dispatch(updateImage(image));
+      dispatch(updateUserImage({ userID: auth.userID, userImageUrl: image }));
     }
   };
 

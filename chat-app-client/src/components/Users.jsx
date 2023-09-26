@@ -5,6 +5,7 @@ import "../styles/Users.css";
 import {
   addUserServerChannelUpdate,
   removeUserServerChannelUpdate,
+  updateUserImage,
   userChannelRoleUpdate,
 } from "../redux/usersSlice";
 
@@ -18,7 +19,7 @@ function Users({ socket }) {
   const newID = useSelector((state) => state.users.newID);
   const channelsByServerID = useSelector((state) => state.channels.byServerID);
 
-  useSubToUsers(usersByID, auth, socket);
+  useSubToUsers(usersByID, auth, socket, dispatch);
   const curUserChannels = useCurUserChannels(
     usersStatus,
     channel,
@@ -93,7 +94,7 @@ function Users({ socket }) {
 
 export default Users;
 
-function useSubToUsers(usersByID, auth, socket) {
+function useSubToUsers(usersByID, auth, socket, dispatch) {
   useEffect(() => {
     // if usersByID changes, make sure to sub to all users
     for (const userID in usersByID) {
@@ -103,11 +104,19 @@ function useSubToUsers(usersByID, auth, socket) {
 
   const handleOtherUserData = (res) => {
     const parsed = JSON.parse(res.body);
-    const otherUserID = parsed.data.userID;
-    if (otherUserID === auth.userID) {
+    const senderUserID = parsed.data.userID;
+    if (senderUserID === auth.userID) {
       return;
     }
     const resType = parsed.type;
+    if (resType === "IMAGE_EDIT") {
+      dispatch(
+        updateUserImage({
+          userID: senderUserID,
+          userImageUrl: parsed.data.update,
+        })
+      );
+    }
   };
 }
 

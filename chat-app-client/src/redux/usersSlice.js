@@ -146,6 +146,10 @@ const usersSlice = createSlice({
       state.newID = null;
       state.status = "succeeded";
     },
+    updateUserImage: (state, action) => {
+      const { userID, userImageUrl } = action.payload;
+      state.dataByID[userID].userImageUrl = userImageUrl;
+    },
   },
   extraReducers(builder) {
     builder
@@ -426,5 +430,6 @@ export const {
   userServerRoleUpdate,
   userChannelRoleUpdate,
   currentUserServerRoleUpdate,
+  updateUserImage,
 } = usersSlice.actions;
 export default usersSlice.reducer;

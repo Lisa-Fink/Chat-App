@@ -27,7 +27,7 @@ const messagesSlice = createSlice({
         // don't edit the message if the channel messages were never fetched
         return;
       }
-      editMessageHelper(channelID, messageID, text);
+      editMessageHelper(channelID, messageID, text, state);
     },
     deleteMessageUpdate: (state, action) => {
       deleteMessageHelper(state, action);
@@ -92,7 +92,7 @@ const messagesSlice = createSlice({
         state.errorContext = null;
         // update the message
         const { channelID, messageID, text } = action.payload;
-        editMessageHelper(channelID, messageID, text);
+        editMessageHelper(channelID, messageID, text, state);
       })
       .addCase(deleteMessage.rejected, (state, action) => {
         state.status = "failed";
@@ -117,7 +117,7 @@ function deleteMessageHelper(state, action) {
   );
 }
 
-function editMessageHelper(channelID, messageID, text) {
+function editMessageHelper(channelID, messageID, text, state) {
   state.byChannelID[channelID] = state.byChannelID[channelID].map((mes) => {
     if (parseInt(mes.messageID) === parseInt(messageID)) {
       mes.text = text;
