@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.util.Random;
 
 
@@ -63,12 +64,18 @@ public class InvitesController {
         if (!authService.userInServer(user.getUserId(), invite.getServerID())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+        // If the user already created an invite today, return it
+        String inviteCode = invitesDao.getInviteForUserServerToday(user.getUserId(), invite.getServerID());
+        if (inviteCode != null) {
+            return ResponseEntity.ok(inviteCode);
+        }
+        invite.setCreatedDate(new Date(System.currentTimeMillis()));
         boolean success = false;
         invite.setInviteCode(createUniqueCode());
         // If the generated code isn't unique, will create a new one until it is
         while (!success) {
             try {
-                invitesDao.createInvite(invite);
+                invitesDao.createInvite(invite, user.getUserId());
                 success = true;
             } catch (DataIntegrityViolationException e) {
                 invite.setInviteCode(createUniqueCode());
