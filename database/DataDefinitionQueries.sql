@@ -125,7 +125,8 @@ CREATE TABLE Invites (
     inviteID INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     serverID INT NOT NULL,
     inviteCode VARCHAR(255) NOT NULL UNIQUE,
-    expirationTime DATETIME NOT NULL,
+    createdDay DATE NOT NULL,
+    userID INT NOT NULL,
     FOREIGN KEY (serverID) REFERENCES Servers(serverID) ON DELETE CASCADE
 );
 
