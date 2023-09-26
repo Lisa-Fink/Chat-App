@@ -5,10 +5,12 @@ import {
   MdOutlineExpandMore,
   MdClose,
   MdCheck,
+  MdCheckCircleOutline,
   MdCancel,
+  MdOutlineContentCopy,
 } from "react-icons/md";
 import { AiOutlinePlusCircle } from "react-icons/ai";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setChannel, setServer } from "../redux/currentSlice";
 import {
@@ -53,6 +55,9 @@ function Channels({ setShowServerSettingsModal, socket }) {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const codeRef = useRef(null);
+  const [codeStatus, setCodeStatus] = useCodeStatus(codeRef);
+
   useServerSelect(
     setCurChannels,
     server,
@@ -90,19 +95,6 @@ function Channels({ setShowServerSettingsModal, socket }) {
     setShowAddChannelModal(true);
   };
 
-  const channelList = curChannels.map(({ channelID, channelName, roleID }) => (
-    <li key={channelID}>
-      <button
-        data-id={channelID}
-        data-name={channelName}
-        data-roleid={roleID}
-        onClick={handleChannelClick}
-      >
-        # {channelName}
-      </button>
-    </li>
-  ));
-
   const handleServerSettingsClick = () => {
     setShowServerSettingsModal(true);
     setShowServerDropdown(false);
@@ -133,6 +125,113 @@ function Channels({ setShowServerSettingsModal, socket }) {
     setShowServerDropdown(false);
   };
 
+  const handleInviteClick = async () => {
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/invites`;
+
+    const reqBody = { serverID: server.id };
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(reqBody),
+      });
+      if (res.ok) {
+        const data = await res.text();
+        handleInviteData(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleInviteData = (data) => {
+    navigator.clipboard.writeText(data).then(
+      () => {
+        setCodeStatus(`Copied invite code ${data} to clipboard!`);
+      },
+      (err) => {
+        console.error("Failed to copy invite code: ", err);
+      }
+    );
+  };
+
+  const channelList = curChannels.map(({ channelID, channelName, roleID }) => (
+    <li key={channelID}>
+      <button
+        data-id={channelID}
+        data-name={channelName}
+        data-roleid={roleID}
+        onClick={handleChannelClick}
+      >
+        # {channelName}
+      </button>
+    </li>
+  ));
+
+  const serverDropDownUl = (
+    <ul className="server-dropdown">
+      <li>
+        <button onClick={handleInviteClick}>
+          Get Invite <MdOutlineContentCopy />
+        </button>
+        {codeStatus && (
+          <div ref={codeRef} className="code-status">
+            <MdCheckCircleOutline /> {codeStatus}
+          </div>
+        )}
+      </li>
+      {/* if the user is an admin+ show edit option */}
+      {server.roleID <= 2 && (
+        <li>
+          <button onClick={handleServerSettingsClick}>
+            Edit Server <MdSettings />
+          </button>
+        </li>
+      )}
+      {/* can delete if creator otherwise can
+               leave server (creator can't leave) */}
+      {server.roleID === 1 ? (
+        <li>
+          <button onClick={() => setShowDeleteConfirm(true)}>
+            Delete Server
+          </button>
+          {showDeleteConfirm && (
+            <div>
+              Confirm
+              <button onClick={handleConfirmDelete}>
+                <MdCheck />
+              </button>
+              <button onClick={() => setShowDeleteConfirm(false)}>
+                <MdCancel />
+              </button>
+            </div>
+          )}
+        </li>
+      ) : (
+        <li>
+          <button onClick={() => setShowLeaveServerConfirm(true)}>
+            Leave Server
+          </button>
+          {showLeaveServerConfirm && (
+            <div>
+              Confirm{" "}
+              <button onClick={handleConfirmLeave}>
+                <MdCheck />
+              </button>
+              <button onClick={() => setShowLeaveServerConfirm(false)}>
+                <MdCancel />
+              </button>
+            </div>
+          )}
+        </li>
+      )}
+    </ul>
+  );
+
   return (
     <>
       <div className="channels thin-scroll">
@@ -146,55 +245,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
         </div>
         <div className="channel-list-container">
           <ul>{channelList}</ul>
-          {showServerDropdown && (
-            <ul className="server-dropdown">
-              {/* if the user is an admin+ show edit option */}
-              {server.roleID <= 2 && (
-                <li>
-                  <button onClick={handleServerSettingsClick}>
-                    Edit Server <MdSettings />
-                  </button>
-                </li>
-              )}
-              {/* can delete if creator otherwise can
-               leave server (creator can't leave) */}
-              {server.roleID === 1 ? (
-                <li>
-                  <button onClick={() => setShowDeleteConfirm(true)}>
-                    Delete Server
-                  </button>
-                  {showDeleteConfirm && (
-                    <div>
-                      Confirm
-                      <button onClick={handleConfirmDelete}>
-                        <MdCheck />
-                      </button>
-                      <button onClick={() => setShowDeleteConfirm(false)}>
-                        <MdCancel />
-                      </button>
-                    </div>
-                  )}
-                </li>
-              ) : (
-                <li>
-                  <button onClick={() => setShowLeaveServerConfirm(true)}>
-                    Leave Server
-                  </button>
-                  {showLeaveServerConfirm && (
-                    <div>
-                      Confirm{" "}
-                      <button onClick={handleConfirmLeave}>
-                        <MdCheck />
-                      </button>
-                      <button onClick={() => setShowLeaveServerConfirm(false)}>
-                        <MdCancel />
-                      </button>
-                    </div>
-                  )}
-                </li>
-              )}
-            </ul>
-          )}
+          {showServerDropdown && serverDropDownUl}
         </div>
       </div>
       <div className="server-menu">
@@ -406,4 +457,20 @@ function useCurrentServerChannelsChange(
       }
     }
   }, [channels[server.id]]);
+}
+
+function useCodeStatus(codeRef) {
+  const [codeStatus, setCodeStatus] = useState("");
+  useEffect(() => {
+    if (codeStatus !== "") {
+      setTimeout(() => {
+        if (codeRef.current) {
+          codeRef.current.style.opacity = 0;
+
+          setTimeout(() => setCodeStatus(""), 600);
+        }
+      }, 1000);
+    }
+  }, [codeStatus]);
+  return [codeStatus, setCodeStatus];
 }
