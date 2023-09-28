@@ -7,10 +7,16 @@ class WebSocketManager {
     this.socket = null;
   }
 
-  activate(userID, handleUserData) {
+  activate(userID, handleUserData, token) {
     const url = "ws://localhost:8080/ws";
+
+    const headers = {
+      Authorization: token,
+    };
+
     this.socket = new Client({
       brokerURL: url,
+      connectHeaders: headers,
       onConnect: () => {
         this.socket.subscribe("/topic/users/" + userID, handleUserData);
       },
@@ -21,6 +27,7 @@ class WebSocketManager {
 
   deactivate() {
     this.active = false;
+    this.subscriptions = { channels: {}, servers: {}, users: {} };
     this.socket.deactivate();
   }
 

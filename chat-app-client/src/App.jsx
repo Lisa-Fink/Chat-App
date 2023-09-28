@@ -30,7 +30,7 @@ function App() {
   const socket = useRef(new WebSocketManager());
   useEffect(() => {
     if (auth.isAuthenticated && !socket.current.isActive()) {
-      socket.current.activate(auth.userID, handleUserData);
+      socket.current.activate(auth.userID, handleUserData, auth.token);
     }
     if (!auth.isAuthenticated && socket.current.isActive()) {
       socket.current.deactivate();
