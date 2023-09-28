@@ -31,6 +31,7 @@ function MessageInput({ socket }) {
     if (e.key === "Enter" && !e.shiftKey && message.trim().length > 0) {
       e.preventDefault();
       submitMessage();
+      endTyping();
     } else {
       if (!isTyping.current) {
         // if starting to type (hitting a key but not submitting with enter),
@@ -47,10 +48,14 @@ function MessageInput({ socket }) {
     if (!isTyping.current) return;
     const now = Date.now();
     if (now - isTyping.current >= 1000) {
-      isTyping.current = false;
-      if (typingTimeout.current) clearTimeout(typingTimeout.current);
-      socket.current.publishTypingEnd(userID, channel.id);
+      endTyping();
     }
+  };
+
+  const endTyping = () => {
+    isTyping.current = false;
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    socket.current.publishTypingEnd(userID, channel.id);
   };
 
   const submitMessage = () => {
