@@ -18,7 +18,7 @@ class WebSocketManager {
       brokerURL: url,
       connectHeaders: headers,
       onConnect: () => {
-        this.socket.subscribe("/topic/users/" + userID, handleUserData);
+        this.socket.subscribe(`/user/topic/notifications`, handleUserData);
       },
     });
     this.socket.activate();

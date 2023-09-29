@@ -17,6 +17,7 @@ import {
   fetchUsersForServer,
   removeUserServerUpdate,
   setUserChannel,
+  updateUserImage,
   userServerRoleUpdate,
 } from "../redux/usersSlice";
 import {
@@ -346,6 +347,13 @@ function useServersChange(
           })
         );
       }
+    } else if (resType === "USER_IMAGE_EDIT") {
+      dispatch(
+        updateUserImage({
+          userID: parsed.data.userID,
+          userImageUrl: parsed.data.update,
+        })
+      );
     }
   };
 

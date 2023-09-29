@@ -96,10 +96,12 @@ public class ChannelWebSocketService {
         // get channel data
         Channel channel = channelsDao.getChannelByID(serverID, userID, channelID);
 
-        String destination = "/topic/users/" + userID;
+        String destination = "/topic/notifications";
         MessageBroadcast messageBroadcast = new MessageBroadcast(
                 MessageType.CHANNEL_NEW, channel);
-        messaging.convertAndSend(destination, messageBroadcast);
+//        messaging.convertAndSend(destination, messageBroadcast);
+        System.out.println("sending " + userID);
+        messaging.convertAndSendToUser(String.valueOf(userID), destination, messageBroadcast);
     }
 
     public void sendRolesNewChannel(int userID, Channel channel,

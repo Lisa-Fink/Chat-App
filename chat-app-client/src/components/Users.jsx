@@ -5,21 +5,18 @@ import "../styles/Users.css";
 import {
   addUserServerChannelUpdate,
   removeUserServerChannelUpdate,
-  updateUserImage,
   userChannelRoleUpdate,
 } from "../redux/usersSlice";
 
-function Users({ socket }) {
+function Users() {
   const dispatch = useDispatch();
   const { server, channel } = useSelector((state) => state.current);
-  const auth = useSelector((state) => state.auth);
   const userChannels = useSelector((state) => state.users.byChannelID);
   const usersByID = useSelector((state) => state.users.dataByID);
   const usersStatus = useSelector((state) => state.users.status);
   const newID = useSelector((state) => state.users.newID);
   const channelsByServerID = useSelector((state) => state.channels.byServerID);
 
-  useSubToUsers(usersByID, auth, socket, dispatch);
   const curUserChannels = useCurUserChannels(
     usersStatus,
     channel,
@@ -93,32 +90,6 @@ function Users({ socket }) {
 }
 
 export default Users;
-
-function useSubToUsers(usersByID, auth, socket, dispatch) {
-  useEffect(() => {
-    // if usersByID changes, make sure to sub to all users
-    for (const userID in usersByID) {
-      socket.current.addUserSub(userID, handleOtherUserData);
-    }
-  }, [usersByID]);
-
-  const handleOtherUserData = (res) => {
-    const parsed = JSON.parse(res.body);
-    const senderUserID = parsed.data.userID;
-    if (senderUserID === auth.userID) {
-      return;
-    }
-    const resType = parsed.type;
-    if (resType === "IMAGE_EDIT") {
-      dispatch(
-        updateUserImage({
-          userID: senderUserID,
-          userImageUrl: parsed.data.update,
-        })
-      );
-    }
-  };
-}
 
 function useCurUserChannels(usersStatus, channel, userChannels) {
   const [curUserChannels, setCurUserChannels] = useState([]);

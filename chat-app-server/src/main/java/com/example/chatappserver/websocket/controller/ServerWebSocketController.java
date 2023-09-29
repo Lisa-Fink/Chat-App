@@ -1,5 +1,6 @@
 package com.example.chatappserver.websocket.controller;
 
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 
@@ -10,4 +11,5 @@ public class ServerWebSocketController {
 
     @SubscribeMapping("servers/{serverID}/role/{roleID}")
     public void subscribeServerRole() {};
+
 }

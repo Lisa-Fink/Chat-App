@@ -3,9 +3,12 @@ package com.example.chatappserver.websocket.service;
 import com.example.chatappserver.websocket.model.channel.MessageBroadcast;
 import com.example.chatappserver.websocket.model.MessageType;
 import com.example.chatappserver.websocket.model.server.*;
+import com.example.chatappserver.websocket.model.user.UserUpdateData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ServerWebSocketService {
@@ -78,5 +81,16 @@ public class ServerWebSocketService {
         MessageBroadcast messageBroadcast = new MessageBroadcast(
                 MessageType.ROLE_EDIT, data);
         messaging.convertAndSend(destination, messageBroadcast);
+    }
+
+    public void sendUserImageUpdateToServers(int userID, String userImageUrl,
+                                             List<Integer> serverIDs) {
+        UserUpdateData data = new UserUpdateData(userID, userImageUrl);
+        MessageBroadcast messageBroadcast = new MessageBroadcast(
+                MessageType.USER_IMAGE_EDIT, data);
+        for (Integer serverID: serverIDs) {
+            String destination = "/topic/servers/" + serverID;
+            messaging.convertAndSend(destination, messageBroadcast);
+        }
     }
 }

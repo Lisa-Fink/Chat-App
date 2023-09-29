@@ -36,14 +36,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
                     String token = accessor.getFirstNativeHeader("Authorization");
                     if (jwtTokenProvider.validateToken(token)) {
-                        System.out.println("details " + jwtTokenProvider.getUsername(token));
                         Authentication user = new UsernamePasswordAuthenticationToken(
-                                jwtTokenProvider.getUserID(token), null);
+                                String.valueOf(jwtTokenProvider.getUserID(token)), null);
                         accessor.setUser(user);
-                        System.out.println(user);
                     }
-
-
                 }
                 return message;
             }
