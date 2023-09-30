@@ -5,6 +5,7 @@ import messagesReducer from "./messagesSlice";
 import usersReducer from "./usersSlice";
 import currentReducer from "./currentSlice";
 import authReducer from "./authSlice";
+import emojiReducer from "./emojiSlice";
 
 const combinedReducer = combineReducers({
   servers: serversReducer,
@@ -13,6 +14,7 @@ const combinedReducer = combineReducers({
   users: usersReducer,
   current: currentReducer,
   auth: authReducer,
+  emojis: emojiReducer,
 });
 
 const rootReducer = (state, action) => {
