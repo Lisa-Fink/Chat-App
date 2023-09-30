@@ -5,6 +5,7 @@ import {
   fetchMessagesForChannel,
   editMessage,
   deleteMessage,
+  addReaction,
 } from "../redux/messagesSlice";
 import {
   MdEdit,
@@ -13,6 +14,7 @@ import {
   MdCheck,
   MdCancel,
 } from "react-icons/md";
+import EmojiMenu from "./modals/EmojiMenu";
 
 function Chat() {
   const dispatch = useDispatch();
@@ -20,9 +22,11 @@ function Chat() {
   const { token, userID } = useSelector((state) => state.auth);
   const messages = useSelector((state) => state.messages.byChannelID);
   const messagesStatus = useSelector((state) => state.messages.status);
+  const state = useSelector((state) => state.messages.updateChannelID);
   const usersStatus = useSelector((state) => state.users.status);
   const users = useSelector((state) => state.users.dataByID);
   const usersInChannel = useSelector((state) => state.users.byChannelID);
+  const emojis = useSelector((state) => state.emojis.emojis);
 
   const [curMessages, setCurMessages] = useState(
     channel.id in messages ? messages[channel.id] : []
@@ -36,7 +40,19 @@ function Chat() {
 
   const [confirmDelID, setConfirmDelID] = useState(null);
 
+  const [showEmojiMenu, setShowEmojiMenu] = useState(0);
+
   const chatRef = useRef();
+  const closeEmojisOnClick = () => {
+    if (showEmojiMenu) setShowEmojiMenu(null);
+  };
+  useEffect(() => {
+    document.addEventListener("mousedown", closeEmojisOnClick);
+
+    return () => {
+      document.removeEventListener("mousedown", closeEmojisOnClick);
+    };
+  }, []);
 
   // if the channel changes, fetch the messages for the new channel
   useEffect(() => {
@@ -57,6 +73,15 @@ function Chat() {
     if (!messages[channel.id]) return;
     setCurMessages(messages[channel.id]);
   }, [messages[channel.id]]);
+  // If a new reaction is added to the channel update the messages
+  useEffect(() => {
+    if (
+      (messagesStatus === "addReaction" || messagesStatus === "rmReaction") &&
+      state.updateChannelID === channel.id
+    ) {
+      setCurMessages(messages[channel.id]);
+    }
+  }, [messagesStatus]);
 
   useLayoutEffect(() => {
     // Always scroll to the bottom of the chat container
@@ -115,6 +140,154 @@ function Chat() {
     setConfirmDelID(null);
   };
 
+  const handleMessageMouseEnter = (messageID) => {
+    if (showEmojiMenu !== messageID) {
+      setShowOptions(messageID);
+    }
+  };
+
+  const handleEmojiSelectClick = (messageID) => {
+    if (showOptions === messageID) {
+      setShowOptions(null);
+    }
+    setShowEmojiMenu(messageID);
+  };
+
+  const handleEmojiClick = (emojiID, messageID) => {
+    setShowEmojiMenu(null);
+    dispatch(
+      addReaction({
+        token: token,
+        userID: userID,
+        messageID: messageID,
+        emojiID: emojiID,
+        channelID: channel.id,
+      })
+    );
+  };
+
+  const userThumbnail = (message, isUnknown) =>
+    isUnknown ? (
+      <div className="message-thumbnail">U</div>
+    ) : users[message.userID].userImageUrl ? (
+      <img
+        className="message-thumbnail"
+        src={users[message.userID].userImageUrl}
+      />
+    ) : (
+      <div className="message-thumbnail">
+        {users[message.userID].username.substring(0, 1).toUpperCase()}
+      </div>
+    );
+
+  const reactions = (reactionMap) => {
+    if (!reactionMap) return;
+    const keys = Object.keys(reactionMap);
+    return keys.map((emojiID) => {
+      const emojiCode = getEmojiCode(emojiID);
+      if (emojiCode) {
+        return (
+          <button key={emojiID} className="active-btn message-btn reaction-btn">
+            {emojiCode} {reactionMap[emojiID].length}
+          </button>
+        );
+      }
+    });
+  };
+
+  const messageData = (message, isUnknown) => (
+    <div>
+      <div className="message-data">
+        <div className="message-username">
+          {isUnknown ? "Unknown User" : users[message.userID].username}
+        </div>
+        <div className="message-time">
+          {new Date(message.time).toLocaleString()}
+        </div>
+        {message.edited && <div className="edited">(edited)</div>}
+      </div>
+      {editID !== message.messageID ? (
+        <p>{message.text}</p>
+      ) : (
+        <div className="edit-div">
+          <textarea
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+          />
+          <div>
+            <button
+              className="message-btn active-btn"
+              onClick={handleEditConfirm}
+            >
+              <MdCheck />
+            </button>
+            <button className="message-btn active-btn" onClick={clearEditState}>
+              <MdCancel />
+            </button>
+          </div>
+        </div>
+      )}
+      {reactions(message.reactions)}
+    </div>
+  );
+
+  const messageHoverOptions = (message) =>
+    showOptions === message.messageID && (
+      <div className="message-options">
+        <button
+          className="message-btn active-btn"
+          onClick={() => handleEmojiSelectClick(message.messageID)}
+        >
+          <MdAddReaction />
+        </button>
+
+        {message.userID === userID && (
+          <>
+            <button
+              className="message-btn active-btn"
+              onClick={() => handleEditClick(message.messageID, message.text)}
+            >
+              <MdEdit />
+            </button>
+            <button
+              className="message-btn active-btn"
+              onClick={() => handleDeleteClick(message.messageID)}
+            >
+              <MdDelete />
+            </button>
+          </>
+        )}
+      </div>
+    );
+
+  const confirmDelete = (message) =>
+    confirmDelID === message.messageID && (
+      <div className="message-btn confirm-del">
+        Confirm Delete
+        <div>
+          <button
+            className="message-btn active-btn"
+            onClick={handleDeleteConfirm}
+          >
+            <MdCheck />
+          </button>
+          <button
+            className="message-btn active-btn"
+            onClick={() => setConfirmDelID(null)}
+          >
+            <MdCancel />
+          </button>
+        </div>
+      </div>
+    );
+
+  const getEmojiCode = (emojiId) => {
+    const found = emojis.find(
+      (em) => parseInt(em.emojiID) === parseInt(emojiId)
+    );
+    if (found) return found.emojiCode;
+  };
+
   const messageList = curMessages.map((message) => {
     const isUnknown =
       !message.userID ||
@@ -124,84 +297,19 @@ function Chat() {
       <li
         className="message"
         key={message.messageID}
-        onMouseEnter={() => setShowOptions(message.messageID)}
+        onMouseEnter={() => handleMessageMouseEnter(message.messageID)}
         onMouseLeave={() => setShowOptions(null)}
       >
-        {isUnknown ? (
-          <div className="message-thumbnail">U</div>
-        ) : users[message.userID].userImageUrl ? (
-          <img
-            className="message-thumbnail"
-            src={users[message.userID].userImageUrl}
+        {userThumbnail(message, isUnknown)}
+        {messageData(message, isUnknown)}
+        {showEmojiMenu === message.messageID && (
+          <EmojiMenu
+            addEmoji={handleEmojiClick}
+            messageID={message.messageID}
           />
-        ) : (
-          <div className="message-thumbnail">
-            {users[message.userID].username.substring(0, 1).toUpperCase()}
-          </div>
         )}
-        <div>
-          <div className="message-data">
-            <div className="message-username">
-              {isUnknown ? "Unknown User" : users[message.userID].username}
-            </div>
-            <div className="message-time">
-              {new Date(message.time).toLocaleString()}
-            </div>
-            {message.edited && <div className="edited">(edited)</div>}
-          </div>
-          {editID !== message.messageID ? (
-            <p>{message.text}</p>
-          ) : (
-            <div className="edit-div">
-              <textarea
-                value={editText}
-                onChange={(e) => setEditText(e.target.value)}
-              />
-              <div>
-                <button onClick={handleEditConfirm}>
-                  <MdCheck />
-                </button>
-                <button onClick={clearEditState}>
-                  <MdCancel />
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-        {showOptions === message.messageID && (
-          <div className="message-options">
-            <button>
-              <MdAddReaction />
-            </button>
-            {message.userID === userID && (
-              <>
-                <button
-                  onClick={() =>
-                    handleEditClick(message.messageID, message.text)
-                  }
-                >
-                  <MdEdit />
-                </button>
-                <button onClick={() => handleDeleteClick(message.messageID)}>
-                  <MdDelete />
-                </button>
-              </>
-            )}
-          </div>
-        )}
-        {confirmDelID === message.messageID && (
-          <div className="confirm-del">
-            Confirm Delete
-            <div>
-              <button onClick={handleDeleteConfirm}>
-                <MdCheck />
-              </button>
-              <button onClick={() => setConfirmDelID(null)}>
-                <MdCancel />
-              </button>
-            </div>
-          </div>
-        )}
+        {messageHoverOptions(message)}
+        {confirmDelete(message)}
       </li>
     );
   });
@@ -210,7 +318,7 @@ function Chat() {
     <div className="chat" ref={chatRef}>
       {server.id !== null &&
         channel.id !== null &&
-        messagesStatus === "succeeded" &&
+        messagesStatus !== "failed" &&
         usersStatus === "succeeded" && (
           <ul className="message-list">{messageList}</ul>
         )}

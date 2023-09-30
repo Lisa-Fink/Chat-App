@@ -65,6 +65,8 @@ const messagesSlice = createSlice({
         state.error = null;
         const { isNew, channelID, messages } = action.payload;
         if (isNew) state.byChannelID[channelID] = messages;
+
+        processReactions(messages);
       })
       .addCase(fetchMessagesForChannel.rejected, (state, action) => {
         state.status = "failed";
@@ -105,9 +107,51 @@ const messagesSlice = createSlice({
         state.errorContext = null;
         // remove the message
         deleteMessageHelper(state, action);
+      })
+      .addCase(addReaction.rejected, (state, action) => {
+        state.error = action.error.message;
+        state.errorContext = "addReaction";
+      })
+      .addCase(addReaction.fulfilled, (state, action) => {
+        if (!action.payload.isNew) return;
+
+        // add the reaction
+        const { reactionID, userID, messageID, emojiID, channelID } =
+          action.payload;
+        state.status = "addReaction";
+        state.updateChannelID = channelID;
+        state.error = null;
+        state.errorContext = null;
+
+        state.byChannelID[channelID].map((mes) => {
+          if (parseInt(mes.messageID) === parseInt(messageID)) {
+            if (!mes.reactions) mes.reactions = [];
+            if (!(emojiID in mes.reactions)) mes.reactions[emojiID] = [];
+            mes.reactions[emojiID].push([userID, reactionID]);
+          }
+        });
       });
   },
 });
+
+function processReactions(messages) {
+  if (!messages || !Array.isArray(messages)) return;
+  for (const message of messages) {
+    if (!message.reactions) continue;
+    const reactionArr = message.reactions;
+    const reactionMap = {}; // {emojiID: [[userID, reactionID], [userID...]]}
+    for (const reaction of reactionArr) {
+      if (!(reaction.reactionID in reactionMap)) {
+        reactionMap[reaction.reactionID] = [];
+      }
+      reactionMap[reaction.reactionID].push([
+        reaction.userID,
+        reaction.emojiID,
+      ]);
+    }
+    message.reactions = reactionMap;
+  }
+}
 
 function deleteMessageHelper(state, action) {
   const deleteID = action.payload.messageID;
@@ -126,6 +170,45 @@ function editMessageHelper(channelID, messageID, text, state) {
     return mes;
   });
 }
+
+export const addReaction = createAsyncThunk(
+  "messages/addReaction",
+  async ({ token, userID, emojiID, messageID, channelID }, { getState }) => {
+    let isNew = true;
+    // do nothing if the user already added the same reaction to the same message
+    const messagesInChannel = getState().messages.byChannelID[channelID];
+    const message =
+      messagesInChannel &&
+      messagesInChannel.find(
+        (mes) => parseInt(mes.messageID) === parseInt(messageID)
+      );
+    const reactions = message && message.reactions;
+    if (reactions && emojiID in reactions) {
+      for (const data of reactions[emojiID]) {
+        if (parseInt(data[0]) === parseInt(userID)) {
+          return { isNew: false };
+        }
+      }
+    }
+
+    const reaction = { userID, emojiID, messageID };
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/reactions`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(reaction),
+    });
+    if (!res.ok) {
+      throw new Error("Failed to add reaction");
+    }
+    const reactionID = await res.json();
+    return { isNew, reactionID, userID, emojiID, messageID, channelID };
+  }
+);
 
 export const fetchMessagesForChannel = createAsyncThunk(
   "messages/fetchMessagesForChannel",
