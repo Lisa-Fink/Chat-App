@@ -217,9 +217,14 @@ VALUES
 -- Emojis
 INSERT INTO Emojis (emojiCode, emojiName)
 VALUES
-    ('U+1F604', 'Smile'),
-    ('U+2764', 'Heart'),
-    ('U+1F389', 'Party');
+   ('😊', 'Happy'),
+   ('❤️', 'Love'),
+   ('😂', 'Laugh'),
+   ('👍', 'ThumbsUp'),
+   ('🙏', 'Prayer'),
+   ('😍', 'Admire'),
+   ('😎', 'Cool'),
+   ('🎉', 'Party');
 
 -- Reactions
 INSERT INTO Reactions (emojiID, userID, messageID)
