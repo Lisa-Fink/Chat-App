@@ -2,6 +2,7 @@ package com.example.chatappserver.websocket.service;
 
 import com.example.chatappserver.model.Channel;
 import com.example.chatappserver.model.Message;
+import com.example.chatappserver.model.ReactionRequest;
 import com.example.chatappserver.repository.ChannelsDao;
 import com.example.chatappserver.websocket.model.*;
 import com.example.chatappserver.websocket.model.channel.*;
@@ -124,5 +125,11 @@ public class ChannelWebSocketService {
         messaging.convertAndSend(destination, messageBroadcast);
     }
 
+    public void sendNewReactionToSubscribers(ReactionRequest reaction) {
+        String destination = "/topic/channels/" + reaction.getChannelID();
+        MessageBroadcast messageBroadcast = new MessageBroadcast(
+                MessageType.REACTION_NEW, reaction);
+        messaging.convertAndSend(destination, messageBroadcast);
+    }
 
 }

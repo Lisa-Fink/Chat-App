@@ -15,6 +15,7 @@ public enum MessageType {
     SERVER_DELETE_USER,
     DESCRIPTION_EDIT,
     IMAGE_EDIT,
-    USER_IMAGE_EDIT
+    USER_IMAGE_EDIT,
+    REACTION_NEW
 
 }

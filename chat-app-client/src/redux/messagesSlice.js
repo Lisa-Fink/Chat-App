@@ -53,6 +53,18 @@ const messagesSlice = createSlice({
         channelID
       ].filter((id) => parseInt(id) !== parseInt(userID));
     },
+    addReactionUpdate: (state, action) => {
+      const { reactionID, userID, messageID, emojiID, channelID } =
+        action.payload;
+      addReactionHelper(
+        reactionID,
+        userID,
+        messageID,
+        emojiID,
+        channelID,
+        state
+      );
+    },
   },
   extraReducers(builder) {
     builder
@@ -118,21 +130,38 @@ const messagesSlice = createSlice({
         // add the reaction
         const { reactionID, userID, messageID, emojiID, channelID } =
           action.payload;
-        state.status = "addReaction";
-        state.updateChannelID = channelID;
-        state.error = null;
-        state.errorContext = null;
-
-        state.byChannelID[channelID].map((mes) => {
-          if (parseInt(mes.messageID) === parseInt(messageID)) {
-            if (!mes.reactions) mes.reactions = [];
-            if (!(emojiID in mes.reactions)) mes.reactions[emojiID] = [];
-            mes.reactions[emojiID].push([userID, reactionID]);
-          }
-        });
+        addReactionHelper(
+          reactionID,
+          userID,
+          messageID,
+          emojiID,
+          channelID,
+          state
+        );
       });
   },
 });
+
+function addReactionHelper(
+  reactionID,
+  userID,
+  messageID,
+  emojiID,
+  channelID,
+  state
+) {
+  state.updateChannelID = channelID;
+  state.error = null;
+  state.errorContext = null;
+  state.status = "addReaction";
+  state.byChannelID[channelID].map((mes) => {
+    if (parseInt(mes.messageID) === parseInt(messageID)) {
+      if (!mes.reactions) mes.reactions = {};
+      if (!(emojiID in mes.reactions)) mes.reactions[emojiID] = [];
+      mes.reactions[emojiID].push([userID, reactionID]);
+    }
+  });
+}
 
 function processReactions(messages) {
   if (!messages || !Array.isArray(messages)) return;
@@ -191,7 +220,7 @@ export const addReaction = createAsyncThunk(
       }
     }
 
-    const reaction = { userID, emojiID, messageID };
+    const reaction = { userID, emojiID, messageID, channelID };
     const apiUrl = import.meta.env.VITE_CHAT_API;
     const url = `${apiUrl}/reactions`;
     const res = await fetch(url, {
@@ -309,4 +338,5 @@ export const {
   deleteMessageChannelUpdate,
   addTyping,
   rmTyping,
+  addReactionUpdate,
 } = messagesSlice.actions;

@@ -5,8 +5,16 @@ public class ReactionRequest {
     int userID;
     int messageID;
     int reactionID;
+    int channelID;
 
     public ReactionRequest() {}
+    public int getChannelID() {
+        return channelID;
+    }
+
+    public void setChannelID(int channelID) {
+        this.channelID = channelID;
+    }
 
     public int getReactionID() {
         return reactionID;

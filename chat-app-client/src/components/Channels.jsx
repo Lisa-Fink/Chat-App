@@ -31,6 +31,7 @@ import AddChannelModal from "./modals/AddChannelModal";
 import { deleteServer } from "../redux/serversSlice";
 import {
   addMessageUpdate,
+  addReactionUpdate,
   addTyping,
   deleteMessageChannelUpdate,
   deleteMessageUpdate,
@@ -404,6 +405,8 @@ function useChannelsChange(socket, channels, dispatch, channel, token, userID) {
           );
         }
       }
+    } else if (resType === "REACTION_NEW") {
+      dispatch(addReactionUpdate(parsed.data));
     }
   };
 }
