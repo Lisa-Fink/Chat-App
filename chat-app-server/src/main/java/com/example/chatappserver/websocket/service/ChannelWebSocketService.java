@@ -132,4 +132,11 @@ public class ChannelWebSocketService {
         messaging.convertAndSend(destination, messageBroadcast);
     }
 
+    public void sendDeleteReactionToSubscribers(ReactionRequest reaction) {
+        String destination = "/topic/channels/" + reaction.getChannelID();
+        MessageBroadcast messageBroadcast = new MessageBroadcast(
+                MessageType.REACTION_DELETE, reaction);
+        messaging.convertAndSend(destination, messageBroadcast);
+    }
+
 }

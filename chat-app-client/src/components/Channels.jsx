@@ -36,6 +36,7 @@ import {
   deleteMessageChannelUpdate,
   deleteMessageUpdate,
   editMessageUpdate,
+  removeReactionUpdate,
   rmTyping,
 } from "../redux/messagesSlice";
 
@@ -407,6 +408,8 @@ function useChannelsChange(socket, channels, dispatch, channel, token, userID) {
       }
     } else if (resType === "REACTION_NEW") {
       dispatch(addReactionUpdate(parsed.data));
+    } else if (resType === "REACTION_DELETE") {
+      dispatch(removeReactionUpdate(parsed.data));
     }
   };
 }

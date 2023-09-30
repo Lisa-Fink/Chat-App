@@ -3,6 +3,7 @@ package com.example.chatappserver.repository;
 import com.example.chatappserver.model.Reaction;
 import com.example.chatappserver.model.ReactionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -38,6 +39,55 @@ public class ReactionsDao {
         // Get and set the userID
         int reactionID = Objects.requireNonNull(keyHolder.getKey()).intValue();
         reaction.setReactionID(reactionID);
+    }
+
+    public boolean isUser(int reactionID, int userID) {
+        String sql = """
+                SELECT COUNT(*) FROM Reactions
+                	WHERE reactionID = ? AND userID = ?;
+                """;
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, reactionID, userID);
+        return count != null && count > 0;
+    }
+
+    public ReactionRequest getReactionChannel(int reactionID) {
+        String sql = """
+                SELECT r.reactionID, r.userID, r.emojiID, r.messageID, c.channelID FROM Reactions r
+                	JOIN Messages m ON r.messageID = m.messageID
+                    JOIN Channels c ON m.channelID = c.channelID
+                    WHERE r.reactionID = ?;
+                """;
+
+        return jdbcTemplate.queryForObject(sql, (resultSet, rowNum) -> {
+            int fetchedReactionID = resultSet.getInt("reactionID");
+            int fetchedUserID = resultSet.getInt("userID");
+            int fetchedEmojiID = resultSet.getInt("emojiID");
+            int fetchedMessageID = resultSet.getInt("messageID");
+            int fetchedChannelID = resultSet.getInt("channelID");
+
+            // Create a new instance of ReactionRequest
+            return new ReactionRequest(fetchedEmojiID, fetchedUserID, fetchedMessageID, fetchedReactionID, fetchedChannelID);
+        }, reactionID);
+
+    }
+
+    public boolean senderIsAdminInReactionServer(int reactionID, int userID) {
+        String sql = """
+                SELECT us.roleID FROM Reactions r
+                	JOIN Messages m ON r.messageID = m.messageID
+                    JOIN Channels c ON m.channelID = c.channelID
+                    JOIN Servers s ON c.serverID = s.serverID
+                    JOIN UserServers us ON s.serverID = us.serverID
+                        AND ? = us.userID
+                    WHERE r.reactionID = ?;
+                """;
+        try {
+            Integer roleID = jdbcTemplate.queryForObject(sql, Integer.class,
+                    userID, reactionID);
+            return roleID != null && roleID <= 2;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 
 

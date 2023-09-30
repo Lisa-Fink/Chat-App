@@ -6,6 +6,7 @@ import {
   editMessage,
   deleteMessage,
   addReaction,
+  removeReaction,
 } from "../redux/messagesSlice";
 import {
   MdEdit,
@@ -22,7 +23,7 @@ function Chat() {
   const { token, userID } = useSelector((state) => state.auth);
   const messages = useSelector((state) => state.messages.byChannelID);
   const messagesStatus = useSelector((state) => state.messages.status);
-  const state = useSelector((state) => state.messages.updateChannelID);
+
   const usersStatus = useSelector((state) => state.users.status);
   const users = useSelector((state) => state.users.dataByID);
   const usersInChannel = useSelector((state) => state.users.byChannelID);
@@ -63,20 +64,11 @@ function Chat() {
       setCurMessages([]);
     }
   }, [channel]);
-  // After the messages are fetched, update the local state
+  // After the messages for the channel are fetched/added to, update the local state
   useEffect(() => {
     if (!messages[channel.id]) return;
     setCurMessages(messages[channel.id]);
   }, [messages[channel.id]]);
-  // If a new reaction is added to the channel update the messages
-  useEffect(() => {
-    if (
-      (messagesStatus === "addReaction" || messagesStatus === "rmReaction") &&
-      state.updateChannelID === channel.id
-    ) {
-      setCurMessages(messages[channel.id]);
-    }
-  }, [messagesStatus]);
 
   useLayoutEffect(() => {
     // Always scroll to the bottom of the chat container
@@ -143,7 +135,7 @@ function Chat() {
     setShowEmojiMenu(messageID);
   };
 
-  const handleEmojiClick = (emojiID, messageID) => {
+  const handleNewEmojiClick = (emojiID, messageID) => {
     setShowEmojiMenu(null);
     dispatch(
       addReaction({
@@ -154,6 +146,32 @@ function Chat() {
         channelID: channel.id,
       })
     );
+  };
+
+  const handleEmojiClick = (reactionList, emojiID, messageID) => {
+    const userReact = reactionList.find(
+      (react) => parseInt(react[0]) === userID
+    );
+    if (userReact)
+      dispatch(
+        removeReaction({
+          token: token,
+          emojiID: emojiID,
+          messageID: messageID,
+          channelID: channel.id,
+          reactionID: userReact[1],
+        })
+      );
+    else
+      dispatch(
+        addReaction({
+          token: token,
+          emojiID: emojiID,
+          messageID: messageID,
+          channelID: channel.id,
+          userID: userID,
+        })
+      );
   };
 
   const userThumbnail = (message, isUnknown) =>
@@ -170,14 +188,20 @@ function Chat() {
       </div>
     );
 
-  const reactions = (reactionMap) => {
+  const reactions = (reactionMap, messageID) => {
     if (!reactionMap) return;
     const keys = Object.keys(reactionMap);
     return keys.map((emojiID) => {
       const emojiCode = getEmojiCode(emojiID);
       if (emojiCode) {
         return (
-          <button key={emojiID} className="active-btn message-btn reaction-btn">
+          <button
+            key={emojiID}
+            className="active-btn message-btn reaction-btn"
+            onClick={() =>
+              handleEmojiClick(reactionMap[emojiID], emojiID, messageID)
+            }
+          >
             {emojiCode} {reactionMap[emojiID].length}
           </button>
         );
@@ -217,7 +241,7 @@ function Chat() {
           </div>
         </div>
       )}
-      {reactions(message.reactions)}
+      {reactions(message.reactions, message.messageID)}
     </div>
   );
 
@@ -295,7 +319,7 @@ function Chat() {
         {messageData(message, isUnknown)}
         {showEmojiMenu === message.messageID && (
           <EmojiMenu
-            addEmoji={handleEmojiClick}
+            addEmoji={handleNewEmojiClick}
             messageID={message.messageID}
             cancel={closeEmojisOnClick}
           />

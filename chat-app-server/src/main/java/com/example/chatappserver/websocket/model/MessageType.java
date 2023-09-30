@@ -16,6 +16,7 @@ public enum MessageType {
     DESCRIPTION_EDIT,
     IMAGE_EDIT,
     USER_IMAGE_EDIT,
-    REACTION_NEW
+    REACTION_NEW,
+    REACTION_DELETE
 
 }

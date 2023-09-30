@@ -65,6 +65,10 @@ const messagesSlice = createSlice({
         state
       );
     },
+    removeReactionUpdate: (state, action) => {
+      const { reactionID, messageID, emojiID, channelID } = action.payload;
+      removeReactionHelper(reactionID, messageID, emojiID, channelID, state);
+    },
   },
   extraReducers(builder) {
     builder
@@ -138,6 +142,14 @@ const messagesSlice = createSlice({
           channelID,
           state
         );
+      })
+      .addCase(removeReaction.rejected, (state, action) => {
+        state.error = action.error.message;
+        state.errorContext = "removeReaction";
+      })
+      .addCase(removeReaction.fulfilled, (state, action) => {
+        const { reactionID, messageID, emojiID, channelID } = action.payload;
+        removeReactionHelper(reactionID, messageID, emojiID, channelID, state);
       });
   },
 });
@@ -150,10 +162,9 @@ function addReactionHelper(
   channelID,
   state
 ) {
-  state.updateChannelID = channelID;
   state.error = null;
   state.errorContext = null;
-  state.status = "addReaction";
+  state.status = "succeeded";
   state.byChannelID[channelID].map((mes) => {
     if (parseInt(mes.messageID) === parseInt(messageID)) {
       if (!mes.reactions) mes.reactions = {};
@@ -161,6 +172,33 @@ function addReactionHelper(
       mes.reactions[emojiID].push([userID, reactionID]);
     }
   });
+}
+
+function removeReactionHelper(
+  reactionID,
+  messageID,
+  emojiID,
+  channelID,
+  state
+) {
+  state.error = null;
+  state.errorContext = null;
+  state.status = "succeeded";
+  const message = state.byChannelID[channelID].find(
+    (mes) => parseInt(mes.messageID) === parseInt(messageID)
+  );
+  const reactions = message && message.reactions;
+  const reactionsForEmoji = reactions && reactions[emojiID];
+  if (reactionsForEmoji) {
+    const filtered = reactionsForEmoji.filter((react) => {
+      return parseInt(react[1]) !== parseInt(reactionID);
+    });
+    if (filtered.length === 0) {
+      delete message.reactions[emojiID];
+    } else {
+      reactions[emojiID] = filtered;
+    }
+  }
 }
 
 function processReactions(messages) {
@@ -199,6 +237,24 @@ function editMessageHelper(channelID, messageID, text, state) {
     return mes;
   });
 }
+
+export const removeReaction = createAsyncThunk(
+  "messages/removeReaction",
+  async ({ token, emojiID, messageID, channelID, reactionID }) => {
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/reactions/${reactionID}`;
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) {
+      throw new Error("Failed to delete reaction.");
+    }
+    return { emojiID, messageID, channelID, reactionID };
+  }
+);
 
 export const addReaction = createAsyncThunk(
   "messages/addReaction",
@@ -339,4 +395,5 @@ export const {
   addTyping,
   rmTyping,
   addReactionUpdate,
+  removeReactionUpdate,
 } = messagesSlice.actions;

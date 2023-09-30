@@ -8,6 +8,15 @@ public class ReactionRequest {
     int channelID;
 
     public ReactionRequest() {}
+
+    public ReactionRequest(int emojiID, int userID, int messageID, int reactionID, int channelID) {
+        this.emojiID = emojiID;
+        this.userID = userID;
+        this.messageID = messageID;
+        this.reactionID = reactionID;
+        this.channelID = channelID;
+    }
+
     public int getChannelID() {
         return channelID;
     }
