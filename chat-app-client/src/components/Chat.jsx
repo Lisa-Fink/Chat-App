@@ -44,15 +44,10 @@ function Chat() {
 
   const chatRef = useRef();
   const closeEmojisOnClick = () => {
-    if (showEmojiMenu) setShowEmojiMenu(null);
+    if (showEmojiMenu) {
+      setShowEmojiMenu(null);
+    }
   };
-  useEffect(() => {
-    document.addEventListener("mousedown", closeEmojisOnClick);
-
-    return () => {
-      document.removeEventListener("mousedown", closeEmojisOnClick);
-    };
-  }, []);
 
   // if the channel changes, fetch the messages for the new channel
   useEffect(() => {
@@ -141,15 +136,10 @@ function Chat() {
   };
 
   const handleMessageMouseEnter = (messageID) => {
-    if (showEmojiMenu !== messageID) {
-      setShowOptions(messageID);
-    }
+    setShowOptions(messageID);
   };
 
   const handleEmojiSelectClick = (messageID) => {
-    if (showOptions === messageID) {
-      setShowOptions(null);
-    }
     setShowEmojiMenu(messageID);
   };
 
@@ -232,6 +222,7 @@ function Chat() {
   );
 
   const messageHoverOptions = (message) =>
+    showEmojiMenu !== message.messageID &&
     showOptions === message.messageID && (
       <div className="message-options">
         <button
@@ -306,6 +297,7 @@ function Chat() {
           <EmojiMenu
             addEmoji={handleEmojiClick}
             messageID={message.messageID}
+            cancel={closeEmojisOnClick}
           />
         )}
         {messageHoverOptions(message)}

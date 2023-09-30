@@ -1,13 +1,26 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import "../../styles/Emojis.css";
 
-function EmojiMenu({ addEmoji, messageID }) {
+function EmojiMenu({ addEmoji, messageID, cancel }) {
   const [hoverEmojiName, setHoverEmojiName] = useState("");
   const [emojiNamePosition, setEmojiNamePosition] = useState({
     top: 0,
     left: 0,
   });
+
+  useEffect(() => {
+    document.addEventListener("mouseup", (e) => {
+      // close emojis when clicking off the emoji menu
+      if (e.target.parentElement.id !== "emojis") {
+        cancel();
+      }
+    });
+
+    return () => {
+      document.removeEventListener("mouseup", cancel);
+    };
+  }, []);
 
   const handleMouseEnter = (e, emojiName) => {
     setHoverEmojiName(emojiName);
