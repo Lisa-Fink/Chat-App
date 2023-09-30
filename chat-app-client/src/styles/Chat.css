@@ -113,7 +113,7 @@ div .message-thumbnail {
   justify-content: space-around;
 }
 
-.message button {
+.message-btn {
   font-size: 130%;
   margin: 2px;
   border-radius: 5px;
@@ -125,7 +125,7 @@ div .message-thumbnail {
   gap: 15px;
 }
 
-.message button:hover {
+.message-btn:hover {
   background-color: var(--input-bg);
 }
 .message-options button:hover {
@@ -142,4 +142,12 @@ div .message-thumbnail {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.reaction-btn {
+  background-color: var(--medium-grey);
+}
+
+.reaction-btn:hover {
+  background-color: var(--dark-grey2);
 }
