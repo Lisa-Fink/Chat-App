@@ -148,6 +148,24 @@ INSERT INTO Attachments (filename, attachmentUrl, messageID) VALUES (:newFileNam
 -- Delete a message using a given messageID
 DELETE FROM Messages WHERE messageID = :delMessageID;
 
+-- Check if the userID and reactionID match, used to verify delete auth
+SELECT COUNT(*) FROM Reactions
+	WHERE reactionID = ? AND userID = ?;
+
+-- Check the role of the user in the server for the reaction, based on userID and reactionID
+SELECT us.roleID FROM Reactions r
+	JOIN Messages m ON r.messageID = m.messageID
+    JOIN Channels c ON m.channelID = c.channelID
+    JOIN Servers s ON c.serverID = s.serverID
+    JOIN UserServers us ON s.serverID = us.serverID AND :userID = us.userID
+    WHERE r.reactionID = :reactionID;
+    
+-- Gets the reaction with channelID based on reactionID (used to broadcast the data when deleting)
+SELECT r.reactionID, r.userID, r.emojiID, r.messageID, c.channelID FROM Reactions r
+	JOIN Messages m ON r.messageID = m.messageID
+	JOIN Channels c ON m.channelID = c.channelID
+	WHERE r.reactionID = ?;
+
 -- Delete a reaction using a given reactionID
 DELETE FROM Reactions WHERE reactionID = :delReactionID;
 
