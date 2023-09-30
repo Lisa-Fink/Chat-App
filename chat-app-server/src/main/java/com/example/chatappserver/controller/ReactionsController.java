@@ -1,6 +1,7 @@
 package com.example.chatappserver.controller;
 
 import com.example.chatappserver.model.Reaction;
+import com.example.chatappserver.model.ReactionRequest;
 import com.example.chatappserver.repository.ReactionsDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,7 @@ public class ReactionsController {
 
     // Create a reaction (adds a reaction to a message
     @PostMapping
-    public ResponseEntity<Integer> createReaction(@RequestBody Reaction reaction) {
+    public ResponseEntity<Integer> createReaction(@RequestBody ReactionRequest reaction) {
         reactionsDao.create(reaction);
         return ResponseEntity.status(HttpStatus.CREATED).body(reaction.getReactionID());
     }

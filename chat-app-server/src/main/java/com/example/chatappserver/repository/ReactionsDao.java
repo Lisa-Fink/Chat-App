@@ -1,6 +1,7 @@
 package com.example.chatappserver.repository;
 
 import com.example.chatappserver.model.Reaction;
+import com.example.chatappserver.model.ReactionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -21,7 +22,7 @@ public class ReactionsDao {
 
     // Add a reaction to a message using a given emojiID, userID and messageID
     // Updates the Reaction with the new reactionID
-    public void create(Reaction reaction) {
+    public void create(ReactionRequest reaction) {
         String sql = "INSERT INTO Reactions (emojiID, userID, messageID) VALUES (?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -36,7 +37,7 @@ public class ReactionsDao {
 
         // Get and set the userID
         int reactionID = Objects.requireNonNull(keyHolder.getKey()).intValue();
-        reaction.setMessageID(reactionID);
+        reaction.setReactionID(reactionID);
     }
 
 

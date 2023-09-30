@@ -119,15 +119,14 @@ UPDATE Channels SET channelName = :newChannelName, roleID = :newRoleID WHERE cha
 -- --------------------------------------------------------------------------------------
 -- Messages
 
--- Get all Messages in a particular channel, get all Reactions to each message including the emojiCode, emojiName, and username, get all Attachments to each message
+-- Get all Messages in a particular channel, get all Reactions to each message, get all Attachments to each message
 -- including the attachmentUrl, filename, attachmentID
 SELECT m.messageID, m.text, m.time, m.edited, u.username, u.userID,
-       r.reactionID, e.emojiCode, e.emojiName,
+       r.reactionID, r.userID as reactionUserID, r.emojiID,
        a.attachmentID, a.attachmentUrl, a.filename
 FROM Messages m
 LEFT JOIN Users u ON m.userID = u.userID
 LEFT JOIN Reactions r ON m.messageID = r.messageID
-LEFT JOIN Emojis e ON r.emojiID = e.emojiID
 LEFT JOIN Attachments a ON m.messageID = a.messageID
 WHERE m.channelID = :channelID;
 

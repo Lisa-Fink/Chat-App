@@ -71,12 +71,11 @@ public class MessagesDao {
     // Get all Messages in a channel, and all Reactions to each message including the emojiCode, emojiName, and username
     public List<Message> getMessagesInChannel(int channelID) {
         String sql = "SELECT m.messageID, m.text, m.time, m.edited, u.username, u.userID, " +
-                "       r.reactionID, e.emojiCode, e.emojiName, " +
+                "       r.reactionID, r.userID as reactionUserID, r.emojiID, " +
                 "       a.attachmentID, a.attachmentUrl, a.filename " +
                 "FROM Messages m " +
                 "LEFT JOIN Users u ON m.userID = u.userID " +
                 "LEFT JOIN Reactions r ON m.messageID = r.messageID " +
-                "LEFT JOIN Emojis e ON r.emojiID = e.emojiID " +
                 "LEFT JOIN Attachments a ON m.messageID = a.messageID " +
                 "WHERE m.channelID = ?";
 
@@ -94,8 +93,8 @@ public class MessagesDao {
                 int userID = resultSet.getInt("userID");
 
                 int reactionID = resultSet.getInt("reactionID");
-                String emojiCode = resultSet.getString("emojiCode");
-                String emojiName = resultSet.getString("emojiName");
+                int reactionUserID = resultSet.getInt("reactionUserID");
+                int emojiID = resultSet.getInt("emojiID");
 
                 int attachmentID = resultSet.getInt("attachmentID");
                 String filename = resultSet.getString("filename");
@@ -108,7 +107,7 @@ public class MessagesDao {
                 }
 
                 if (reactionID != 0) { // Check if reactionID is not null
-                    Reaction reaction = new Reaction(messageID, reactionID, emojiCode, emojiName, userID);
+                    Reaction reaction = new Reaction(reactionID, reactionUserID, messageID, emojiID);
                     currentMessage.addReaction(reaction);
                 }
 
