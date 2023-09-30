@@ -12,6 +12,7 @@ import { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { addChannelUpdate } from "./redux/channelsSlice";
 import WebSocketManager from "./WebSocketManager";
+import { fetchEmojis } from "./redux/emojiSlice";
 
 function App() {
   const auth = useSelector((state) => state.auth);
@@ -31,6 +32,7 @@ function App() {
   useEffect(() => {
     if (auth.isAuthenticated && !socket.current.isActive()) {
       socket.current.activate(auth.userID, handleUserData, auth.token);
+      dispatch(fetchEmojis({ token: auth.token }));
     }
     if (!auth.isAuthenticated && socket.current.isActive()) {
       socket.current.deactivate();
