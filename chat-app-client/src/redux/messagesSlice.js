@@ -141,12 +141,12 @@ function processReactions(messages) {
     const reactionArr = message.reactions;
     const reactionMap = {}; // {emojiID: [[userID, reactionID], [userID...]]}
     for (const reaction of reactionArr) {
-      if (!(reaction.reactionID in reactionMap)) {
-        reactionMap[reaction.reactionID] = [];
+      if (!(reaction.emojiID in reactionMap)) {
+        reactionMap[reaction.emojiID] = [];
       }
-      reactionMap[reaction.reactionID].push([
+      reactionMap[reaction.emojiID].push([
         reaction.userID,
-        reaction.emojiID,
+        reaction.reactionID,
       ]);
     }
     message.reactions = reactionMap;
