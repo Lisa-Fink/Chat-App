@@ -17,7 +17,11 @@ import { fetchEmojis } from "./redux/emojiSlice";
 function App() {
   const auth = useSelector((state) => state.auth);
   const [showSeverSettingsModal, setShowServerSettingsModal] = useState(false);
+  const [wsConnect, setWsConnect] = useState(false);
+  const authorized = useAuthorized(auth, wsConnect);
   const dispatch = useDispatch();
+
+  const socket = useRef(new WebSocketManager(wsConnect, setWsConnect));
 
   const handleUserData = (res) => {
     const parsed = JSON.parse(res.body);
@@ -28,10 +32,9 @@ function App() {
     }
   };
 
-  const socket = useRef(new WebSocketManager());
   useEffect(() => {
     if (auth.isAuthenticated && !socket.current.isActive()) {
-      socket.current.activate(auth.userID, handleUserData, auth.token);
+      socket.current.activate(handleUserData, auth.token);
       dispatch(fetchEmojis({ token: auth.token }));
     }
     if (!auth.isAuthenticated && socket.current.isActive()) {
@@ -42,7 +45,7 @@ function App() {
   return (
     <>
       <div className="container">
-        {!auth.isAuthenticated ? (
+        {!authorized ? (
           <Auth />
         ) : (
           <>
@@ -67,5 +70,17 @@ function App() {
     </>
   );
 }
+
+const useAuthorized = (auth, wsConnect) => {
+  const [authorized, setAuthorized] = useState(false);
+
+  useEffect(() => {
+    if (auth.isAuthenticated && wsConnect && !authorized) setAuthorized(true);
+    if ((!auth.isAuthenticated || !wsConnect) && authorized)
+      setAuthorized(false);
+  }, [auth, wsConnect]);
+
+  return authorized;
+};
 
 export default App;

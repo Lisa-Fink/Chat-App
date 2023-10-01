@@ -1,15 +1,15 @@
 import { Client } from "@stomp/stompjs";
 
 class WebSocketManager {
-  constructor() {
-    this.active = false;
+  constructor(active, setActive) {
+    this.setActive = setActive;
+    this.active = active;
     this.subscriptions = { channels: {}, servers: {}, users: {} };
     this.socket = null;
   }
 
-  activate(userID, handleUserData, token) {
+  activate(handleUserData, token) {
     const url = "ws://localhost:8080/ws";
-
     const headers = {
       Authorization: token,
     };
@@ -19,14 +19,14 @@ class WebSocketManager {
       connectHeaders: headers,
       onConnect: () => {
         this.socket.subscribe(`/user/topic/notifications`, handleUserData);
+        this.setActive(true);
       },
     });
     this.socket.activate();
-    this.active = true;
   }
 
   deactivate() {
-    this.active = false;
+    this.setActive(false);
     this.subscriptions = { channels: {}, servers: {}, users: {} };
     this.socket.deactivate();
   }
