@@ -61,9 +61,8 @@ function App() {
               setShowServerSettingsModal={setShowServerSettingsModal}
               socket={socket}
             />
-            <Chat />
+            <Chat socket={socket} />
             <Users />
-            <MessageInput socket={socket} />
           </>
         )}
       </div>

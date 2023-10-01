@@ -1,14 +1,15 @@
-.message-input {
-  grid-area: 4/3/6/4;
+.message-input-container {
+  /* grid-area: 4/3/6/4; */
   background-color: var(--medium-grey2);
-  padding: 0 5% 2% 0;
-}
-
-.message-input > div {
+  padding: 10px 50px 20px 0;
   color: var(--medium-light-text);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 }
 
-textarea {
+.message-input {
   padding: 2%;
   outline: none;
   border: none;
@@ -16,11 +17,62 @@ textarea {
   width: 70%;
   font-size: 105%;
   background-color: var(--input-bg);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+}
+
+.message-icon-btn {
+  font-size: 115%;
+}
+
+.message-icon-btn:hover {
+  transform: scale(130%);
+  color: var(--light-text);
+}
+
+.message-icon-btn:active {
+  transform: scale(130%) translateY(2px);
+  color: var(--medium-text);
+}
+
+textarea {
+  outline: none;
+  border: none;
+  font-size: 105%;
+  background-color: var(--input-bg);
   color: white;
   font-family: "Lunasima", sans-serif;
   resize: none;
+  width: 100%;
 }
 
 .message-input input::placeholder {
   color: var(--medium-text);
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(5px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.too-long {
+  animation: shake 0.5s ease-in;
 }

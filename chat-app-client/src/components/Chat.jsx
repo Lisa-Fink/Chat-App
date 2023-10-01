@@ -16,8 +16,9 @@ import {
   MdCancel,
 } from "react-icons/md";
 import EmojiMenu from "./modals/EmojiMenu";
+import MessageInput from "./MessageInput";
 
-function Chat() {
+function Chat({ socket }) {
   const dispatch = useDispatch();
   const { channel, server } = useSelector((state) => state.current);
   const { token, userID } = useSelector((state) => state.auth);
@@ -399,13 +400,16 @@ function Chat() {
   });
 
   return (
-    <div className="chat" ref={chatRef}>
-      {server.id !== null &&
-        channel.id !== null &&
-        messagesStatus !== "failed" &&
-        usersStatus === "succeeded" && (
-          <ul className="message-list">{messageList}</ul>
-        )}
+    <div className="chat-container" ref={chatRef}>
+      <div className="chat">
+        {server.id !== null &&
+          channel.id !== null &&
+          messagesStatus !== "failed" &&
+          usersStatus === "succeeded" && (
+            <ul className="message-list">{messageList}</ul>
+          )}
+      </div>
+      <MessageInput socket={socket} />
     </div>
   );
 }

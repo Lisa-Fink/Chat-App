@@ -22,6 +22,9 @@ function MessageInput({ socket }) {
 
   const dispatch = useDispatch();
 
+  const textAreaRef = useRef(null);
+  useResizeTextArea(textAreaRef.current, message);
+
   useEffect(() => {
     if (channel.id && channel.id in channelData && channelData[channel.id]) {
       setChannelTyping(channelData[channel.id]);
@@ -101,6 +104,15 @@ function MessageInput({ socket }) {
   );
 
   const addEmojiToMessage = (id, messageID, code) => {
+    console.log(textAreaRef);
+    if (textAreaRef.current.style.height.slice(0, -2) >= 532) {
+      textAreaRef.current.parentElement.classList.add("too-long");
+      setTimeout(() => {
+        textAreaRef.current.parentElement.classList.remove("too-long");
+      }, 500);
+      setShowEmojiMenu(false);
+      return;
+    }
     const cursorStart = textAreaRef.current.selectionStart;
     const cursorEnd = textAreaRef.current.selectionEnd;
     const newMessage =
@@ -111,8 +123,22 @@ function MessageInput({ socket }) {
     setShowEmojiMenu(false);
   };
 
+  const handleTextChange = (e) => {
+    if (
+      e.target.style.height.slice(0, -2) >= 520 &&
+      e.target.value.length > message.length
+    ) {
+      e.target.parentElement.classList.add("too-long");
+      setTimeout(() => {
+        e.target.parentElement.classList.remove("too-long");
+      }, 500);
+    } else {
+      setMessage(e.target.value);
+    }
+  };
+
   return (
-    <div className="message-input">
+    <div className="message-input-container">
       {typingDiv}
       <div className="message-input">
         {error && <p>{error}</p>}
@@ -142,5 +168,14 @@ function MessageInput({ socket }) {
     </div>
   );
 }
+
+const useResizeTextArea = (textAreaRef, message) => {
+  useEffect(() => {
+    if (textAreaRef) {
+      textAreaRef.style.height = "0px";
+      textAreaRef.style.height = textAreaRef.scrollHeight + 3 + "px";
+    }
+  }, [textAreaRef, message]);
+};
 
 export default MessageInput;
