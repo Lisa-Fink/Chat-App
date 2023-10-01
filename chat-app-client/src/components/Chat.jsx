@@ -42,7 +42,7 @@ function Chat() {
   const [confirmDelID, setConfirmDelID] = useState(null);
 
   const [showEmojiMenu, setShowEmojiMenu] = useState(0);
-  const [showReactionDetails, setShowReactionDetails] = useState("😂-157");
+  const [showReactionDetails, setShowReactionDetails] = useState(null);
 
   const chatRef = useRef();
   const closeEmojisOnClick = () => {
@@ -149,21 +149,38 @@ function Chat() {
     );
   };
 
-  const handleEmojiClick = (reactionList, emojiID, messageID) => {
+  const handleEmojiClick = (e, reactionList, emojiID, messageID) => {
     const userReact = reactionList.find(
       (react) => parseInt(react[0]) === userID
     );
-    if (userReact)
-      dispatch(
-        removeReaction({
-          token: token,
-          emojiID: emojiID,
-          messageID: messageID,
-          channelID: channel.id,
-          reactionID: userReact[1],
-        })
-      );
-    else
+    if (userReact) {
+      if (reactionList.length === 1) {
+        e.target.disabled = true;
+        e.target.classList.remove("in");
+        e.target.classList.add("out");
+        e.target.nextSibling.style.display = "none";
+        setTimeout(() => {
+          dispatch(
+            removeReaction({
+              token: token,
+              emojiID: emojiID,
+              messageID: messageID,
+              channelID: channel.id,
+              reactionID: userReact[1],
+            })
+          );
+        }, 300);
+      } else
+        dispatch(
+          removeReaction({
+            token: token,
+            emojiID: emojiID,
+            messageID: messageID,
+            channelID: channel.id,
+            reactionID: userReact[1],
+          })
+        );
+    } else
       dispatch(
         addReaction({
           token: token,
@@ -215,6 +232,7 @@ function Chat() {
 
   const reactionDetailsDiv = (reactionList, emojiCode, emojiName) => {
     if (!reactionList || reactionList.length == 0) return;
+
     const div = (
       <div className="reaction-details">
         <div>
@@ -236,15 +254,16 @@ function Chat() {
         return (
           <span className="reaction-span" key={`${emojiCode}-${messageID}`}>
             <button
-              key={emojiID}
-              className="active-btn message-btn reaction-btn"
-              onClick={() =>
-                handleEmojiClick(reactionMap[emojiID], emojiID, messageID)
+              className="active-btn message-btn reaction-btn in"
+              onClick={(e) =>
+                handleEmojiClick(e, reactionMap[emojiID], emojiID, messageID)
               }
-              onMouseEnter={() =>
-                setShowReactionDetails(`${emojiCode}-${messageID}`)
-              }
-              onMouseLeave={() => setShowReactionDetails(null)}
+              onMouseEnter={() => {
+                setShowReactionDetails(`${emojiCode}-${messageID}`);
+              }}
+              onMouseLeave={() => {
+                setShowReactionDetails(null);
+              }}
             >
               {emojiCode} {reactionMap[emojiID].length}
             </button>
@@ -288,7 +307,9 @@ function Chat() {
           </div>
         </div>
       )}
-      {reactions(message.reactions, message.messageID)}
+      <div className="reaction-row">
+        {reactions(message.reactions, message.messageID)}
+      </div>
     </div>
   );
 

@@ -12,6 +12,7 @@
   /* Firefox */
   scrollbar-width: thin;
   scrollbar-color: var(--medium-grey3) var(--dark-grey);
+  padding-top: 15px;
 
   /* WebKit (Chrome, Safari) */
   &::-webkit-scrollbar {
@@ -143,30 +144,76 @@ div .message-thumbnail {
   justify-content: space-between;
   align-items: center;
 }
+@keyframes expand-in {
+  0% {
+    transform: scale(0.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes expand-out {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
 
 .reaction-btn {
   background-color: var(--medium-grey);
+  border: 1px solid var(--medium-grey);
+}
+
+.in {
+  animation: expand-in 0.5s;
+}
+.out {
+  animation: expand-out 0.5s forwards;
 }
 
 .reaction-btn:hover {
   background-color: var(--dark-grey2);
+  border: 1px solid var(--medium-light-text);
 }
 
 .reaction-span {
   position: relative;
 }
 
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 .reaction-details {
   background-color: var(--black-tr);
   padding: 10px;
-  width: 200px;
+  width: 240px;
   z-index: 501;
   left: 0;
+  bottom: 40px;
   position: absolute;
   border-radius: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  animation: fade-in 0.5s ease-in;
+}
+
+.reaction-details.show {
+  opacity: 1;
 }
 
 .emoji-code {
