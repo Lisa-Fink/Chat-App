@@ -12,7 +12,11 @@ function EmojiMenu({ addEmoji, messageID, cancel }) {
   useEffect(() => {
     document.addEventListener("mouseup", (e) => {
       // close emojis when clicking off the emoji menu
-      if (e.target.parentElement.id !== "emojis") {
+      if (
+        !e.target ||
+        !e.target.parentElement ||
+        (e.target.id !== "emojis" && e.target.parentElement.id !== "emojis")
+      ) {
         cancel();
       }
     });
