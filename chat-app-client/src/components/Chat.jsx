@@ -42,6 +42,7 @@ function Chat() {
   const [confirmDelID, setConfirmDelID] = useState(null);
 
   const [showEmojiMenu, setShowEmojiMenu] = useState(0);
+  const [showReactionDetails, setShowReactionDetails] = useState("😂-157");
 
   const chatRef = useRef();
   const closeEmojisOnClick = () => {
@@ -188,22 +189,68 @@ function Chat() {
       </div>
     );
 
+  const reactionString = (reactionList) => {
+    const maxNames = 3;
+    const numReactions = reactionList.length;
+    const sliceList = reactionList
+      .map((data) =>
+        users[data[0]] ? users[data[0]].username : "unknown user"
+      )
+      .slice(0, maxNames);
+
+    if (numReactions === 1) {
+      return sliceList;
+    }
+    if (numReactions === 2) {
+      return sliceList.join(" and ");
+    }
+    if (numReactions === 3) {
+      return `${sliceList[0]}, ${sliceList[1]}, and ${sliceList[2]}`;
+    }
+    const overMax = numReactions - maxNames;
+    return `${sliceList.join(", ")} and ${overMax} ${
+      overMax === 1 ? "user" : "users"
+    }`;
+  };
+
+  const reactionDetailsDiv = (reactionList, emojiCode, emojiName) => {
+    if (!reactionList || reactionList.length == 0) return;
+    const div = (
+      <div className="reaction-details">
+        <div>
+          <span className="emoji-code">{emojiCode}</span>
+          <span className="emoji-name">{emojiName}</span>
+        </div>{" "}
+        reacted by {reactionString(reactionList)}
+      </div>
+    );
+    return div;
+  };
+
   const reactions = (reactionMap, messageID) => {
     if (!reactionMap) return;
     const keys = Object.keys(reactionMap);
     return keys.map((emojiID) => {
-      const emojiCode = getEmojiCode(emojiID);
+      const { emojiCode, emojiName } = getEmoji(emojiID);
       if (emojiCode) {
         return (
-          <button
-            key={emojiID}
-            className="active-btn message-btn reaction-btn"
-            onClick={() =>
-              handleEmojiClick(reactionMap[emojiID], emojiID, messageID)
-            }
-          >
-            {emojiCode} {reactionMap[emojiID].length}
-          </button>
+          <span className="reaction-span" key={`${emojiCode}-${messageID}`}>
+            <button
+              key={emojiID}
+              className="active-btn message-btn reaction-btn"
+              onClick={() =>
+                handleEmojiClick(reactionMap[emojiID], emojiID, messageID)
+              }
+              onMouseEnter={() =>
+                setShowReactionDetails(`${emojiCode}-${messageID}`)
+              }
+              onMouseLeave={() => setShowReactionDetails(null)}
+            >
+              {emojiCode} {reactionMap[emojiID].length}
+            </button>
+            {showReactionDetails === `${emojiCode}-${messageID}` &&
+              reactionDetailsDiv(reactionMap[emojiID], emojiCode, emojiName)}
+          </span>
         );
       }
     });
@@ -296,11 +343,11 @@ function Chat() {
       </div>
     );
 
-  const getEmojiCode = (emojiId) => {
+  const getEmoji = (emojiId) => {
     const found = emojis.find(
       (em) => parseInt(em.emojiID) === parseInt(emojiId)
     );
-    if (found) return found.emojiCode;
+    if (found) return found;
   };
 
   const messageList = curMessages.map((message) => {

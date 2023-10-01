@@ -151,3 +151,27 @@ div .message-thumbnail {
 .reaction-btn:hover {
   background-color: var(--dark-grey2);
 }
+
+.reaction-span {
+  position: relative;
+}
+
+.reaction-details {
+  background-color: var(--black-tr);
+  padding: 10px;
+  width: 200px;
+  z-index: 501;
+  left: 0;
+  position: absolute;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.emoji-code {
+  font-size: 200%;
+}
+.emoji-name {
+  font-size: 110%;
+}
