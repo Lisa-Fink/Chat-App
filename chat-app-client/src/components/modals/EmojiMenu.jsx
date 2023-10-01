@@ -50,7 +50,7 @@ function EmojiMenu({ addEmoji, messageID, cancel }) {
     <div id="emojis">
       {emojiMenu}
       {hoverEmojiName && (
-        <div className="tooltip" style={emojiNamePosition}>
+        <div className="emoji-hover" style={emojiNamePosition}>
           {hoverEmojiName}
         </div>
       )}
