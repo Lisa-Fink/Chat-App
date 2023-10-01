@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import "../styles/MessageInput.css";
 import { useSelector, useDispatch } from "react-redux";
 import { createMessage } from "../redux/messagesSlice";
+import { MdAddReaction } from "react-icons/md";
+import EmojiMenu from "./modals/EmojiMenu";
 
 function MessageInput({ socket }) {
   const [message, setMessage] = useState("");
@@ -13,6 +15,7 @@ function MessageInput({ socket }) {
   const channelData = useSelector((state) => state.messages.typingByChannelID);
   const users = useSelector((state) => state.users.dataByID);
   const [channelTyping, setChannelTyping] = useState([]);
+  const [showEmojiMenu, setShowEmojiMenu] = useState(false);
 
   const isTyping = useRef(false);
   const typingTimeout = useRef(null);
@@ -97,16 +100,45 @@ function MessageInput({ socket }) {
     </div>
   );
 
+  const addEmojiToMessage = (id, messageID, code) => {
+    const cursorStart = textAreaRef.current.selectionStart;
+    const cursorEnd = textAreaRef.current.selectionEnd;
+    const newMessage =
+      message.slice(0, Math.min(cursorStart, cursorEnd)) +
+      code +
+      message.slice(Math.max(cursorStart, cursorEnd), message.length + 1);
+    setMessage(newMessage);
+    setShowEmojiMenu(false);
+  };
+
   return (
     <div className="message-input">
       {typingDiv}
-      {error && <p>{error}</p>}
-      <textarea
-        placeholder={channel.name && `Message # ${channel.name}`}
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        onKeyDown={handleKeyDown}
-      />
+      <div className="message-input">
+        {error && <p>{error}</p>}
+        <textarea
+          placeholder={channel.name && `Message # ${channel.name}`}
+          value={message}
+          onChange={handleTextChange}
+          onKeyDown={handleKeyDown}
+          ref={textAreaRef}
+        />
+        {showEmojiMenu && (
+          <EmojiMenu
+            addEmoji={addEmojiToMessage}
+            cancel={() => {
+              setShowEmojiMenu(false);
+            }}
+          />
+        )}
+        <button
+          className="message-icon-btn"
+          onClick={() => setShowEmojiMenu(true)}
+          disabled={showEmojiMenu}
+        >
+          <MdAddReaction />
+        </button>
+      </div>
     </div>
   );
 }

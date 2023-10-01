@@ -45,7 +45,7 @@ function EmojiMenu({ addEmoji, messageID, cancel }) {
       key={emoji.emojiID}
       onMouseEnter={(e) => handleMouseEnter(e, emoji.emojiName)}
       onMouseLeave={handleMouseLeave}
-      onClick={() => addEmoji(emoji.emojiID, messageID)}
+      onClick={() => addEmoji(emoji.emojiID, messageID, emoji.emojiCode)}
     >
       {emoji.emojiCode}
     </button>
