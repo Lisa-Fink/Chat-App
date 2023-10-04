@@ -127,6 +127,12 @@ div .message-thumbnail {
   border-radius: 5px;
 }
 
+.message-options > .message-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .edit-div,
 .edit-div > div {
   display: flex;
