@@ -126,6 +126,9 @@ function Chat({ socket }) {
   };
 
   const handleNewEmojiClick = (emojiID, messageID) => {
+    // scroll if last message
+    const lastMessageID = curMessages[curMessages.length - 1].messageID;
+    if (lastMessageID === messageID) scroll();
     setShowEmojiMenu(null);
     dispatch(
       addReaction({
