@@ -1,14 +1,13 @@
 .servers {
   background-color: var(--dark-grey);
   padding: 2%;
-  max-height: 720px;
-  min-width: 100px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   gap: 18px;
-  grid-area: 2/1/6/2;
+  grid-area: 2/1/5/2;
   overflow-y: scroll;
   /* no scrollbar */
   /* Firefox */

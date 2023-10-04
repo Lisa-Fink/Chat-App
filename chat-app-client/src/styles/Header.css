@@ -9,6 +9,7 @@
   font-weight: bold;
   grid-area: 1/1/2/5;
   box-sizing: border-box;
+  height: 100%;
 }
 
 .header h1 {
