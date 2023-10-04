@@ -1,6 +1,11 @@
+.channels-container {
+  grid-area: 2/2/5/3;
+  background-color: var(--dark-grey);
+}
+
 .channels {
   width: 100%;
-  grid-area: 2/2/5/3;
+
   background-color: var(--medium-grey);
   color: var(--light-text);
   border-top-left-radius: 6px;

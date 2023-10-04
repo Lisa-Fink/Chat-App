@@ -16,6 +16,7 @@
   justify-items: stretch;
   grid-template-columns: 1.1fr 2fr 6fr 2fr;
   grid-template-rows: 2fr 1fr 14fr 0.8fr;
+  border-radius: 10px;
 }
 
 .thin-scroll {

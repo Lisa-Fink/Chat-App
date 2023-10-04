@@ -236,18 +236,20 @@ function Channels({ setShowServerSettingsModal, socket }) {
 
   return (
     <>
-      <div className="channels thin-scroll">
-        <div className="col-head">
-          <h2>{server.name}</h2>
-          {server.name && (
-            <button onClick={handleShowServerMenu}>
-              {!showServerDropdown ? <MdOutlineExpandMore /> : <MdClose />}
-            </button>
-          )}
-        </div>
-        <div className="channel-list-container">
-          <ul>{channelList}</ul>
-          {showServerDropdown && serverDropDownUl}
+      <div className="channels-container">
+        <div className="channels thin-scroll">
+          <div className="col-head">
+            <h2>{server.name}</h2>
+            {server.name && (
+              <button onClick={handleShowServerMenu}>
+                {!showServerDropdown ? <MdOutlineExpandMore /> : <MdClose />}
+              </button>
+            )}
+          </div>
+          <div className="channel-list-container">
+            <ul>{channelList}</ul>
+            {showServerDropdown && serverDropDownUl}
+          </div>
         </div>
       </div>
       <div className="server-menu">

@@ -3,6 +3,7 @@
   background-color: var(--medium-grey);
   font-size: 105%;
   height: 100%;
+  border-bottom-right-radius: 10px;
 }
 
 .users ul {

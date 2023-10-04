@@ -12,6 +12,7 @@
   /* no scrollbar */
   /* Firefox */
   scrollbar-width: 0px;
+  border-bottom-left-radius: 10px;
 }
 
 /* WebKit (Chrome, Safari) */
