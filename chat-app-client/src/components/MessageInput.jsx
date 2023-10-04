@@ -126,7 +126,7 @@ function MessageInput({ socket, scroll }) {
 
   const handleTextChange = (e) => {
     if (
-      e.target.style.height.slice(0, -2) >= 520 &&
+      e.target.style.height.slice(0, -2) >= 460 &&
       e.target.value.length > message.length
     ) {
       e.target.parentElement.classList.add("too-long");
