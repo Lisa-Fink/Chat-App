@@ -81,7 +81,7 @@ function Chat({ socket }) {
   };
 
   const handleEditConfirm = () => {
-    if (editText !== originalText.current) {
+    if (editText !== originalText.current && editText.trim()) {
       dispatch(
         editMessage({
           token: token,
