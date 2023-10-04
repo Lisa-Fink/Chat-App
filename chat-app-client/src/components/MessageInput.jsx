@@ -5,7 +5,7 @@ import { createMessage } from "../redux/messagesSlice";
 import { MdAddReaction } from "react-icons/md";
 import EmojiMenu from "./modals/EmojiMenu";
 
-function MessageInput({ socket }) {
+function MessageInput({ socket, scroll }) {
   const [message, setMessage] = useState("");
   const userID = useSelector((state) => state.auth.userID);
   const serverID = useSelector((state) => state.current.server.id);
@@ -77,6 +77,7 @@ function MessageInput({ socket }) {
           time: new Date().toISOString(),
         })
       );
+      scroll();
     }
     setMessage("");
   };

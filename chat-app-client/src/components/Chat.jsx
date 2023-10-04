@@ -52,8 +52,10 @@ function Chat({ socket }) {
     }
   };
 
+  const scroll = scrollToNewMessage(chatRef, curMessages);
   // if the channel changes, fetch the messages for the new channel
   useEffect(() => {
+    scroll();
     if (channel && channel.id) {
       dispatch(
         fetchMessagesForChannel({
@@ -71,20 +73,6 @@ function Chat({ socket }) {
     if (!messages[channel.id]) return;
     setCurMessages(messages[channel.id]);
   }, [messages[channel.id]]);
-
-  useLayoutEffect(() => {
-    // Always scroll to the bottom of the chat container
-    if (
-      chatRef.current &&
-      chatRef.current.lastChild &&
-      chatRef.current.lastChild.lastChild
-    ) {
-      const lastMessage = chatRef.current.lastChild.lastChild;
-      if (lastMessage) {
-        lastMessage.scrollIntoView();
-      }
-    }
-  }, [chatRef, curMessages]);
 
   const handleEditClick = (id, text) => {
     setEditID(id);
@@ -409,9 +397,29 @@ function Chat({ socket }) {
             <ul className="message-list">{messageList}</ul>
           )}
       </div>
-      <MessageInput socket={socket} />
+      <MessageInput socket={socket} scroll={scroll} />
     </div>
   );
 }
 
+const scrollToNewMessage = (chatRef, curMessages) => {
+  const [scroll, setScroll] = useState(true);
+  useLayoutEffect(() => {
+    // Always scroll to the bottom of the chat container
+    if (
+      scroll &&
+      chatRef.current &&
+      chatRef.current.firstChild &&
+      chatRef.current.firstChild.lastChild &&
+      chatRef.current.firstChild.lastChild.lastChild
+    ) {
+      const lastMessage = chatRef.current.firstChild.lastChild.lastChild;
+      if (lastMessage) {
+        lastMessage.scrollIntoView();
+      }
+      setScroll(false);
+    }
+  }, [curMessages]);
+  return () => setScroll(true);
+};
 export default Chat;
