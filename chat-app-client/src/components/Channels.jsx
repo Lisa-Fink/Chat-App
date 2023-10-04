@@ -254,7 +254,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
       </div>
       <div className="server-menu">
         <div>
-          <button onClick={handleAddChannelClick}>
+          <button className="hover-btn" onClick={handleAddChannelClick}>
             <AiOutlinePlusCircle />
           </button>
         </div>

@@ -134,7 +134,7 @@ function Servers({
       <li>
         <button
           id="new"
-          className="server-thumbnail add-thumbnail"
+          className="server-thumbnail add-thumbnail hover-btn"
           onMouseEnter={() => handleServerHover("new")}
           onMouseLeave={handleServerHoverExit}
           onClick={() => setShowAddServerModal(true)}
