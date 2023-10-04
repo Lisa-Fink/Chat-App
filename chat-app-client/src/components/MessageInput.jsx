@@ -141,8 +141,8 @@ function MessageInput({ socket, scroll }) {
   return (
     <div className="message-input-container">
       {typingDiv}
+      {error && <p>{error}</p>}
       <div className="message-input">
-        {error && <p>{error}</p>}
         <textarea
           placeholder={channel.name && `Message # ${channel.name}`}
           value={message}
