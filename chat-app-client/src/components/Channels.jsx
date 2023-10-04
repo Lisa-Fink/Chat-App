@@ -258,9 +258,6 @@ function Channels({ setShowServerSettingsModal, socket }) {
             <AiOutlinePlusCircle />
           </button>
         </div>
-        <div>
-          <MdSettings />
-        </div>
       </div>
       {showAddChannelModal && (
         <AddChannelModal closeModal={() => setShowAddChannelModal(false)} />
