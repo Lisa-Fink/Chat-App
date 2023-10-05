@@ -44,8 +44,6 @@ function Servers({
   const [showServerDetails, setShowServerDetails] = useState(0);
   const [showAddServerModal, setShowAddServerModal] = useState(false);
 
-  useFetchServersAtLogin(dispatch, serversStatus, token);
-
   // fetches all channels and users in servers the first time Servers changes
   useServersChange(
     servers,
@@ -102,7 +100,7 @@ function Servers({
   const thumbnails = servers.map((server) => {
     const isCurrentServer = server.serverID === curServer.id;
     return (
-      <li key={server.serverID}>
+      <li className="server-thumb-li" key={server.serverID}>
         <div
           className={`server-dot${isCurrentServer ? " selected-dot" : ""}${
             server.serverID !== curServer.id &&
@@ -174,15 +172,6 @@ function Servers({
   );
 }
 
-function useFetchServersAtLogin(dispatch, serversStatus, token) {
-  // fetches the users servers after login
-  useEffect(() => {
-    if (serversStatus === "idle") {
-      dispatch(fetchServers(token));
-    }
-  }, []);
-}
-
 function useServersChange(
   servers,
   serversStatus,
@@ -212,19 +201,6 @@ function useServersChange(
           handleServerData,
           handleServerRoleData
         );
-
-        // fetch all channels for each server
-        dispatch(
-          fetchChannelsForServer({ token: token, serverID: server.serverID })
-        );
-
-        // fetch all users for each server
-        dispatch(
-          fetchUsersForServer({
-            token: token,
-            serverID: server.serverID,
-          })
-        );
       }
 
       serverSub.current = true;
@@ -237,11 +213,11 @@ function useServersChange(
         handleServerData,
         handleServerRoleData
       );
-      // fetch all channels for server
+      // fetch all channels for new server
       dispatch(
         fetchChannelsForServer({ token: token, serverID: lastServer.serverID })
       );
-      // fetch all users for each server
+      // fetch all users for new server
       dispatch(
         fetchUsersForServer({
           token: token,

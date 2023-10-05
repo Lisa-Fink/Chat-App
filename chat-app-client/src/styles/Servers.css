@@ -22,7 +22,7 @@
   width: 0px;
 }
 
-.servers li {
+.server-thumb-li {
   list-style: none;
   width: 100%;
   display: flex;
