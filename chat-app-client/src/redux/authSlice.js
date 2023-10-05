@@ -1,4 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { addServers } from "./serversSlice";
+import { addChannels } from "./channelsSlice";
+import { addUsers } from "./usersSlice";
 
 const initialState = {
   userID: null,
@@ -28,15 +31,7 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(login.fulfilled, (state, action) => {
-        // login the user
-        state.userID = action.payload.userID;
-        state.token = action.payload.jwtAuthResponse.token;
-        state.isAuthenticated = true;
-        state.username = action.payload.username;
-        state.email = action.payload.email;
-        state.userImageUrl = action.payload.userImageUrl;
-        state.error = null;
-        state.errorContext = null;
+        loginHelper(state, action); // login the user
       })
       .addCase(login.rejected, (state, action) => {
         state.error = action.error.message;
@@ -77,6 +72,17 @@ const authSlice = createSlice({
   },
 });
 
+function loginHelper(state, action) {
+  state.userID = action.payload.userID;
+  state.token = action.payload.jwtAuthResponse.token;
+  state.isAuthenticated = true;
+  state.username = action.payload.username;
+  state.email = action.payload.email;
+  state.userImageUrl = action.payload.userImageUrl;
+  state.error = null;
+  state.errorContext = null;
+}
+
 export const login = createAsyncThunk(
   "auth/login",
   async (credentials, { dispatch }) => {
@@ -94,13 +100,19 @@ export const login = createAsyncThunk(
       throw new Error("Failed to login.");
     }
     const data = await res.json();
+    // set servers
+    dispatch(addServers(data.data.servers));
+    // set channels
+    dispatch(addChannels(data.data.channelsInServers));
+    // set users by ID/ and ids in channels and servers
+    dispatch(addUsers(data.data));
     return data;
   }
 );
 
 export const registerAndLogin = createAsyncThunk(
   "auth/registerAndLogin",
-  async (userData, { dispatch }) => {
+  async (userData) => {
     const apiUrl = import.meta.env.VITE_CHAT_API;
     const url = `${apiUrl}/users/signup`;
     const requestBody = JSON.stringify(userData);

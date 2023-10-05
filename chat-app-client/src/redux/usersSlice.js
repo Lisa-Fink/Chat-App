@@ -150,6 +150,23 @@ const usersSlice = createSlice({
       const { userID, userImageUrl } = action.payload;
       state.dataByID[userID].userImageUrl = userImageUrl;
     },
+    addUsers: (state, action) => {
+      state.byChannelID = action.payload.userIDsByChannelID;
+      const userObjByServerID = action.payload.usersInServers;
+      Object.entries(userObjByServerID).forEach(([serverID, users]) => {
+        users.forEach((user) => {
+          if (user.userID in state.dataByID) {
+            state.dataByID[user.userID].serverRoles[serverID] = user.roleID;
+          } else {
+            const { userID, username, userImageUrl } = user;
+            state.dataByID[user.userID] = { userID, username, userImageUrl };
+            state.dataByID[user.userID].serverRoles = {};
+            state.dataByID[user.userID].serverRoles[serverID] = user.roleID;
+          }
+        });
+        state.byServerID[serverID] = users.map((user) => user.userID);
+      });
+    },
   },
   extraReducers(builder) {
     builder
@@ -431,5 +448,6 @@ export const {
   userChannelRoleUpdate,
   currentUserServerRoleUpdate,
   updateUserImage,
+  addUsers,
 } = usersSlice.actions;
 export default usersSlice.reducer;

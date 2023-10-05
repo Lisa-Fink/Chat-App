@@ -16,15 +16,18 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserDataService userDataService;
 
     @Autowired
     public UserService(UsersDao usersDao, PasswordEncoder passwordEncoder, 
                        AuthenticationManager authenticationManager, 
-                       JwtTokenProvider jwtTokenProvider) {
+                       JwtTokenProvider jwtTokenProvider,
+                       UserDataService userDataService) {
         this.usersDao = usersDao;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.userDataService = userDataService;
     }
 
     public boolean checkAvailableUsername(String username) {
@@ -52,13 +55,13 @@ public class UserService {
         );
 
         if (authentication.isAuthenticated()) {
-            System.out.println("auth");
             CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
             JwtAuthResponse jwtAuthResponse  =
                     new JwtAuthResponse(jwtTokenProvider.generateToken(
                             user.getUsername(), user.getUserId(), user.getUserImageUrl(), user.getDbUsername()));
-
-            return new JwtLoginResponse(jwtAuthResponse, user.getUsername(), user.getUserId(), user.getUserImageUrl(), user.getDbUsername());
+            UserDataResponse userData = userDataService.fetchUserData(user.getUserId());
+            return new JwtLoginResponse(jwtAuthResponse, user.getUsername(), user.getUserId(), user.getUserImageUrl(),
+                    user.getDbUsername(), userData);
         }
         return null;
     }

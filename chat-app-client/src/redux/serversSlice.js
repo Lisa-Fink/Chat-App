@@ -45,6 +45,10 @@ const serversSlice = createSlice({
       state.status = "update";
       state.lastID = action.payload.serverID;
     },
+    addServers: (state, action) => {
+      state.data = action.payload;
+      state.status = "succeeded";
+    },
   },
   extraReducers(builder) {
     builder
@@ -288,5 +292,6 @@ export const {
   serverImageUpdate,
   serverDescriptionUpdate,
   currentUserRoleUpdate,
+  addServers,
 } = serversSlice.actions;
 export default serversSlice.reducer;

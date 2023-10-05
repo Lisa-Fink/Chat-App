@@ -17,7 +17,6 @@ import {
   deleteChannelUpdate,
   editName,
   editRole,
-  fetchChannelsForServer,
 } from "../redux/channelsSlice";
 import {
   addUserChannelUpdate,
@@ -276,19 +275,12 @@ function useServerSelect(
   dispatch,
   token
 ) {
-  // When a server is selected clear menus and fetch channels
+  // When a server is selected clear menus
   useEffect(() => {
     setShowLeaveServerConfirm(false);
     setShowServerDropdown(false);
 
-    if (server && server.id) {
-      dispatch(
-        fetchChannelsForServer({
-          token: token,
-          serverID: server.id,
-        })
-      );
-    } else {
+    if (!server || !server.id) {
       setCurChannels([]);
     }
   }, [server]);

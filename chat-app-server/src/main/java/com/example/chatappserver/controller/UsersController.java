@@ -54,7 +54,6 @@ public class UsersController {
     // Login using email and password
     @PostMapping("/login")
     public ResponseEntity<?>loginUserWithEmail(@RequestBody UserLoginRequest loginRequest) {
-        System.out.println("controller");
         JwtLoginResponse jwtLoginResponse = userService.loginUser(loginRequest);
         if (jwtLoginResponse == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"" + "Invalid Email/Password" + "\"}");

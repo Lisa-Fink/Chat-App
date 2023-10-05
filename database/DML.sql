@@ -72,6 +72,13 @@ SELECT c.channelID, c.roleID, c.channelTypeID, c.channelName
             LEFT JOIN UserServers us ON us.serverID = c.serverID AND us.userID = ?
             WHERE (uc.channelID IS NOT NULL OR us.roleID <= c.roleID) AND
                 c.serverID = ?;
+                
+-- Get all Channels for a user
+SELECT c.channelID, c.roleID, c.channelTypeID, c.channelName, c.serverID
+            FROM Channels c
+            LEFT JOIN UserChannels uc ON c.channelID = uc.channelID AND uc.userID = ?
+            LEFT JOIN UserServers us ON us.serverID = c.serverID AND us.userID = ?
+            WHERE (uc.channelID IS NOT NULL OR us.roleID <= c.roleID);
 
 -- Get data for a Channel by id, only if the user has the correct user channel or role
 SELECT c.channelID, c.roleID, c.channelTypeID, c.channelName

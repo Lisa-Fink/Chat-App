@@ -61,6 +61,10 @@ const channelsSlice = createSlice({
         state.byServerID[serverID].push(channel);
       }
     },
+    addChannels: (state, action) => {
+      state.status = "succeeded";
+      state.byServerID = action.payload;
+    },
   },
   extraReducers(builder) {
     builder
@@ -250,5 +254,6 @@ export const {
   deleteChannelUpdate,
   addChannelUpdate,
   editName,
+  addChannels,
 } = channelsSlice.actions;
 export default channelsSlice.reducer;
