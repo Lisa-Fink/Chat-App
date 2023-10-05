@@ -58,12 +58,15 @@ const channelsSlice = createSlice({
           (chan) => parseInt(chan.channelID) === parseInt(channel.channelID)
         )
       ) {
-        state.byServerID[serverID].push(channel);
+        addChannelHelper(state, serverID, channel);
       }
     },
     addChannels: (state, action) => {
-      state.status = "succeeded";
+      state.status = "initialized";
       state.byServerID = action.payload;
+    },
+    channelSuccess: (state) => {
+      state.status = "succeeded";
     },
   },
   extraReducers(builder) {
@@ -114,11 +117,16 @@ const channelsSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(createChannel.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.byServerID[action.payload.serverID].push(action.payload);
+        addChannelHelper(state, action.payload.serverID, action.payload);
       });
   },
 });
+
+function addChannelHelper(state, serverID, channel) {
+  state.status = "new";
+  state.newIDs = [serverID, channel.channelID];
+  state.byServerID[serverID].push(channel);
+}
 
 function deleteChannelHelper(state, action) {
   const { serverID, channelID } = action.payload;
@@ -255,5 +263,6 @@ export const {
   addChannelUpdate,
   editName,
   addChannels,
+  channelSuccess,
 } = channelsSlice.actions;
 export default channelsSlice.reducer;

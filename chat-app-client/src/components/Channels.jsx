@@ -14,6 +14,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setChannel, setServer } from "../redux/currentSlice";
 import {
+  channelSuccess,
   deleteChannelUpdate,
   editName,
   editRole,
@@ -43,8 +44,8 @@ function Channels({ setShowServerSettingsModal, socket }) {
   const dispatch = useDispatch();
   const { server, channel } = useSelector((state) => state.current);
   const { token, userID } = useSelector((state) => state.auth);
-  const channelData = useSelector((state) => state.channels);
-  const channels = channelData.byServerID;
+  const channels = useSelector((state) => state.channels.byServerID);
+  const { status, newIDs } = useSelector((state) => state.channels);
   const [curChannels, setCurChannels] = useState(
     channels && server && server.id in channels ? channels[server.id] : []
   );
@@ -67,7 +68,16 @@ function Channels({ setShowServerSettingsModal, socket }) {
     dispatch,
     token
   );
-  useChannelsChange(socket, channels, dispatch, channel, token, userID);
+  useChannelsChange(
+    socket,
+    channels,
+    dispatch,
+    channel,
+    status,
+    newIDs,
+    token,
+    userID
+  );
   useCurrentServerChannelsChange(
     server,
     channels,
@@ -271,9 +281,7 @@ function useServerSelect(
   setCurChannels,
   server,
   setShowLeaveServerConfirm,
-  setShowServerDropdown,
-  dispatch,
-  token
+  setShowServerDropdown
 ) {
   // When a server is selected clear menus
   useEffect(() => {
@@ -286,27 +294,43 @@ function useServerSelect(
   }, [server]);
 }
 
-function useChannelsChange(socket, channels, dispatch, channel, token, userID) {
+function useChannelsChange(
+  socket,
+  channels,
+  dispatch,
+  channel,
+  channelStatus,
+  newIDs,
+  token,
+  userID
+) {
   useEffect(() => {
-    // subscribe to all channels
-    for (const serverID in channels) {
-      const channelArr = channels[serverID];
-      for (const chan of channelArr) {
-        // if not already subscribed, subscribe
-        if (!(chan.channelID in socket.current.getChannelSubs())) {
-          socket.current.addChannelSub(chan.channelID, handleChannelData);
+    if (channelStatus === "initialized") {
+      // subscribe to all channels
+      for (const serverID in channels) {
+        const channelArr = channels[serverID];
+        for (const chan of channelArr) {
+          // if not already subscribed, subscribe
+          if (!(chan.channelID in socket.current.getChannelSubs())) {
+            socket.current.addChannelSub(chan.channelID, handleChannelData);
+          }
         }
-        // fetch users for channel
-        dispatch(
-          fetchUsersForChannel({
-            token: token,
-            serverID: chan.serverID,
-            channelID: chan.channelID,
-          })
-        );
       }
+    } else if (channelStatus === "new") {
+      // fetch users for channel
+      dispatch(
+        fetchUsersForChannel({
+          token: token,
+          serverID: newIDs[0],
+          channelID: newIDs[1],
+        })
+      );
+      // subscribe
+      socket.current.addChannelSub(newIDs[1], handleChannelData);
     }
-  }, [channels]);
+    if (channelStatus === "new" || channelStatus === "initialized")
+      dispatch(channelSuccess());
+  }, [channelStatus]);
 
   const handleChannelData = (res) => {
     const parsed = JSON.parse(res.body);
