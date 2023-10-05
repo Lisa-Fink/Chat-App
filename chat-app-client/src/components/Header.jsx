@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "../styles/Header.css";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/authSlice";
-import EditModal from "./EditModal";
+import EditModal from "./modals/EditModal";
 
 function Header() {
   const auth = useSelector((state) => state.auth);

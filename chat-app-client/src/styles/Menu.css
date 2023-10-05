@@ -8,15 +8,16 @@
   justify-content: space-between;
   color: var(--light-text);
   padding: 0.5%;
-  font-size: 1.5em;
 }
 
 .channel-name {
   text-align: left;
   font-weight: bold;
   padding-left: 2%;
+  font-size: 1.5em;
 }
 
 #channel-setting-icon {
   margin-right: 20px;
+  font-size: 1.5em;
 }

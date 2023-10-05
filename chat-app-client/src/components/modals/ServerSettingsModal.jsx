@@ -5,9 +5,9 @@ import {
   updateServerImage,
 } from "../../redux/serversSlice";
 
-import "../../styles/modal.css";
 import "../../styles/ServerSettingsModal.css";
 import MangeUsers from "./MangeUsers";
+import Modal from "./Modal";
 
 function ServerSettingsModal({ closeModal }) {
   const dispatch = useDispatch();
@@ -72,153 +72,144 @@ function ServerSettingsModal({ closeModal }) {
   };
 
   return (
-    <div className="modal-container">
-      <div className="modal">
-        <h2>{name}</h2>
-        <h3>Server Settings</h3>
-        <button className="modal-view-btn" onClick={() => setView("details")}>
-          Server Details
-        </button>{" "}
-        |
-        <button className="modal-view-btn" onClick={() => setView("users")}>
-          Manage Users
-        </button>
-        {view === "details" ? (
-          <form>
-            <>
-              <div className="form-field-container">
-                Edit Server Details
-                <div className="flex-row">
+    <Modal closeModal={closeModal}>
+      <h2>{name}</h2>
+      <h3>Server Settings</h3>
+      <button className="modal-view-btn" onClick={() => setView("details")}>
+        Server Details
+      </button>{" "}
+      |
+      <button className="modal-view-btn" onClick={() => setView("users")}>
+        Manage Users
+      </button>
+      {view === "details" ? (
+        <form>
+          <>
+            <div className="form-field-container">
+              Edit Server Details
+              <div className="flex-row">
+                <div>
                   <div>
-                    <div>
-                      <label htmlFor="server-description">
-                        Server Description
-                      </label>
-                      {!validDescription && (
-                        <span class="error">Enter a Server Description</span>
-                      )}
-                    </div>
-                    {!editDescription ? (
-                      <div id="server-description">{description}</div>
-                    ) : (
-                      <textarea
-                        name="server-description"
-                        id="server-description"
-                        placeholder="Type Server Description"
-                        value={serverDescription}
-                        onChange={(e) => setServerDescription(e.target.value)}
-                      />
+                    <label htmlFor="server-description">
+                      Server Description
+                    </label>
+                    {!validDescription && (
+                      <span class="error">Enter a Server Description</span>
                     )}
                   </div>
                   {!editDescription ? (
-                    <button
-                      id="edit-desc-btn"
-                      onClick={handleEditDescriptionClick}
-                    >
-                      edit
-                    </button>
+                    <div id="server-description">{description}</div>
                   ) : (
-                    <>
-                      <button
-                        id="edit-desc-btn"
-                        onClick={handleDescriptionSubmit}
-                      >
-                        submit
-                      </button>
-                      <button
-                        id="edit-desc-btn"
-                        onClick={handleDescriptionCancel}
-                      >
-                        cancel
-                      </button>
-                    </>
+                    <textarea
+                      name="server-description"
+                      id="server-description"
+                      placeholder="Type Server Description"
+                      value={serverDescription}
+                      onChange={(e) => setServerDescription(e.target.value)}
+                    />
                   )}
                 </div>
-              </div>
-
-              <div className="form-field-container">
-                Edit Server Image
-                <ul onClick={handleImageClick}>
-                  <li>
-                    <img
-                      data-img={"./images/cat-drawing.jpg"}
-                      className={
-                        "edit-thumbnail" +
-                        (image === "./images/cat-drawing.jpg"
-                          ? " selected"
-                          : "")
-                      }
-                      src="./images/cat-drawing.jpg"
-                    />
-                  </li>
-                  <li>
-                    <img
-                      data-img={"./images/cat1.jpg"}
-                      className={
-                        "edit-thumbnail" +
-                        (image === "./images/cat1.jpg" ? " selected" : "")
-                      }
-                      src="./images/cat1.jpg"
-                    />
-                  </li>
-                  <li>
-                    <img
-                      data-img={"./images/cat2.jpg"}
-                      className={
-                        "edit-thumbnail" +
-                        (image === "./images/cat2.jpg" ? " selected" : "")
-                      }
-                      src="./images/cat2.jpg"
-                    />
-                  </li>
-                  <li>
-                    <img
-                      data-img={"./images/dog1.jpg"}
-                      className={
-                        "edit-thumbnail" +
-                        (image === "./images/dog1.jpg" ? " selected" : "")
-                      }
-                      src="./images/dog1.jpg"
-                    />
-                  </li>
-                  <li>
-                    <img
-                      data-img={"./images/lisa.jpg"}
-                      className={
-                        "edit-thumbnail" +
-                        (image === "./images/lisa.jpg" ? " selected" : "")
-                      }
-                      src="./images/lisa.jpg"
-                    />
-                  </li>
-                  <li>
+                {!editDescription ? (
+                  <button
+                    id="edit-desc-btn"
+                    onClick={handleEditDescriptionClick}
+                  >
+                    edit
+                  </button>
+                ) : (
+                  <>
                     <button
-                      data-img={null}
-                      className={
-                        "edit-thumbnail edit-btn" +
-                        (image === null || image === undefined
-                          ? " selected"
-                          : "")
-                      }
+                      id="edit-desc-btn"
+                      onClick={handleDescriptionSubmit}
                     >
-                      {name.substring(0, 1).toUpperCase()}
+                      submit
                     </button>
-                  </li>
-                </ul>
-                <button id="modal-btn" onClick={handleImageSubmit}>
-                  submit
-                </button>
+                    <button
+                      id="edit-desc-btn"
+                      onClick={handleDescriptionCancel}
+                    >
+                      cancel
+                    </button>
+                  </>
+                )}
               </div>
-            </>
-          </form>
-        ) : (
-          <MangeUsers id={id} />
-        )}
-        <button id="close-btn" onClick={closeModal}>
-          Close
-        </button>
-      </div>
-    </div>
+            </div>
+
+            <div className="form-field-container">
+              Edit Server Image
+              <ul onClick={handleImageClick}>
+                <li>
+                  <img
+                    data-img={"./images/cat-drawing.jpg"}
+                    className={
+                      "edit-thumbnail" +
+                      (image === "./images/cat-drawing.jpg" ? " selected" : "")
+                    }
+                    src="./images/cat-drawing.jpg"
+                  />
+                </li>
+                <li>
+                  <img
+                    data-img={"./images/cat1.jpg"}
+                    className={
+                      "edit-thumbnail" +
+                      (image === "./images/cat1.jpg" ? " selected" : "")
+                    }
+                    src="./images/cat1.jpg"
+                  />
+                </li>
+                <li>
+                  <img
+                    data-img={"./images/cat2.jpg"}
+                    className={
+                      "edit-thumbnail" +
+                      (image === "./images/cat2.jpg" ? " selected" : "")
+                    }
+                    src="./images/cat2.jpg"
+                  />
+                </li>
+                <li>
+                  <img
+                    data-img={"./images/dog1.jpg"}
+                    className={
+                      "edit-thumbnail" +
+                      (image === "./images/dog1.jpg" ? " selected" : "")
+                    }
+                    src="./images/dog1.jpg"
+                  />
+                </li>
+                <li>
+                  <img
+                    data-img={"./images/lisa.jpg"}
+                    className={
+                      "edit-thumbnail" +
+                      (image === "./images/lisa.jpg" ? " selected" : "")
+                    }
+                    src="./images/lisa.jpg"
+                  />
+                </li>
+                <li>
+                  <button
+                    data-img={null}
+                    className={
+                      "edit-thumbnail edit-btn" +
+                      (image === null || image === undefined ? " selected" : "")
+                    }
+                  >
+                    {name.substring(0, 1).toUpperCase()}
+                  </button>
+                </li>
+              </ul>
+              <button id="modal-btn" onClick={handleImageSubmit}>
+                submit
+              </button>
+            </div>
+          </>
+        </form>
+      ) : (
+        <MangeUsers id={id} />
+      )}
+    </Modal>
   );
 }
 

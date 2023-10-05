@@ -23,7 +23,6 @@
   padding: 2%;
   border-radius: 15px;
   color: var(--light-text);
-
   /* scrollbar */
   /* Firefox */
   scrollbar-width: thin;
@@ -129,4 +128,18 @@ select {
   padding: 1%;
   font-size: 100%;
   border-radius: 15px;
+}
+
+.modal-close {
+  font-size: 150%;
+  text-align: right;
+  margin-top: -20px;
+}
+
+.modal-hover:hover {
+  color: var(--medium-text);
+}
+
+.modal h2 {
+  margin-top: 10px;
 }

@@ -15,7 +15,7 @@ import {
   MdCheck,
   MdCancel,
 } from "react-icons/md";
-import EmojiMenu from "./modals/EmojiMenu";
+import EmojiMenu from "./EmojiMenu";
 import MessageInput from "./MessageInput";
 
 function Chat({ socket }) {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import "./../styles/modal.css";
-import { createServer, joinServerByInviteCode } from "../redux/serversSlice";
+import { createServer, joinServerByInviteCode } from "../../redux/serversSlice";
+import Modal from "./Modal";
 
 function AddServerModal({ closeModal }) {
   const auth = useSelector((state) => state.auth);
@@ -101,8 +101,13 @@ function AddServerModal({ closeModal }) {
     <>
       <h2>Create Server </h2>
       <div>
-        <button onClick={() => setShowJoin(false)}>Create Server</button>|
-        <button onClick={() => setShowJoin(true)}>Join Server</button>
+        <button className="modal-hover" onClick={() => setShowJoin(false)}>
+          Create Server
+        </button>
+        |
+        <button className="modal-hover" onClick={() => setShowJoin(true)}>
+          Join Server
+        </button>
       </div>
       <form>
         <div className="form-field-container">
@@ -216,17 +221,7 @@ function AddServerModal({ closeModal }) {
     </>
   );
 
-  return (
-    <div className="modal-container">
-      <div className="modal">
-        {!showJoin ? create : join}
-
-        <button id="close-btn" onClick={closeModal}>
-          Cancel
-        </button>
-      </div>
-    </div>
-  );
+  return <Modal closeModal={closeModal}>{!showJoin ? create : join}</Modal>;
 }
 
 export default AddServerModal;

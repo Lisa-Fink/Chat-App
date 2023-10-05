@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import "../../styles/Emojis.css";
+import "../styles/Emojis.css";
 
 function EmojiMenu({ addEmoji, messageID, cancel }) {
   const [hoverEmojiName, setHoverEmojiName] = useState("");

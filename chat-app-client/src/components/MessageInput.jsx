@@ -3,7 +3,7 @@ import "../styles/MessageInput.css";
 import { useSelector, useDispatch } from "react-redux";
 import { createMessage } from "../redux/messagesSlice";
 import { MdAddReaction } from "react-icons/md";
-import EmojiMenu from "./modals/EmojiMenu";
+import EmojiMenu from "./EmojiMenu";
 
 function MessageInput({ socket, scroll }) {
   const [message, setMessage] = useState("");

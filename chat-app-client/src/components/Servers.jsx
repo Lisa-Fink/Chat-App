@@ -10,7 +10,7 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { setServer } from "../redux/currentSlice";
 import "../styles/Servers.css";
-import AddServerModal from "./AddServerModal";
+import AddServerModal from "./modals/AddServerModal";
 import ServerSettingsModal from "./modals/ServerSettingsModal";
 import {
   addUserServerUpdate,
