@@ -1,11 +1,10 @@
 .channels-container {
-  grid-area: 2/2/5/3;
+  grid-area: 2/2/4/3;
   background-color: var(--dark-grey);
 }
 
 .channels {
   width: 100%;
-
   background-color: var(--medium-grey);
   color: var(--light-text);
   border-top-left-radius: 6px;
@@ -28,14 +27,17 @@
 
 .col-head {
   border-bottom: 2px solid var(--divider);
+  background-color: var(--medium-grey);
   text-align: center;
-  grid-row: 1/2;
   color: white;
   display: flex;
   padding: 5px;
   gap: 2px;
   align-items: center;
   justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .col-head h2 {
