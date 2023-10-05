@@ -1,6 +1,8 @@
 # ChatApp Server API Documentation
 
-Welcome to the ChatApp Server API Documentation! This guide provides detailed information about the API endpoints available for interacting with the ChatApp server. Below you'll find information on how to make requests, what each endpoint does, and example request and response structures.
+Welcome to the ChatApp Server API Documentation! This guide provides detailed information about the API endpoints
+available for interacting with the ChatApp server. Below you'll find information on how to make requests, what each
+endpoint does, and example request and response structures.
 
 ## Table of Contents
 
@@ -66,7 +68,8 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 
 - `PUT /servers/{serverID}/channels/{channelID}/role`: Update the channel's role. (Request text)
 - `PUT /servers/{serverID}/channels/{channelID}/name`: Update the channel's name. (Request text)
-- `PUT /servers/{serverID}/channels/{channelID}`: Update the channel's role and name. (Request json with roleID and channelName)
+- `PUT /servers/{serverID}/channels/{channelID}`: Update the channel's role and name. (Request json with roleID and
+  channelName)
 
 ### Delete Channel/UserChannel
 
@@ -114,7 +117,6 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
     "createdDate": "2199-08-17"
   }
   ```
-
 
 ## Messages
 
@@ -217,23 +219,27 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
 
 (user sending request must be the creator of the message, or a moderator if deleting a message)
 
-- `PUT /servers/{serverID}/channels/{channelID}/messages/{messageID}`: Edit a messages text without changing attachments.
+- `PUT /servers/{serverID}/channels/{channelID}/messages/{messageID}`: Edit a messages text without changing
+  attachments.
   - Request:
   ```json
   { "text": "New Text" }
   ```
-- `PUT /servers/{serverID}/channels/{channelID}/messages/attachments/{messageID}`: Edit a message by removing attachment(s).
+- `PUT /servers/{serverID}/channels/{channelID}/messages/attachments/{messageID}`: Edit a message by removing
+  attachment(s).
   - Request (list of attachmentIDs):
   ```json
   [1, 2, 3]
   ```
-- `DELETE /servers/{serverID}/channels/{channelID}/messages/{messageID}`: Delete a message, removing all attachments and reactions (CASCADE).
+- `DELETE /servers/{serverID}/channels/{channelID}/messages/{messageID}`: Delete a message, removing all attachments and
+  reactions (CASCADE).
 
 ## Servers
 
 ### Create a Server
 
-- `POST /servers`: Create a new server. Also creates a UserServer for the user sending the request, with a role of Creator (1) and a General Channel.
+- `POST /servers`: Create a new server. Also creates a UserServer for the user sending the request, with a role of
+  Creator (1) and a General Channel.
   - Request:
     ```json
     {
@@ -326,13 +332,49 @@ Welcome to the ChatApp Server API Documentation! This guide provides detailed in
   ```json
   {
     "jwtAuthResponse": {
-      "token": "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbjFAZXhhbXBsZS5jb20iLCJ1c2VySUQiOjEyLCJ1c2VySW1hZ2VVcmwiOiJodHRwOi8vZXhhbXBsZS5jb20vdXNlci1pbWFnZS5qcGciLCJkYlVzZXJuYW1lIjoiYWRtaW4xIiwiaWF0IjoxNjkzMjQ2NzQ2LCJleHAiOjE2OTM4NTE1NDZ9.bI-pbuzsH6fR0RrzG7xOcGRt4fKG_H8HPOQ71jc-rG61rRCd2iZlyebPZyceUGKy"
+      "token": "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbjFAZXh"
     },
     "email": "admin1@example.com",
     "userID": 12,
     "userImageUrl": "http://example.com/user-image.jpg",
-    "username": "admin1"
+    "username": "admin1",
+    "data": {
+      "servers": [
+        {
+          "serverID": 1,
+          "serverName": "Server",
+          "serverDescription": "abcd",
+          "serverImageUrl": "http://imageurl.com",
+          "roleID": 1
+        }
+      ],
+      "usersInServers": {
+        "1": [
+          {
+            "userID": 1,
+            "username": "Bob",
+            "userImageUrl": "http://userimage.com",
+            "roleID": 1
+          }
+        ]
+      },
+      "channelsInServers": {
+        "2": [
+          {
+            "channelID": 42,
+            "serverID": 1,
+            "roleID": 2,
+            "channelTypeID": 1,
+            "channelName": "General"
+          }
+        ]
+      },
+      "userIDsByChannelID": {
+        "42": [1]
+      }
+    }
   }
+
   ```
 
 ### Get Users in a Channel
