@@ -39,6 +39,7 @@ function Servers({
   const lastServerID = useSelector((state) => state.servers.lastID);
   const serversStatus = useSelector((state) => state.servers.status);
   const serverSub = useRef(false);
+  const curServer = useSelector((state) => state.current.server);
 
   const [showServerDetails, setShowServerDetails] = useState(0);
   const [showAddServerModal, setShowAddServerModal] = useState(false);
@@ -99,10 +100,22 @@ function Servers({
   };
 
   const thumbnails = servers.map((server) => {
+    const isCurrentServer = server.serverID === curServer.id;
     return (
       <li key={server.serverID}>
+        <div
+          className={`server-dot${isCurrentServer ? " selected-dot" : ""}${
+            server.serverID !== curServer.id &&
+            showServerDetails === server.serverID
+              ? " hover-dot"
+              : ""
+          }`}
+        ></div>
+
         <button
-          className="server-thumbnail"
+          className={`server-thumbnail${
+            isCurrentServer ? " selected-thumbnail" : ""
+          }`}
           id={server.serverID}
           onClick={() =>
             handleServerClick(
@@ -117,7 +130,12 @@ function Servers({
           onMouseLeave={handleServerHoverExit}
         >
           {server.serverImageUrl !== null ? (
-            <img className="image-thumbnail" src={server.serverImageUrl} />
+            <img
+              className={`image-thumbnail${
+                isCurrentServer ? " selected-thumbnail" : ""
+              }`}
+              src={server.serverImageUrl}
+            />
           ) : (
             server.serverName.substring(0, 1)
           )}
@@ -132,6 +150,7 @@ function Servers({
     <ul className="servers">
       {thumbnails}
       <li>
+        <div className="server-dot"></div>
         <button
           id="new"
           className="server-thumbnail add-thumbnail hover-btn"

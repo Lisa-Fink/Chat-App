@@ -1,11 +1,13 @@
 .servers {
   background-color: var(--dark-grey);
   padding: 2%;
+  padding-left: 0;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  width: 100%;
   gap: 18px;
   grid-area: 2/1/5/2;
   overflow-y: scroll;
@@ -19,8 +21,39 @@
 .servers::-webkit-scrollbar {
   width: 0px;
 }
+
 .servers li {
   list-style: none;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 6px;
+}
+
+.server-dot {
+  width: 5px;
+  height: 1px;
+  background-color: var(--dark-grey);
+  border-radius: 0 100% 100% 0;
+  transition: height 0.3s ease-in, background-color 0.3s ease-in;
+}
+
+.selected-dot {
+  height: 50%;
+  background-color: white;
+  margin: 0;
+  padding: 0;
+  border-radius: 0 100% 100% 0;
+}
+
+.hover-dot {
+  height: 25%;
+  background-color: white;
+  margin: 0;
+  padding: 0;
+  border-radius: 0 100% 100% 0;
+  transition: height 0.3s ease-in, background-color 0.3s ease-in;
 }
 
 .server-thumbnail,
@@ -32,6 +65,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: border-radius 0.3s;
 }
 
 .server-thumbnail {
@@ -44,6 +78,13 @@
 
 .image-thumbnail {
   object-fit: cover;
+}
+
+.image-thumbnail:hover,
+.server-thumbnail:hover,
+.server-thumbnail.selected-thumbnail,
+.image-thumbnail.selected-thumbnail {
+  border-radius: 35%;
 }
 
 .add-thumbnail {
