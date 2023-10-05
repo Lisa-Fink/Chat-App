@@ -1,12 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
-  MdAdd,
-  MdCancel,
   MdCheck,
-  MdClose,
-  MdOutlineAdd,
   MdOutlineAddCircleOutline,
-  MdOutlineExpandMore,
   MdOutlineRemoveCircleOutline,
 } from "react-icons/md";
 import { useSelector, useDispatch } from "react-redux";
