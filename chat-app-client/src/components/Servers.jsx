@@ -102,7 +102,13 @@ function Servers({
     return (
       <li className="server-thumb-li" key={server.serverID}>
         <div
-          className={`server-dot${isCurrentServer ? " selected-dot" : ""}${
+          className={`server-dot${
+            isCurrentServer
+              ? " selected-dot"
+              : server.hasUnread
+              ? " unread-dot"
+              : ""
+          }${
             server.serverID !== curServer.id &&
             showServerDetails === server.serverID
               ? " hover-dot"

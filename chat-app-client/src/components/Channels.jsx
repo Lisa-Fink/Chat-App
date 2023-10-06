@@ -170,18 +170,21 @@ function Channels({ setShowServerSettingsModal, socket }) {
     );
   };
 
-  const channelList = curChannels.map(({ channelID, channelName, roleID }) => (
-    <li key={channelID}>
-      <button
-        data-id={channelID}
-        data-name={channelName}
-        data-roleid={roleID}
-        onClick={handleChannelClick}
-      >
-        # {channelName}
-      </button>
-    </li>
-  ));
+  const channelList = curChannels.map(
+    ({ channelID, channelName, roleID, hasUnread }) => (
+      <li key={channelID}>
+        <div className={`chan-icon ${hasUnread ? "unread" : ""}`}></div>
+        <button
+          data-id={channelID}
+          data-name={channelName}
+          data-roleid={roleID}
+          onClick={handleChannelClick}
+        >
+          # {channelName}
+        </button>
+      </li>
+    )
+  );
 
   const serverDropDownUl = (
     <ul className="server-dropdown">
@@ -263,9 +266,11 @@ function Channels({ setShowServerSettingsModal, socket }) {
       </div>
       <div className="server-menu">
         <div>
-          <button className="hover-btn" onClick={handleAddChannelClick}>
-            <AiOutlinePlusCircle />
-          </button>
+          {channel.channelID && (
+            <button className="hover-btn" onClick={handleAddChannelClick}>
+              <AiOutlinePlusCircle />
+            </button>
+          )}
         </div>
       </div>
       {showAddChannelModal && (

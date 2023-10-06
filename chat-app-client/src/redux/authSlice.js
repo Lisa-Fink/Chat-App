@@ -100,6 +100,8 @@ export const login = createAsyncThunk(
       throw new Error("Failed to login.");
     }
     const data = await res.json();
+    // iterate through channels to set unread status for channel and servers
+    getUnreadStatusHelper(data.data.channelsInServers, data.data.servers);
     // set servers
     dispatch(addServers(data.data.servers));
     // set channels
@@ -109,6 +111,27 @@ export const login = createAsyncThunk(
     return data;
   }
 );
+
+const getUnreadStatusHelper = (channels, servers) => {
+  for (const server of servers) {
+    for (const channel of channels[server.serverID]) {
+      if (!("hasUnread" in server)) server.hasUnread = false;
+      if (!channel.channelTime) {
+        channel.hasUnread = false;
+        continue;
+      }
+      const channelTime = new Date(channel.channelTime);
+      let userRead;
+      if (channel.userRead) userRead = new Date(channel.userRead);
+      if (!userRead || userRead < channelTime) {
+        channel.hasUnread = true;
+        server.hasUnread = true;
+      } else {
+        channel.hasUnread = false;
+      }
+    }
+  }
+};
 
 export const registerAndLogin = createAsyncThunk(
   "auth/registerAndLogin",
