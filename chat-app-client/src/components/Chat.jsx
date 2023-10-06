@@ -55,8 +55,13 @@ function Chat({ socket }) {
   };
 
   const hasUnread = useRef(null);
+  const curChanUserTime = useRef(null);
 
-  const scroll = useScrollToNewMessage(chatRef, curMessages);
+  const scroll = useScrollToNewMessage(
+    chatRef,
+    curMessages,
+    curChanUserTime.current
+  );
   // if the channel changes, fetch the messages for the new channel
   useEffect(() => {
     scroll();
@@ -69,13 +74,23 @@ function Chat({ socket }) {
         })
       );
       const curChan = channels[server.id].find(
-        (chan) => chan.channelID == channel.id
+        (chan) => parseInt(chan.channelID) == parseInt(channel.id)
       );
       hasUnread.current = curChan && curChan.hasUnread;
+      curChanUserTime.current = curChan && curChan.userRead;
     } else {
       setCurMessages([]);
     }
   }, [channel]);
+  useEffect(() => {
+    if (channels && channels[server.id]) {
+      const curChan = channels[server.id].find(
+        (chan) => parseInt(chan.channelID) == parseInt(channel.id)
+      );
+      hasUnread.current = curChan && curChan.hasUnread;
+      curChanUserTime.current = curChan && curChan.userRead;
+    }
+  }, [channels[server.id]]);
 
   // After the messages for the channel are fetched/added to, update the local state
   useEffect(() => {
@@ -437,20 +452,35 @@ function Chat({ socket }) {
   );
 }
 
-const useScrollToNewMessage = (chatRef, curMessages) => {
+const useScrollToNewMessage = (chatRef, curMessages, time) => {
   const [scroll, setScroll] = useState(true);
   useLayoutEffect(() => {
-    // Always scroll to the bottom of the chat container
+    // Always scroll to the channel with the same or prev time
     if (
       scroll &&
       chatRef.current &&
       chatRef.current.firstChild &&
-      chatRef.current.firstChild.lastChild &&
-      chatRef.current.firstChild.lastChild.lastChild
+      chatRef.current.firstChild.firstChild
     ) {
-      const lastMessage = chatRef.current.firstChild.lastChild.lastChild;
+      let lastMessage;
+      const messageList = chatRef.current.firstChild.children;
+
+      let i = 0;
+      const dateTime = new Date(time).getTime();
+      while (i < messageList.length) {
+        const messageTime = new Date(curMessages[i].time).getTime();
+        if (messageTime === dateTime) {
+          lastMessage = messageList[i];
+          break;
+        }
+        if (messageTime > dateTime) {
+          lastMessage = messageList[Math.max(i - 1, 0)];
+          break;
+        }
+        i++;
+      }
       if (lastMessage) {
-        lastMessage.scrollIntoView();
+        lastMessage.scrollIntoView({ block: "end" });
       }
       setScroll(false);
     }
