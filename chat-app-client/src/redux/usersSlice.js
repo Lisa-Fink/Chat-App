@@ -166,6 +166,7 @@ const usersSlice = createSlice({
         });
         state.byServerID[serverID] = users.map((user) => user.userID);
       });
+      state.status = "succeeded";
     },
   },
   extraReducers(builder) {
