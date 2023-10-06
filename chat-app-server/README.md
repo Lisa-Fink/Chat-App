@@ -365,7 +365,9 @@ endpoint does, and example request and response structures.
             "serverID": 1,
             "roleID": 2,
             "channelTypeID": 1,
-            "channelName": "General"
+            "channelName": "General",
+            "channelTime": "2023-10-04T02:48:47.000+00:00",
+            "userRead": "2023-10-04T02:48:47.000+00:00"
           }
         ]
       },

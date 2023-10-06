@@ -74,10 +74,14 @@ SELECT c.channelID, c.roleID, c.channelTypeID, c.channelName
                 c.serverID = ?;
                 
 -- Get all Channels for a user
-SELECT c.channelID, c.roleID, c.channelTypeID, c.channelName, c.serverID
+            SELECT c.channelID, c.roleID, c.channelTypeID, c.channelName, c.serverID, cr.lastRead as userRead,
+                (SELECT MAX(m.time) FROM Messages m
+                    WHERE m.channelID = c.channelID)
+                        AS channelTime
             FROM Channels c
             LEFT JOIN UserChannels uc ON c.channelID = uc.channelID AND uc.userID = ?
             LEFT JOIN UserServers us ON us.serverID = c.serverID AND us.userID = ?
+            LEFT JOIN ChannelRead cr ON cr.channelID = c.channelID AND cr.userID = ?
             WHERE (uc.channelID IS NOT NULL OR us.roleID <= c.roleID);
 
 -- Get data for a Channel by id, only if the user has the correct user channel or role

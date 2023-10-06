@@ -1,9 +1,8 @@
 package com.example.chatappserver.repository;
 
 import com.example.chatappserver.model.Channel;
-import com.example.chatappserver.model.Server;
+import com.example.chatappserver.model.ChannelLoginResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -23,12 +22,6 @@ public class ChannelsDao {
     @Autowired
     public ChannelsDao(JdbcTemplate jdbcTemplate) {this.jdbcTemplate = jdbcTemplate;}
 
-    private static RowMapper<Channel> channelRowMapper() {
-        return (resultSet, rowNum) -> {
-                    int serverID = resultSet.getInt("serverID");
-                    return channelRowMapper(serverID).mapRow(resultSet, rowNum);
-                };
-    }
     private static RowMapper<Channel> channelRowMapper(int serverID) {
         return (resultSet, rowNum) -> new Channel(
                 resultSet.getInt("channelID"),
@@ -36,6 +29,18 @@ public class ChannelsDao {
                 resultSet.getInt("roleID"),
                 resultSet.getInt("channelTypeID"),
                 resultSet.getString("channelName")
+        );
+    }
+
+    private static RowMapper<ChannelLoginResponse> channelLoginResponseRowMapper() {
+        return (resultSet, rowNum) -> new ChannelLoginResponse(
+                resultSet.getInt("channelID"),
+                resultSet.getInt("serverID"),
+                resultSet.getInt("roleID"),
+                resultSet.getInt("channelTypeID"),
+                resultSet.getString("channelName"),
+                resultSet.getTimestamp("channelTime"),
+                resultSet.getTimestamp("userRead")
         );
     }
 
@@ -113,16 +118,20 @@ public class ChannelsDao {
     }
 
     // Get all channels for a user
-    public List<Channel> getAllUserChannels(int userID) {
+    public List<ChannelLoginResponse> getAllUserChannels(int userID) {
         String sql = """
-            SELECT c.channelID, c.roleID, c.channelTypeID, c.channelName, c.serverID
+            SELECT c.channelID, c.roleID, c.channelTypeID, c.channelName, c.serverID, cr.lastRead as userRead,
+                (SELECT MAX(m.time) FROM Messages m
+                    WHERE m.channelID = c.channelID)
+                        AS channelTime
             FROM Channels c
             LEFT JOIN UserChannels uc ON c.channelID = uc.channelID AND uc.userID = ?
             LEFT JOIN UserServers us ON us.serverID = c.serverID AND us.userID = ?
+            LEFT JOIN ChannelRead cr ON cr.channelID = c.channelID AND cr.userID = ?
             WHERE (uc.channelID IS NOT NULL OR us.roleID <= c.roleID);
 """;
-        return jdbcTemplate.query(sql, channelRowMapper(),
-                userID, userID);
+        return jdbcTemplate.query(sql, channelLoginResponseRowMapper(),
+                userID, userID, userID);
     }
 
     public Channel getChannelByID(int serverID, int userID, int channelID) {

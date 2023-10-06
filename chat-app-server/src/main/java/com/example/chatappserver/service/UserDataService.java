@@ -1,9 +1,6 @@
 package com.example.chatappserver.service;
 
-import com.example.chatappserver.model.Channel;
-import com.example.chatappserver.model.ServerResponse;
-import com.example.chatappserver.model.UserChannelResponse;
-import com.example.chatappserver.model.UserDataResponse;
+import com.example.chatappserver.model.*;
 import com.example.chatappserver.repository.ChannelsDao;
 import com.example.chatappserver.repository.ServersDao;
 import com.example.chatappserver.repository.UsersDao;
@@ -40,14 +37,14 @@ public class UserDataService {
                 ));
 
         // Get all channels for each server, mapped by serverID
-        List<Channel> channels = channelsDao.getAllUserChannels(userId);
-        Map<Integer, List<Channel>> channelsInServers = channels.stream()
-                .collect(Collectors.groupingBy(Channel::getServerID));
+        List<ChannelLoginResponse> channels = channelsDao.getAllUserChannels(userId);
+        Map<Integer, List<ChannelLoginResponse>> channelsInServers = channels.stream()
+                .collect(Collectors.groupingBy(ChannelLoginResponse::getServerID));
 
         // Get all userIDs for each channel, mapped by channelID
         Map<Integer, List<Integer>> userIDsByChannelID = channels.stream()
                 .collect(Collectors.toMap(
-                        Channel::getChannelID,
+                        ChannelLoginResponse::getChannelID,
                         channel -> usersDao.getUsersInChannel(
                                 channel.getChannelID(),
                                 channel.getServerID())
