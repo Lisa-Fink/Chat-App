@@ -9,8 +9,10 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -96,6 +98,16 @@ public class ChannelsDao {
         }
 
         jdbcTemplate.batchUpdate(sql, batchArgs);
+    }
+
+    // Add/Update ReadChannel
+    public void addChannelRead(int userID, int channelID, String lastRead) {
+        String sql = """
+                INSERT INTO ChannelRead (userID, channelID, lastRead)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE lastRead = ?;
+                """;
+        jdbcTemplate.update(sql, userID, channelID, lastRead, lastRead);
     }
 
     public void addUserToChannel(int userID, int channelID) {

@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @RestController
@@ -93,6 +94,16 @@ public class ChannelsController {
                 channelID, userID, serverID, user.getUserId(), true);
         // broadcast user add to new user
         channelWebSocketService.sendUserNewChannel(userID, channelID, serverID);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{channelID}/channel-read")
+    public ResponseEntity<Void> addChannelRead(
+            @PathVariable int serverID, @PathVariable int channelID,
+            @AuthenticationPrincipal CustomUserDetails user,
+            @RequestBody String msgTime) {
+
+ channelsDao.addChannelRead(user.getUserId(), channelID, msgTime);
         return ResponseEntity.ok().build();
     }
 
