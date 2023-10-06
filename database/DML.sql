@@ -112,6 +112,11 @@ INSERT INTO Channels (serverID, roleID, channelTypeID, channelName) VALUES (:new
 -- Add a user to a channel (Create UserChannels) using a given userID and channelID
 INSERT INTO UserChannels (userID, channelID) VALUES (:newUserID, :newChannelID);
 
+-- Add/Update ChannelRead
+INSERT INTO ChannelRead (userID, channelID, lastRead)
+VALUES (:userID, :channelID, :lastRead)
+ON DUPLICATE KEY UPDATE lastRead = :lastRead;
+
 -- Remove a user from a channel (Delete UserChannels) using a given userID and channelID
 DELETE FROM UserChannels WHERE userID = :userID and channelID = :delChannelID;
 
