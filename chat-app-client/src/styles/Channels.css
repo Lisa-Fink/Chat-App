@@ -108,8 +108,12 @@
 
 .chan-icon {
   width: 6px;
-  height: 12px;
-  background-color: aliceblue;
+  height: 0;
   border-radius: 0 50% 50% 0;
   margin-left: 0px;
+}
+
+.chan-icon.unread {
+  height: 12px;
+  background-color: aliceblue;
 }

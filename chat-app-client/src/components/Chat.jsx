@@ -17,6 +17,7 @@ import {
 } from "react-icons/md";
 import EmojiMenu from "./EmojiMenu";
 import MessageInput from "./MessageInput";
+import { readChannelMsg } from "../redux/channelsSlice";
 
 function Chat({ socket }) {
   const dispatch = useDispatch();
@@ -24,6 +25,7 @@ function Chat({ socket }) {
   const { token, userID } = useSelector((state) => state.auth);
   const messages = useSelector((state) => state.messages.byChannelID);
   const messagesStatus = useSelector((state) => state.messages.status);
+  const channels = useSelector((state) => state.channels.byServerID);
 
   const usersStatus = useSelector((state) => state.users.status);
   const users = useSelector((state) => state.users.dataByID);
@@ -52,7 +54,9 @@ function Chat({ socket }) {
     }
   };
 
-  const scroll = scrollToNewMessage(chatRef, curMessages);
+  const hasUnread = useRef(null);
+
+  const scroll = useScrollToNewMessage(chatRef, curMessages);
   // if the channel changes, fetch the messages for the new channel
   useEffect(() => {
     scroll();
@@ -64,6 +68,10 @@ function Chat({ socket }) {
           channelID: channel.id,
         })
       );
+      const curChan = channels[server.id].find(
+        (chan) => chan.channelID == channel.id
+      );
+      hasUnread.current = curChan && curChan.hasUnread;
     } else {
       setCurMessages([]);
     }
@@ -390,9 +398,28 @@ function Chat({ socket }) {
     );
   });
 
+  const setScrollTop = useReadLastViewed(
+    hasUnread,
+    curMessages,
+    chatRef,
+    server,
+    channel,
+    dispatch,
+    token
+  );
+
+  const handleChatScroll = () => {
+    lastScrollTime.current = Date.now();
+    setTimeout(() => {
+      if (Date.now() - lastScrollTime.current >= 490) {
+        setScrollTop(true);
+      }
+    }, 500);
+  };
+
   return (
-    <div className="chat-container" ref={chatRef}>
-      <div className="chat">
+    <div className="chat-container">
+      <div className="chat" ref={chatRef} onScroll={handleChatScroll}>
         {server.id !== null &&
           channel.id !== null &&
           messagesStatus !== "failed" &&
@@ -405,7 +432,7 @@ function Chat({ socket }) {
   );
 }
 
-const scrollToNewMessage = (chatRef, curMessages) => {
+const useScrollToNewMessage = (chatRef, curMessages) => {
   const [scroll, setScroll] = useState(true);
   useLayoutEffect(() => {
     // Always scroll to the bottom of the chat container
@@ -424,5 +451,67 @@ const scrollToNewMessage = (chatRef, curMessages) => {
     }
   }, [curMessages]);
   return () => setScroll(true);
+};
+
+const useReadLastViewed = (
+  hasUnread,
+  curMessages,
+  chatRef,
+  server,
+  channel,
+  dispatch,
+  token
+) => {
+  const [scrollTop, setScrollTop] = useState(null);
+  const lastScrollTime = useRef(null);
+  useEffect(() => {
+    setScrollTop(true);
+  }, [curMessages]);
+  useEffect(() => {
+    if (scrollTop !== true) return;
+
+    setScrollTop(false);
+    if (!hasUnread.current) return;
+    if (curMessages && curMessages.length) {
+      const list = chatRef.current.firstChild.childNodes;
+      const chatRect = chatRef.current.getBoundingClientRect();
+      const inView = (li) => {
+        const listRect = li.getBoundingClientRect();
+        return (
+          listRect.bottom > chatRect.top &&
+          listRect.top < chatRect.bottom &&
+          listRect.bottom <= chatRect.bottom + 10 &&
+          listRect.top >= chatRect.top - 20
+        );
+      };
+      // find the last viewable li
+      const getLastMsgIdx = () => {
+        let start = false;
+        let i = 0;
+        while (i < list.length) {
+          if (inView(list[i])) {
+            start = true;
+          } else if (start) {
+            return i;
+          }
+          i++;
+        }
+        return list.length - 1;
+      };
+      const readIdx = getLastMsgIdx();
+      const lastReadMsg = curMessages[readIdx];
+      // set the last read time for this channel to be the lastReadMsg time
+      dispatch(
+        readChannelMsg({
+          token: token,
+          serverID: server.id,
+          channelID: channel.id,
+          msgTime: lastReadMsg.time,
+          isLast: readIdx === curMessages.length - 1,
+        })
+      );
+    }
+  }, [scrollTop]);
+  return setScrollTop;
 };
 export default Chat;

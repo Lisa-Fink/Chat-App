@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { setUserChannel } from "./usersSlice";
+import { updateServerRead } from "./serversSlice";
 
 const initialState = {
   byServerID: {},
@@ -118,6 +119,18 @@ const channelsSlice = createSlice({
       })
       .addCase(createChannel.fulfilled, (state, action) => {
         addChannelHelper(state, action.payload.serverID, action.payload);
+      })
+      .addCase(readChannelMsg.fulfilled, (state, action) => {
+        const { channelID, serverID, isLast, msgTime } = action.payload;
+
+        const channel = state.byServerID[serverID].find(
+          (chan) => parseInt(chan.channelID) === parseInt(channelID)
+        );
+        channel.userRead = msgTime;
+        if (isLast) {
+          // if the last read channel is the last message in the channel update has unread
+          channel.hasUnread = false;
+        }
       });
   },
 });
@@ -255,6 +268,56 @@ export const deleteChannel = createAsyncThunk(
   }
 );
 
+export const readChannelMsg = createAsyncThunk(
+  "channels/readChannelMsg",
+  async (
+    { token, serverID, channelID, msgTime, isLast },
+    { getState, dispatch }
+  ) => {
+    if (!token || !serverID || !channelID || !msgTime || isLast === null)
+      return;
+    // check if channel has unread
+    // check if readMsg time is valid (>userRead)
+    const channel = getState().channels.byServerID[serverID].find(
+      (chan) => parseInt(chan.channelID) === parseInt(channelID)
+    );
+    if (
+      !channel ||
+      !channel.hasUnread ||
+      (channel.userRead && msgTime > channel.userRead)
+    )
+      return;
+
+    // update ChannelRead for userID and channelID with new msgTime
+    const apiUrl = import.meta.env.VITE_CHAT_API;
+    const url = `${apiUrl}/servers/${serverID}/channels/${channelID}/channel-read`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "text/plain",
+      },
+      body: msgTime,
+    });
+    if (!res.ok) {
+      throw new Error("Failed to update channel read.");
+    }
+    if (isLast) {
+      const channels = getState().channels.byServerID[serverID];
+      for (const chan of channels) {
+        if (
+          parseInt(chan.channelID) !== parseInt(channelID) &&
+          chan.hasUnread
+        ) {
+          return { channelID, serverID, isLast, msgTime };
+        }
+      }
+      dispatch(updateServerRead(serverID));
+    }
+    return { channelID, serverID, isLast, msgTime };
+  }
+);
+
 export const {
   addGeneralChannel,
   removeServer,
@@ -264,5 +327,6 @@ export const {
   editName,
   addChannels,
   channelSuccess,
+  markAsRead,
 } = channelsSlice.actions;
 export default channelsSlice.reducer;

@@ -49,6 +49,13 @@ const serversSlice = createSlice({
       state.data = action.payload;
       state.status = "succeeded";
     },
+    updateServerRead: (state, action) => {
+      const id = action.payload;
+      const server = state.data.find(
+        (server) => parseInt(server.serverID) === parseInt(id)
+      );
+      if (server) server.hasUnread = false;
+    },
   },
   extraReducers(builder) {
     builder
@@ -293,5 +300,6 @@ export const {
   serverDescriptionUpdate,
   currentUserRoleUpdate,
   addServers,
+  updateServerRead,
 } = serversSlice.actions;
 export default serversSlice.reducer;
