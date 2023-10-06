@@ -130,6 +130,14 @@ CREATE TABLE Invites (
     FOREIGN KEY (serverID) REFERENCES Servers(serverID) ON DELETE CASCADE
 );
 
+-- Channel ReadChannel Table
+CREATE TABLE ChannelRead (
+    userID INT,
+    channelID INT,
+    lastRead DATETIME,
+    PRIMARY KEY (userID, channelID)
+);
+
 
 -- Populate the db with sample data
 -- Insert sample data for Chat App
