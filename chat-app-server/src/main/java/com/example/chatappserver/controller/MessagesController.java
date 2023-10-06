@@ -1,6 +1,7 @@
 package com.example.chatappserver.controller;
 
 import com.example.chatappserver.model.*;
+import com.example.chatappserver.repository.ChannelsDao;
 import com.example.chatappserver.repository.MessagesDao;
 import com.example.chatappserver.service.AuthService;
 import com.example.chatappserver.websocket.controller.ChannelWebSocketController;
@@ -19,10 +20,15 @@ public class MessagesController {
     private final MessagesDao messagesDao;
     private final AuthService authService;
     private final ChannelWebSocketService webSocketService;
+    private final ChannelsDao channelsDao;
 
     @Autowired
-    public MessagesController(MessagesDao messagesDao, AuthService authService, ChannelWebSocketService webSocketService) {
+    public MessagesController(MessagesDao messagesDao, AuthService authService,
+                              ChannelWebSocketService webSocketService,
+                              ChannelsDao channelsDao
+    ) {
         this.messagesDao = messagesDao;
+        this.channelsDao = channelsDao;
         this.authService = authService;
         this.webSocketService = webSocketService;
     }
@@ -36,7 +42,7 @@ public class MessagesController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         messagesDao.create(message);
-
+        channelsDao.addChannelRead(user.getUserId(), channelID, String.valueOf(message.getTime()));
         webSocketService.sendMessageToSubscribers(message);
         return ResponseEntity.status(HttpStatus.CREATED).body(message.getMessageID());
     }
