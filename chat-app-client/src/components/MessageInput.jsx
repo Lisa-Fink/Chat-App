@@ -105,7 +105,6 @@ function MessageInput({ socket, scroll }) {
   );
 
   const addEmojiToMessage = (id, messageID, code) => {
-    console.log(textAreaRef);
     if (textAreaRef.current.style.height.slice(0, -2) >= 532) {
       textAreaRef.current.parentElement.classList.add("too-long");
       setTimeout(() => {

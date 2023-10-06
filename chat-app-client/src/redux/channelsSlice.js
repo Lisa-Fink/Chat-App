@@ -69,6 +69,34 @@ const channelsSlice = createSlice({
     channelSuccess: (state) => {
       state.status = "succeeded";
     },
+    channelHasNewMessage: (state, action) => {
+      const { channelID, msgTime } = action.payload;
+      // get the serverID first
+      const servers = Object.keys(state.byServerID);
+      for (const serverID of servers) {
+        const channels = state.byServerID[serverID];
+        const found = channels.find(
+          (chan) => parseInt(chan.channelID) === parseInt(channelID)
+        );
+        if (found) {
+          const channel = state.byServerID[serverID].find(
+            (chan) => parseInt(chan.channelID) === parseInt(channelID)
+          );
+          channel.hasUnread = true;
+          channel.channelTime = msgTime;
+          state.newIDs = [serverID, channelID];
+          state.status = "newMsg";
+        }
+      }
+    },
+    channelNewMessageCreate: (state, action) => {
+      const { channelID, serverID, msgTime } = action.payload;
+      const channel = state.byServerID[serverID].find(
+        (chan) => parseInt(chan.channelID) === parseInt(channelID)
+      );
+      channel.channelTime = msgTime;
+      channel.userRead = msgTime;
+    },
   },
   extraReducers(builder) {
     builder
@@ -121,6 +149,7 @@ const channelsSlice = createSlice({
         addChannelHelper(state, action.payload.serverID, action.payload);
       })
       .addCase(readChannelMsg.fulfilled, (state, action) => {
+        if (action.payload.noUpdate) return;
         const { channelID, serverID, isLast, msgTime } = action.payload;
 
         const channel = state.byServerID[serverID].find(
@@ -284,9 +313,9 @@ export const readChannelMsg = createAsyncThunk(
     if (
       !channel ||
       !channel.hasUnread ||
-      (channel.userRead && msgTime > channel.userRead)
+      (channel.userRead && msgTime < channel.userRead)
     )
-      return;
+      return { noUpdate: true };
 
     // update ChannelRead for userID and channelID with new msgTime
     const apiUrl = import.meta.env.VITE_CHAT_API;
@@ -312,7 +341,7 @@ export const readChannelMsg = createAsyncThunk(
           return { channelID, serverID, isLast, msgTime };
         }
       }
-      dispatch(updateServerRead(serverID));
+      dispatch(updateServerRead({ id: serverID }));
     }
     return { channelID, serverID, isLast, msgTime };
   }
@@ -328,5 +357,7 @@ export const {
   addChannels,
   channelSuccess,
   markAsRead,
+  channelHasNewMessage,
+  channelNewMessageCreate,
 } = channelsSlice.actions;
 export default channelsSlice.reducer;

@@ -14,6 +14,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setChannel, setServer } from "../redux/currentSlice";
 import {
+  channelHasNewMessage,
   channelSuccess,
   deleteChannelUpdate,
   editName,
@@ -28,7 +29,7 @@ import {
   setUserChannel,
 } from "../redux/usersSlice";
 import AddChannelModal from "./modals/AddChannelModal";
-import { deleteServer } from "../redux/serversSlice";
+import { deleteServer, updateServerRead } from "../redux/serversSlice";
 import {
   addMessageUpdate,
   addReactionUpdate,
@@ -76,7 +77,8 @@ function Channels({ setShowServerSettingsModal, socket }) {
     status,
     newIDs,
     token,
-    userID
+    userID,
+    server
   );
   useCurrentServerChannelsChange(
     server,
@@ -307,7 +309,8 @@ function useChannelsChange(
   channelStatus,
   newIDs,
   token,
-  userID
+  userID,
+  server
 ) {
   useEffect(() => {
     if (channelStatus === "initialized") {
@@ -332,8 +335,14 @@ function useChannelsChange(
       );
       // subscribe
       socket.current.addChannelSub(newIDs[1], handleChannelData);
+    } else if (channelStatus === "newMsg") {
+      dispatch(updateServerRead({ id: newIDs[0], isUnread: true }));
     }
-    if (channelStatus === "new" || channelStatus === "initialized")
+    if (
+      channelStatus === "new" ||
+      channelStatus === "initialized" ||
+      channelStatus === "newMsg"
+    )
       dispatch(channelSuccess());
   }, [channelStatus]);
 
@@ -348,6 +357,12 @@ function useChannelsChange(
     if (resType === "MESSAGE_NEW") {
       // add the new message
       dispatch(addMessageUpdate({ message: parsed.data }));
+      dispatch(
+        channelHasNewMessage({
+          channelID: parsed.data.channelID,
+          msgTime: parsed.data.time,
+        })
+      );
     } else if (resType === "MESSAGE_EDIT") {
       const data = parsed.data;
       dispatch(editMessageUpdate(data));

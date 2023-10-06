@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { channelNewMessageCreate } from "./channelsSlice";
 
 const initialState = {
   byChannelID: {},
@@ -320,7 +321,7 @@ export const fetchMessagesForChannel = createAsyncThunk(
 
 export const createMessage = createAsyncThunk(
   "messages/createMessage",
-  async ({ token, userID, serverID, channelID, text, time }) => {
+  async ({ token, userID, serverID, channelID, text, time }, { dispatch }) => {
     const apiUrl = import.meta.env.VITE_CHAT_API;
     const url = `${apiUrl}/servers/${serverID}/channels/${channelID}/messages`;
     const message = { userID, channelID, text, time };
@@ -340,6 +341,13 @@ export const createMessage = createAsyncThunk(
     // get new message id and add to messages
     const id = await res.json();
     message.messageID = id;
+    dispatch(
+      channelNewMessageCreate({
+        channelID: channelID,
+        serverID: serverID,
+        msgTime: message.time,
+      })
+    );
     return message;
   }
 );

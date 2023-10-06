@@ -50,11 +50,13 @@ const serversSlice = createSlice({
       state.status = "succeeded";
     },
     updateServerRead: (state, action) => {
-      const id = action.payload;
+      const id = action.payload.id;
       const server = state.data.find(
         (server) => parseInt(server.serverID) === parseInt(id)
       );
-      if (server) server.hasUnread = false;
+      if (server) {
+        server.hasUnread = action.payload.isUnread === true;
+      }
     },
   },
   extraReducers(builder) {

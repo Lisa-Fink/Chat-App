@@ -76,10 +76,15 @@ function Chat({ socket }) {
       setCurMessages([]);
     }
   }, [channel]);
+
   // After the messages for the channel are fetched/added to, update the local state
   useEffect(() => {
     if (!messages[channel.id]) return;
     setCurMessages(messages[channel.id]);
+    const curChan = channels[server.id].find(
+      (chan) => chan.channelID == channel.id
+    );
+    hasUnread.current = curChan && curChan.hasUnread;
   }, [messages[channel.id]]);
 
   const handleEditClick = (id, text) => {
@@ -407,7 +412,7 @@ function Chat({ socket }) {
     dispatch,
     token
   );
-
+  const lastScrollTime = useRef(null);
   const handleChatScroll = () => {
     lastScrollTime.current = Date.now();
     setTimeout(() => {
@@ -463,7 +468,7 @@ const useReadLastViewed = (
   token
 ) => {
   const [scrollTop, setScrollTop] = useState(null);
-  const lastScrollTime = useRef(null);
+
   useEffect(() => {
     setScrollTop(true);
   }, [curMessages]);
@@ -480,7 +485,7 @@ const useReadLastViewed = (
         return (
           listRect.bottom > chatRect.top &&
           listRect.top < chatRect.bottom &&
-          listRect.bottom <= chatRect.bottom + 10 &&
+          listRect.bottom <= chatRect.bottom - 20 &&
           listRect.top >= chatRect.top - 20
         );
       };
