@@ -146,7 +146,7 @@ function MessageInput({ socket, scroll }) {
           placeholder={
             channel.name &&
             `Message # ${channel.name.slice(0, 17)}${
-              channel.name.length > 17 && "..."
+              channel.name.length > 17 ? "..." : ""
             }`
           }
           value={message}
