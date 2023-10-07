@@ -143,7 +143,12 @@ function MessageInput({ socket, scroll }) {
       {error && <p>{error}</p>}
       <div className="message-input">
         <textarea
-          placeholder={channel.name && `Message # ${channel.name}`}
+          placeholder={
+            channel.name &&
+            `Message # ${channel.name.slice(0, 17)}${
+              channel.name.length > 17 && "..."
+            }`
+          }
           value={message}
           onChange={handleTextChange}
           onKeyDown={handleKeyDown}
