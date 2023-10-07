@@ -4,6 +4,25 @@
   font-size: 105%;
   height: 100%;
   border-bottom-right-radius: 10px;
+  overflow-y: auto;
+  border-right: 1px solid var(--medium-grey);
+  border-bottom: 6px solid var(--medium-grey);
+}
+
+#dark-scroll {
+  /* scrollbar */
+  /* Firefox */
+  scrollbar-color: var(--medium-grey) var(--dark-grey);
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--dark-grey);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: var(--medium-grey);
+    border-radius: 4px;
+  }
 }
 
 .users ul {

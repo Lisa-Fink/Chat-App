@@ -60,7 +60,7 @@ function Users() {
   };
 
   return (
-    <div className="users thin-scroll">
+    <div className="users thin-scroll" id="dark-scroll">
       {creator.length !== 0 && (
         <ul>
           <h3>Creator</h3>
