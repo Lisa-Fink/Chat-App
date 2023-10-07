@@ -29,16 +29,25 @@
   text-align: center;
 }
 
+.header-thumbnail > .server-thumbnail:hover {
+  border-radius: 50%;
+}
+
 .header-dropdown {
   position: absolute;
   background-color: var(--dark-grey);
   color: var(--light-text);
+  min-width: 110px;
   width: 150%;
   padding: 15px;
   margin-left: -35px;
   text-align: left;
   border: 1px solid var(--medium-grey);
   border-radius: 15px;
+}
+
+.header-thumbnail > .server-thumbnail {
+  width: 120px;
 }
 
 .header-dropdown li {
