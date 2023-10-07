@@ -62,45 +62,19 @@ function Chat({ socket }) {
     curMessages,
     curChanUserTime.current
   );
-  // if the channel changes, fetch the messages for the new channel
-  useEffect(() => {
-    scroll();
-    if (channel && channel.id) {
-      dispatch(
-        fetchMessagesForChannel({
-          token: token,
-          serverID: server.id,
-          channelID: channel.id,
-        })
-      );
-      const curChan = channels[server.id].find(
-        (chan) => parseInt(chan.channelID) == parseInt(channel.id)
-      );
-      hasUnread.current = curChan && curChan.hasUnread;
-      curChanUserTime.current = curChan && curChan.userRead;
-    } else {
-      setCurMessages([]);
-    }
-  }, [channel]);
-  useEffect(() => {
-    if (channels && channels[server.id]) {
-      const curChan = channels[server.id].find(
-        (chan) => parseInt(chan.channelID) == parseInt(channel.id)
-      );
-      hasUnread.current = curChan && curChan.hasUnread;
-      curChanUserTime.current = curChan && curChan.userRead;
-    }
-  }, [channels[server.id]]);
 
-  // After the messages for the channel are fetched/added to, update the local state
-  useEffect(() => {
-    if (!messages[channel.id]) return;
-    setCurMessages(messages[channel.id]);
-    const curChan = channels[server.id].find(
-      (chan) => chan.channelID == channel.id
-    );
-    hasUnread.current = curChan && curChan.hasUnread;
-  }, [messages[channel.id]]);
+  useUpdateMessages(
+    scroll,
+    channel,
+    server,
+    dispatch,
+    token,
+    hasUnread,
+    curChanUserTime,
+    channels,
+    messages,
+    setCurMessages
+  );
 
   const handleEditClick = (id, text) => {
     setEditID(id);
@@ -548,5 +522,54 @@ const useReadLastViewed = (
     }
   }, [scrollTop]);
   return setScrollTop;
+};
+
+const useUpdateMessages = (
+  scroll,
+  channel,
+  server,
+  dispatch,
+  token,
+  hasUnread,
+  curChanUserTime,
+  channels,
+  messages,
+  setCurMessages
+) => {
+  const updateCur = () => {
+    const curChan = channels[server.id].find(
+      (chan) => parseInt(chan.channelID) == parseInt(channel.id)
+    );
+    hasUnread.current = curChan && curChan.hasUnread;
+    curChanUserTime.current = curChan && curChan.userRead;
+  };
+  // if the channel changes, fetch the messages for the new channel
+  useEffect(() => {
+    scroll();
+    if (channel && channel.id) {
+      dispatch(
+        fetchMessagesForChannel({
+          token: token,
+          serverID: server.id,
+          channelID: channel.id,
+        })
+      );
+      updateCur();
+    } else {
+      setCurMessages([]);
+    }
+  }, [channel]);
+  useEffect(() => {
+    if (channels && channels[server.id]) {
+      updateCur();
+    }
+  }, [channels[server.id]]);
+
+  // After the messages for the channel are fetched/added to, update the local state
+  useEffect(() => {
+    if (!messages[channel.id]) return;
+    setCurMessages(messages[channel.id]);
+    updateCur();
+  }, [messages[channel.id]]);
 };
 export default Chat;
