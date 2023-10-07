@@ -125,6 +125,7 @@ function AddServerModal({ closeModal }) {
                 id="server-name"
                 type="text"
                 placeholder="Type Server Name"
+                autoComplete="off"
                 value={serverName}
                 onChange={(e) => setServerName(e.target.value)}
               />

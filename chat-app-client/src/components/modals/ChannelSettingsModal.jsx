@@ -151,6 +151,7 @@ function ChannelSettingsModal({ closeModal }) {
                       name="channel-name"
                       id="channel-name"
                       placeholder="Type Channel Name"
+                      autoComplete="off"
                       value={channelName}
                       onChange={(e) => setChannelName(e.target.value)}
                     />

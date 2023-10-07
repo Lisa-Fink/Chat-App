@@ -49,6 +49,7 @@ function AddChannelModal({ closeModal }) {
                 id="channel-name"
                 type="text"
                 placeholder="Type Channel Name"
+                autoComplete="off"
                 value={channelName}
                 onChange={(e) => setChannelName(e.target.value)}
               />
