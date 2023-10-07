@@ -21,8 +21,14 @@
   padding-left: 0;
   font-weight: bold;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   gap: 10px;
+  width: 100%;
+}
+
+.channels li button {
+  text-align: left;
 }
 
 .channels button:hover {
