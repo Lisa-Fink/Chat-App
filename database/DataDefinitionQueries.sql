@@ -2,7 +2,7 @@
 
 -- Creates the following tables for the Chat App database:
 --    Users, Servers, UserServers, Roles, Channels, UserChannels, 
---    ChannelTypes, FileTypes, Attachments, Messages, Reactions, Emojis, Invites
+--    ChannelTypes, FileTypes, Attachments, Messages, Reactions, Emojis, Invites, ChannelRead
 
 -- Drop tables if they exist
 DROP TABLE IF EXISTS Reactions;
@@ -12,12 +12,12 @@ DROP TABLE IF EXISTS Messages;
 DROP TABLE IF EXISTS Invites;
 DROP TABLE IF EXISTS UserChannels;
 DROP TABLE IF EXISTS UserServers;
+DROP TABLE IF EXISTS ChannelRead;
 DROP TABLE IF EXISTS Channels;
 DROP TABLE IF EXISTS ChannelTypes;
 DROP TABLE IF EXISTS Servers;
 DROP TABLE IF EXISTS Roles;
 DROP TABLE IF EXISTS Users;
-DROP TABLE IF EXISTS ChannelRead;
 
 -- Create the Users table
 CREATE TABLE Users (
@@ -126,17 +126,19 @@ CREATE TABLE Invites (
     inviteID INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     serverID INT NOT NULL,
     inviteCode VARCHAR(255) NOT NULL UNIQUE,
-    createdDay DATE NOT NULL,
+    createdDate DATE NOT NULL,
     userID INT NOT NULL,
     FOREIGN KEY (serverID) REFERENCES Servers(serverID) ON DELETE CASCADE
 );
 
--- Channel ReadChannel Table
+-- Create the ChannelRead Table
 CREATE TABLE ChannelRead (
     userID INT,
     channelID INT,
     lastRead DATETIME,
-    PRIMARY KEY (userID, channelID)
+    PRIMARY KEY (userID, channelID),
+    FOREIGN KEY (userID) REFERENCES Users(userID) ON DELETE CASCADE,
+    FOREIGN KEY (channelID) REFERENCES Channels(channelID) ON DELETE CASCADE
 );
 
 
@@ -418,9 +420,6 @@ VALUES
     (5, 43, 'What are the best toys for cats?', '2023-10-07 11:00:00'),
     (6, 43, 'I recommend interactive toys.', '2023-10-07 11:05:00');
 
-
-
-
 -- Emojis
 INSERT INTO Emojis (emojiCode, emojiName)
 VALUES
@@ -434,106 +433,69 @@ VALUES
    ('🎉', 'Party');
 
 -- Reactions
--- For Messages in Channel 1 (General)
+
 INSERT INTO Reactions (emojiID, userID, messageID)
 VALUES
     (1, 1, 1),  -- '😊' reaction by 'Tinker' to the first message
     (3, 3, 2),  -- '😂' reaction by 'Bella' to the second message
     (4, 4, 3),  -- '👍' reaction by 'Lisa' to the third message
-
--- For Messages in Channel 2 (Admins)
     (5, 1, 4),  -- '🙏' reaction by 'Tinker' to the fourth message
-
--- For Messages in Channel 4 (Game Recommendations)
     (1, 1, 7),  -- '😊' reaction by 'Tinker' to the seventh message
     (3, 3, 8),  -- '😂' reaction by 'Bella' to the eighth message
     (4, 4, 9),  -- '👍' reaction by 'Lisa' to the ninth message
-
--- For Messages in Channel 5 (League of Legends Strategies)
     (5, 1, 10),  -- '🙏' reaction by 'Tinker' to the tenth message
-
--- For Messages in Channel 7 (Recipes Exchange)
     (7, 3, 11),  -- '😎' reaction by 'Bella' to the eleventh message
     (8, 4, 12),  -- '🎉' reaction by 'Lisa' to the twelfth message
     (1, 1, 13),  -- '😊' reaction by 'Tinker' to the thirteenth message
     (6, 6, 13),  -- '❤️' reaction by 'Guest2' to the thirteenth message
     (3, 3, 14),  -- '😂' reaction by 'Bella' to the fourteenth message
     (4, 4, 15),  -- '👍' reaction by 'Lisa' to the fifteenth message
-
--- For Messages in Channel 8 (Cooking Tips)
     (5, 1, 16),  -- '🙏' reaction by 'Tinker' to the sixteenth message
     (6, 2, 16),  -- '😍' reaction by 'Layla' to the sixteenth message
     (7, 3, 17),  -- '😎' reaction by 'Bella' to the seventeenth message
     (8, 4, 18),  -- '🎉' reaction by 'Lisa' to the eighteenth message;
-
-
     (1, 1, 19),  -- '😊' reaction by 'Tinker' to the nineteenth message
     (2, 5, 19),  -- '❤️' reaction by 'Guest1' to the nineteenth message
     (3, 6, 20),  -- '😂' reaction by 'Guest2' to the twentieth message
     (4, 4, 20),  -- '👍' reaction by 'Lisa' to the twentieth message
-    
-
     (1, 1, 21),  -- '😊' reaction by 'Tinker' to the twenty-first message
     (2, 2, 21),  -- '❤️' reaction by 'Layla' to the twenty-first message
     (3, 3, 22),  -- '😂' reaction by 'Bella' to the twenty-second message
     (4, 4, 23),  -- '👍' reaction by 'Lisa' to the twenty-third message
-
-
     (5, 1, 24),  -- '🙏' reaction by 'Tinker' to the twenty-fourth message
     (6, 4, 24),  -- '😍' reaction by 'Lisa' to the twenty-fourth message
     (7, 1, 25),  -- '😎' reaction by 'Tinker' to the twenty-fifth message
     (8, 4, 26),  -- '🎉' reaction by 'Lisa' to the twenty-sixth message
-
-
     (1, 1, 27),  -- '😊' reaction by 'Tinker' to the twenty-seventh message
     (2, 2, 27),  -- '❤️' reaction by 'Layla' to the twenty-seventh message
     (3, 3, 28),  -- '😂' reaction by 'Bella' to the twenty-eighth message
     (4, 4, 29),  -- '👍' reaction by 'Lisa' to the twenty-ninth message
-
-
     (5, 1, 30),  -- '🙏' reaction by 'Tinker' to the thirtieth message
     (6, 2, 30),  -- '😍' reaction by 'Layla' to the thirtieth message
     (7, 3, 31),  -- '😎' reaction by 'Bella' to the thirty-first message
     (8, 4, 32),  -- '🎉' reaction by 'Lisa' to the thirty-second message
-
--- -- For Messages in Channel 17 (Sports News)
     (1, 1, 33),  -- '😊' reaction by 'Tinker' to the thirty-third message
     (2, 2, 33),  -- '❤️' reaction by 'Layla' to the thirty-third message
     (3, 3, 34),  -- '😂' reaction by 'Bella' to the thirty-fourth message
     (4, 4, 35),  -- '👍' reaction by 'Lisa' to the thirty-fifth message
-
--- -- For Messages in Channel 18 (Sports Betting)
     (5, 1, 36),  -- '🙏' reaction by 'Tinker' to the thirty-sixth message
     (6, 2, 36),  -- '😍' reaction by 'Layla' to the thirty-sixth message
-    
--- -- For Messages in Channel 38 (General)
     (8, 4, 38),  -- '🎉' reaction by 'Lisa' to the thirty-eighth message
-
--- -- For Messages in Channel 39 (Music Lovers)
     (1, 1, 39),  -- '😊' reaction by 'Tinker' to the thirty-ninth message
     (2, 2, 39),  -- '❤️' reaction by 'Layla' to the thirty-ninth message
-    
--- -- For Messages in Channel 40 (Movie Night)
     (4, 4, 41),  -- '👍' reaction by 'Lisa' to the forty-first message
     (5, 1, 42),  -- '🙏' reaction by 'Tinker' to the forty-second message
     (6, 2, 42),  -- '😍' reaction by 'Layla' to the forty-second message
-
--- -- For Messages in Channel 41
     (7, 1, 43),  -- '😎' reaction by 'Tinker' to the forty-third message
     (8, 4, 44),  -- '🎉' reaction by 'Lisa' to the forty-fourth message
-
-
     (1, 1, 45),  -- '😊' reaction by 'Tinker' to the forty-fifth message
     (2, 2, 45),  -- '❤️' reaction by 'Layla' to the forty-fifth message
     (3, 3, 46),  -- '😂' reaction by 'Bella' to the forty-sixth message
     (4, 4, 47),  -- '👍' reaction by 'Lisa' to the forty-seventh message
-
     (5, 1, 48),  -- '🙏' reaction by 'Tinker' to the forty-eighth message
     (6, 2, 48),  -- '😍' reaction by 'Layla' to the forty-eighth message
     (7, 3, 49),  -- '😎' reaction by 'Bella' to the forty-ninth message
     (8, 4, 50);  -- '🎉' reaction by 'Lisa' to the fiftieth message
-
-
 
 -- Invites
 -- INSERT INTO Invites (serverID, inviteCode, expirationTime)
