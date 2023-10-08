@@ -4,7 +4,6 @@ import Chat from "./components/Chat";
 import Users from "./components/Users";
 import Channels from "./components/Channels";
 import Menu from "./components/Menu";
-import MessageInput from "./components/MessageInput";
 import Auth from "./components/Auth";
 
 import "./App.css";
@@ -18,7 +17,7 @@ function App() {
   const auth = useSelector((state) => state.auth);
   const [showSeverSettingsModal, setShowServerSettingsModal] = useState(false);
   const [wsConnect, setWsConnect] = useState(false);
-  const authorized = useAuthorized(auth, wsConnect);
+  const { authorized, unAuthorize } = useAuthorized(auth, wsConnect);
   const dispatch = useDispatch();
 
   const socket = useRef(new WebSocketManager(wsConnect, setWsConnect));
@@ -33,14 +32,14 @@ function App() {
   };
 
   useEffect(() => {
-    if (auth.isAuthenticated && !socket.current.isActive()) {
+    if (auth.isAuthenticated && !wsConnect) {
       socket.current.activate(handleUserData, auth.token);
       dispatch(fetchEmojis({ token: auth.token }));
     }
-    if (!auth.isAuthenticated && socket.current.isActive()) {
+    if (!auth.isAuthenticated && wsConnect) {
       socket.current.deactivate();
     }
-  }, [auth]);
+  }, [auth, wsConnect]);
 
   return (
     <>
@@ -49,7 +48,7 @@ function App() {
           <Auth />
         ) : (
           <>
-            <Header />
+            <Header unAuthorize={unAuthorize} />
             <Menu />
             <Servers
               showSeverSettingsModal={showSeverSettingsModal}
@@ -79,7 +78,7 @@ const useAuthorized = (auth, wsConnect) => {
       setAuthorized(false);
   }, [auth, wsConnect]);
 
-  return authorized;
+  return { authorized, unAuthorize: () => setAuthorized(false) };
 };
 
 export default App;

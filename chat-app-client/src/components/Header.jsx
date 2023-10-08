@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/authSlice";
 import EditModal from "./modals/EditModal";
 
-function Header() {
+function Header({ unAuthorize }) {
   const auth = useSelector((state) => state.auth);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
@@ -35,7 +35,14 @@ function Header() {
                 <button onClick={() => setShowEdit(true)}>Edit Account</button>
               </li>
               <li>
-                <button onClick={() => dispatch(logout())}>Log Out</button>
+                <button
+                  onClick={() => {
+                    unAuthorize();
+                    dispatch(logout());
+                  }}
+                >
+                  Log Out
+                </button>
               </li>
             </ul>
           )}
