@@ -7,7 +7,6 @@ import {
   updateChannelName,
   updateChannelRole,
 } from "../../redux/channelsSlice";
-import { setChannel } from "../../redux/currentSlice";
 import { MdCancel, MdCheck } from "react-icons/md";
 import Modal from "./Modal";
 import "../../styles/ChannelSettingsModal.css";
@@ -15,13 +14,13 @@ import "../../styles/ChannelSettingsModal.css";
 function ChannelSettingsModal({ closeModal }) {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
-  const { name, id, roleID } = useSelector((state) => state.current.channel);
+  const { channelName, channelID, roleID, serverID } = useSelector(
+    (state) => state.current.channel
+  );
   const { server } = useSelector((state) => state.current);
 
-  const channels = useSelector((state) => state.channels.byServerID[server.id]);
-
-  const [channelName, setChannelName] = useState(name);
-  const [channelRole, setChannelRole] = useState(roleID);
+  const [newChannelName, setNewChannelName] = useState(channelName);
+  const [newChannelRole, setNewChannelRole] = useState(roleID);
   const [validName, setValidName] = useState(true);
   const [editName, setEditName] = useState(false);
   const [editRole, setEditRole] = useState(false);
@@ -30,37 +29,32 @@ function ChannelSettingsModal({ closeModal }) {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const updateCurChan = () => {
-    dispatch(setChannel({ id: id, name: channelName, roleID: channelRole }));
-  };
-
   const handleEditNameClick = (e) => {
     e.preventDefault();
     setEditName(true);
   };
   const handleNameSubmit = (e) => {
     e.preventDefault();
-    if (!channelName.trim()) {
+    if (!newChannelName.trim()) {
       setValidName(false);
       return;
     }
     setValidName(true);
-    if (channelName !== name) {
+    if (newChannelName !== channelName) {
       dispatch(
         updateChannelName({
           token: auth.token,
-          serverID: server.id,
-          channelID: id,
-          channelName: channelName,
+          serverID: serverID,
+          channelID: channelID,
+          channelName: newChannelName,
         })
       );
-      updateCurChan();
     }
     setEditName(false);
   };
   const handleNameCancel = (e) => {
     e.preventDefault();
-    setChannelName(name);
+    setNewChannelName(channelName);
     setEditName(false);
   };
 
@@ -71,25 +65,24 @@ function ChannelSettingsModal({ closeModal }) {
 
   const handleRoleSubmit = (e) => {
     e.preventDefault();
-    if (channelRole < 1 || channelRole > 4) return;
-    if (roleID !== channelRole) {
+    if (newChannelRole < 1 || newChannelRole > 4) return;
+    if (roleID !== newChannelRole) {
       dispatch(
         updateChannelRole({
           token: auth.token,
-          serverID: server.id,
-          channelID: id,
-          roleID: channelRole,
+          serverID: serverID,
+          channelID: channelID,
+          roleID: newChannelRole,
           oldRoleID: roleID,
         })
       );
-      updateCurChan();
     }
     setEditRole(false);
   };
 
   const handleRoleCancel = (e) => {
     e.preventDefault();
-    setChannelRole(roleID);
+    setNewChannelRole(roleID);
     setEditRole(false);
   };
 
@@ -108,8 +101,8 @@ function ChannelSettingsModal({ closeModal }) {
     dispatch(
       deleteChannel({
         token: auth.token,
-        serverID: server.id,
-        channelID: id,
+        serverID: serverID,
+        channelID: channelID,
       })
     );
     setShowDeleteConfirm(false);
@@ -118,7 +111,7 @@ function ChannelSettingsModal({ closeModal }) {
 
   return (
     <Modal closeModal={closeModal}>
-      <h2>{name}</h2>
+      <h2>{channelName}</h2>
       <h3>Channel Settings</h3>
       <button className="modal-view-btn" onClick={() => setView("details")}>
         Channel Details
@@ -145,15 +138,15 @@ function ChannelSettingsModal({ closeModal }) {
                 </div>
                 <div className="flex-row center">
                   {!editName ? (
-                    <div id="channel-name">{name}</div>
+                    <div id="channel-name">{channelName}</div>
                   ) : (
                     <input
                       name="channel-name"
                       id="channel-name"
                       placeholder="Type Channel Name"
                       autoComplete="off"
-                      value={channelName}
-                      onChange={(e) => setChannelName(e.target.value)}
+                      value={newChannelName}
+                      onChange={(e) => setNewChannelName(e.target.value)}
                     />
                   )}
 
@@ -184,9 +177,9 @@ function ChannelSettingsModal({ closeModal }) {
                 <div className="flex-row center">
                   {!editRole ? (
                     <div id="channel-role">
-                      {channelRole == 4
+                      {newChannelRole == 4
                         ? "Everyone"
-                        : channelRole == 3
+                        : newChannelRole == 3
                         ? "Moderators"
                         : "Admins"}
                     </div>
@@ -194,8 +187,8 @@ function ChannelSettingsModal({ closeModal }) {
                     <select
                       name="channel-role"
                       id="channel-role"
-                      value={channelRole}
-                      onChange={(e) => setChannelRole(e.target.value)}
+                      value={newChannelRole}
+                      onChange={(e) => setNewChannelRole(e.target.value)}
                     >
                       <option value="4">Everyone</option>
                       <option value="3">Moderators</option>
@@ -242,9 +235,9 @@ function ChannelSettingsModal({ closeModal }) {
         </form>
       ) : (
         <MangeChannelUsers
-          id={server.id}
+          id={serverID}
           channelRoleID={roleID}
-          channelID={id}
+          channelID={channelID}
         />
       )}
     </Modal>

@@ -31,7 +31,7 @@ function Users() {
     const members = [];
 
     for (const user of curUserChannels) {
-      const role = usersByID[user].serverRoles[server.id];
+      const role = usersByID[user].serverRoles[server.serverID];
       if (role === 1) creator.push(user);
       else if (role === 2) admins.push(user);
       else if (role === 3) mods.push(user);
@@ -96,7 +96,7 @@ function useCurUserChannels(usersStatus, channel, userChannels) {
   useEffect(() => {
     if (usersStatus === "succeeded") {
       setCurUserChannels(
-        channel.id in userChannels ? userChannels[channel.id] : []
+        channel.channelID in userChannels ? userChannels[channel.channelID] : []
       );
     }
   }, [channel]);
@@ -104,9 +104,9 @@ function useCurUserChannels(usersStatus, channel, userChannels) {
   useEffect(() => {
     // update users list if userChannels changes
     setCurUserChannels(
-      channel.id in userChannels ? userChannels[channel.id] : []
+      channel.channelID in userChannels ? userChannels[channel.channelID] : []
     );
-  }, [userChannels[channel.id]]);
+  }, [userChannels[channel.channelID]]);
 
   return curUserChannels;
 }

@@ -12,8 +12,8 @@ function Menu() {
 
   return (
     <div className="menu">
-      <div className="channel-name"># {channel.name}</div>
-      {channel.id && server && server.roleID && server.roleID <= 2 && (
+      <div className="channel-name"># {channel.channelName}</div>
+      {channel.channelID && server && server.roleID && server.roleID <= 2 && (
         <div id="channel-setting-icon">
           <button className="hover-btn" onClick={() => setSettingsModal(true)}>
             <MdSettings />

@@ -48,7 +48,9 @@ function Channels({ setShowServerSettingsModal, socket }) {
   const channels = useSelector((state) => state.channels.byServerID);
   const { status, newIDs } = useSelector((state) => state.channels);
   const [curChannels, setCurChannels] = useState(
-    channels && server && server.id in channels ? channels[server.id] : []
+    channels && server && server.serverID in channels
+      ? channels[server.serverID]
+      : []
   );
 
   const [showServerDropdown, setShowServerDropdown] = useState(false);
@@ -69,17 +71,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
     dispatch,
     token
   );
-  useChannelsChange(
-    socket,
-    channels,
-    dispatch,
-    channel,
-    status,
-    newIDs,
-    token,
-    userID,
-    server
-  );
+  useChannelsChange(socket, channels, dispatch, status, newIDs, token, userID);
   useCurrentServerChannelsChange(
     server,
     channels,
@@ -93,14 +85,12 @@ function Channels({ setShowServerSettingsModal, socket }) {
 
   const handleChannelClick = (e) => {
     const newChannelID = e.currentTarget.dataset.id;
-    const newChannelName = e.currentTarget.dataset.name;
-    const newChannelRoleID = e.currentTarget.dataset.roleid;
     dispatch(
-      setChannel({
-        id: newChannelID,
-        name: newChannelName,
-        roleID: newChannelRoleID,
-      })
+      setChannel(
+        curChannels.find(
+          (chan) => parseInt(chan.channelID) === parseInt(newChannelID)
+        )
+      )
     );
   };
 
@@ -117,7 +107,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
     dispatch(
       removeCurrentUserFromServer({
         token: token,
-        serverID: server.id,
+        serverID: server.serverID,
         userID: userID,
       })
     );
@@ -131,9 +121,9 @@ function Channels({ setShowServerSettingsModal, socket }) {
   };
 
   const handleConfirmDelete = () => {
-    dispatch(deleteServer({ token: token, serverID: server.id }));
-    dispatch(setServer({ id: null, name: null }));
-    dispatch(setChannel({ id: null, name: null, roleID: null }));
+    dispatch(deleteServer({ token: token, serverID: server.serverID }));
+    dispatch(setServer(null));
+    dispatch(setChannel(null));
     setShowDeleteConfirm(false);
     setShowServerDropdown(false);
   };
@@ -142,7 +132,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
     const apiUrl = import.meta.env.VITE_CHAT_API;
     const url = `${apiUrl}/invites`;
 
-    const reqBody = { serverID: server.id };
+    const reqBody = { serverID: server.serverID };
     try {
       const res = await fetch(url, {
         method: "POST",
@@ -176,12 +166,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
     ({ channelID, channelName, roleID, hasUnread }) => (
       <li key={channelID}>
         <div className={`chan-icon ${hasUnread ? "unread" : ""}`}></div>
-        <button
-          data-id={channelID}
-          data-name={channelName}
-          data-roleid={roleID}
-          onClick={handleChannelClick}
-        >
+        <button data-id={channelID} onClick={handleChannelClick}>
           # {channelName}
         </button>
       </li>
@@ -253,8 +238,8 @@ function Channels({ setShowServerSettingsModal, socket }) {
       <div className="channels-container">
         <div className="channels thin-scroll">
           <div className="col-head">
-            <h2>{server.name}</h2>
-            {server.name && (
+            <h2>{server.serverName}</h2>
+            {server.serverName && (
               <button onClick={handleShowServerMenu}>
                 {!showServerDropdown ? <MdOutlineExpandMore /> : <MdClose />}
               </button>
@@ -295,7 +280,7 @@ function useServerSelect(
     setShowLeaveServerConfirm(false);
     setShowServerDropdown(false);
 
-    if (!server || !server.id) {
+    if (!server || !server.serverID) {
       setCurChannels([]);
     }
   }, [server]);
@@ -305,12 +290,10 @@ function useChannelsChange(
   socket,
   channels,
   dispatch,
-  channel,
   channelStatus,
   newIDs,
   token,
-  userID,
-  server
+  userID
 ) {
   useEffect(() => {
     if (channelStatus === "initialized") {
@@ -400,16 +383,6 @@ function useChannelsChange(
       dispatch(editRole(parsed.data));
       // update users
       dispatch(setUserChannel(parsed.data));
-      if (parseInt(parsed.data.channelID) === parseInt(channel.id)) {
-        // if cur channel changed, update it
-        dispatch(
-          setChannel({
-            id: channel.id,
-            name: channel.channelName,
-            roleID: parsed.data.roleID,
-          })
-        );
-      }
     } else if (resType === "NAME_EDIT") {
       dispatch(editName(parsed.data));
     } else if (resType === "USER_EDIT") {
@@ -472,47 +445,15 @@ function useCurrentServerChannelsChange(
 ) {
   // if channels[serverID] changes update the local channels list
   useEffect(() => {
-    if (server && server.id && channels[server.id]) {
-      setCurChannels(channels[server.id]);
-      // if the changed channel is the current channel, update it
-      if (channel && channel.name) {
-        const curChannel = channels[server.id].find(
-          (chan) => chan.channelID == channel.id
-        );
-        if (curChannel && curChannel.channelName !== channel.name) {
-          dispatch(
-            setChannel({
-              id: curChannel.channelID,
-              name: curChannel.channelName,
-              roleID: curChannel.roleID,
-            })
-          );
-        }
-      }
+    if (server && server.serverID && channels[server.serverID]) {
+      setCurChannels(channels[server.serverID]);
 
       // if the current channel is in the server continue, otherwise select the first channel
-      if (
-        channel.id &&
-        channels[server.id].find(
-          (chan) => parseInt(chan.channelID) === parseInt(channel.id)
-        )
-      ) {
-        return;
-      }
-      const firstChannel = channels[server.id][0];
-      if (firstChannel) {
-        dispatch(
-          setChannel({
-            id: firstChannel.channelID,
-            name: firstChannel.channelName,
-            roleID: firstChannel.roleID,
-          })
-        );
-      } else {
-        dispatch(setChannel({ id: null, name: null, roleID: null }));
+      if (!channel || !channels[server.serverID].includes(channel)) {
+        dispatch(setChannel(channels[server.serverID][0]));
       }
     }
-  }, [channels[server.id]]);
+  }, [channels[server.serverID]]);
 }
 
 function useCodeStatus(codeRef) {

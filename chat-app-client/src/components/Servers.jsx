@@ -56,14 +56,10 @@ function Servers({
     token
   );
 
-  const handleServerClick = (serverID, serverName, roleID) => {
+  const handleServerClick = (serverID) => {
     // set current server
     dispatch(
-      setServer({
-        id: serverID,
-        name: serverName,
-        roleID: roleID,
-      })
+      setServer(servers.find((ser) => parseInt(ser.serverID) === serverID))
     );
   };
 
@@ -97,7 +93,7 @@ function Servers({
   };
 
   const thumbnails = servers.map((server) => {
-    const isCurrentServer = server.serverID === curServer.id;
+    const isCurrentServer = server.serverID === curServer.serverID;
     return (
       <li className="server-thumb-li" key={server.serverID}>
         <div
@@ -108,7 +104,7 @@ function Servers({
               ? " unread-dot"
               : ""
           }${
-            server.serverID !== curServer.id &&
+            server.serverID !== curServer.serverID &&
             showServerDetails === server.serverID
               ? " hover-dot"
               : ""
@@ -120,15 +116,7 @@ function Servers({
             isCurrentServer ? " selected-thumbnail" : ""
           }`}
           id={server.serverID}
-          onClick={() =>
-            handleServerClick(
-              server.serverID,
-              server.serverName,
-              server.roleID,
-              server.serverDescription,
-              server.serverImageUrl
-            )
-          }
+          onClick={() => handleServerClick(server.serverID)}
           onMouseEnter={() => handleServerHover(server.serverID)}
           onMouseLeave={handleServerHoverExit}
         >
@@ -230,12 +218,7 @@ function useServersChange(
         })
       );
       // set current server
-      dispatch(
-        setServer({
-          id: lastServer.serverID,
-          name: lastServer.serverName,
-        })
-      );
+      dispatch(setServer(lastServer));
       dispatch(updateStatus());
     } else if (serversStatus === "delete") {
       // unsub from server
@@ -244,13 +227,8 @@ function useServersChange(
       // unsub from each channel in server and delete each channel
       clearChannelsForServer();
       // change to next server
-      const next_server = servers.length > 0 ? servers[0] : {};
-      dispatch(
-        setServer({
-          name: next_server.serverName,
-          id: next_server.serverID,
-        })
-      );
+      const next_server = servers.length > 0 ? servers[0] : null;
+      dispatch(setServer(next_server));
       dispatch(updateStatus()); // change status
     } else if (serversStatus === "update") {
       // unsub from each channel in server and delete each channel

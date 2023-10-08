@@ -33,7 +33,7 @@ function Chat({ socket }) {
   const emojis = useSelector((state) => state.emojis.emojis);
 
   const [curMessages, setCurMessages] = useState(
-    channel.id in messages ? messages[channel.id] : []
+    channel.channelID in messages ? messages[channel.channelID] : []
   );
 
   const [showOptions, setShowOptions] = useState(null);
@@ -89,8 +89,8 @@ function Chat({ socket }) {
           token: token,
           text: editText,
           messageID: editID,
-          serverID: server.id,
-          channelID: channel.id,
+          serverID: channel.serverID,
+          channelID: channel.channelID,
         })
       );
     }
@@ -112,8 +112,8 @@ function Chat({ socket }) {
       deleteMessage({
         token: token,
         messageID: confirmDelID,
-        serverID: server.id,
-        channelID: channel.id,
+        serverID: channel.serverID,
+        channelID: channel.channelID,
       })
     );
     setConfirmDelID(null);
@@ -138,7 +138,7 @@ function Chat({ socket }) {
         userID: userID,
         messageID: messageID,
         emojiID: emojiID,
-        channelID: channel.id,
+        channelID: channel.channelID,
       })
     );
   };
@@ -159,7 +159,7 @@ function Chat({ socket }) {
               token: token,
               emojiID: emojiID,
               messageID: messageID,
-              channelID: channel.id,
+              channelID: channel.channelID,
               reactionID: userReact[1],
             })
           );
@@ -170,7 +170,7 @@ function Chat({ socket }) {
             token: token,
             emojiID: emojiID,
             messageID: messageID,
-            channelID: channel.id,
+            channelID: channel.channelID,
             reactionID: userReact[1],
           })
         );
@@ -180,7 +180,7 @@ function Chat({ socket }) {
           token: token,
           emojiID: emojiID,
           messageID: messageID,
-          channelID: channel.id,
+          channelID: channel.channelID,
           userID: userID,
         })
       );
@@ -368,8 +368,8 @@ function Chat({ socket }) {
   const messageList = curMessages.map((message) => {
     const isUnknown =
       !message.userID ||
-      !usersInChannel[channel.id] ||
-      !usersInChannel[channel.id].includes(message.userID);
+      !usersInChannel[channel.channelID] ||
+      !usersInChannel[channel.channelID].includes(message.userID);
     return (
       <li
         className="message"
@@ -414,8 +414,8 @@ function Chat({ socket }) {
   return (
     <div className="chat-container">
       <div className="chat" ref={chatRef} onScroll={handleChatScroll}>
-        {server.id !== null &&
-          channel.id !== null &&
+        {server.serverID !== null &&
+          channel.channelID !== null &&
           messagesStatus !== "failed" &&
           usersStatus === "succeeded" && (
             <ul className="message-list">{messageList}</ul>
@@ -513,8 +513,8 @@ const useReadLastViewed = (
       dispatch(
         readChannelMsg({
           token: token,
-          serverID: server.id,
-          channelID: channel.id,
+          serverID: channel.serverID,
+          channelID: channel.channelID,
           msgTime: lastReadMsg.time,
           isLast: readIdx === curMessages.length - 1,
         })
@@ -537,21 +537,18 @@ const useUpdateMessages = (
   setCurMessages
 ) => {
   const updateCur = () => {
-    const curChan = channels[server.id].find(
-      (chan) => parseInt(chan.channelID) == parseInt(channel.id)
-    );
-    hasUnread.current = curChan && curChan.hasUnread;
-    curChanUserTime.current = curChan && curChan.userRead;
+    hasUnread.current = channel.hasUnread;
+    curChanUserTime.current = channel.userRead;
   };
   // if the channel changes, fetch the messages for the new channel
   useEffect(() => {
     scroll();
-    if (channel && channel.id) {
+    if (channel && channel.channelID) {
       dispatch(
         fetchMessagesForChannel({
           token: token,
-          serverID: server.id,
-          channelID: channel.id,
+          serverID: channel.serverID,
+          channelID: channel.channelID,
         })
       );
       updateCur();
@@ -560,16 +557,16 @@ const useUpdateMessages = (
     }
   }, [channel]);
   useEffect(() => {
-    if (channels && channels[server.id]) {
+    if (channels && channels[server.serverID]) {
       updateCur();
     }
-  }, [channels[server.id]]);
+  }, [channels[server.serverID]]);
 
   // After the messages for the channel are fetched/added to, update the local state
   useEffect(() => {
-    if (!messages[channel.id]) return;
-    setCurMessages(messages[channel.id]);
+    if (!messages[channel.channelID]) return;
+    setCurMessages(messages[channel.channelID]);
     updateCur();
-  }, [messages[channel.id]]);
+  }, [messages[channel.channelID]]);
 };
 export default Chat;

@@ -12,14 +12,12 @@ import Modal from "./Modal";
 function ServerSettingsModal({ closeModal }) {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
-  const { name, id } = useSelector((state) => state.current.server);
-  const servers = useSelector((state) => state.servers.data);
-  const server = servers.find((server) => server.serverID === id);
-  const description = server.serverDescription;
-  const url = server.serverImageUrl;
+  const { serverName, serverID, serverDescription, serverImageUrl } =
+    useSelector((state) => state.current.server);
 
-  const [image, setImage] = useState(url);
-  const [serverDescription, setServerDescription] = useState(description);
+  const [image, setImage] = useState(serverImageUrl);
+  const [newServerDescription, setNewServerDescription] =
+    useState(serverDescription);
   const [validDescription, setValidDescription] = useState(true);
   const [editDescription, setEditDescription] = useState(false);
   const [view, setView] = useState("details");
@@ -34,15 +32,15 @@ function ServerSettingsModal({ closeModal }) {
   const handleDescriptionSubmit = (e) => {
     e.preventDefault();
     // check if there is any description
-    const isDescription = serverDescription.length > 0;
+    const isDescription = newServerDescription.length > 0;
     setValidDescription(isDescription);
     // check if the description changed
-    if (isDescription && serverDescription.trim() !== description) {
+    if (isDescription && newServerDescription.trim() !== serverDescription) {
       dispatch(
         updateServerDescription({
           token: auth.token,
-          serverID: id,
-          serverDescription: serverDescription,
+          serverID: serverID,
+          serverDescription: newServerDescription,
         })
       );
     }
@@ -57,7 +55,7 @@ function ServerSettingsModal({ closeModal }) {
   const handleDescriptionCancel = (e) => {
     e.preventDefault();
     setEditDescription(false);
-    setServerDescription(description);
+    setNewServerDescription(serverDescription);
   };
 
   const handleImageSubmit = (e) => {
@@ -65,7 +63,7 @@ function ServerSettingsModal({ closeModal }) {
     dispatch(
       updateServerImage({
         token: auth.token,
-        serverID: id,
+        serverID: serverID,
         serverImageUrl: image,
       })
     );
@@ -73,7 +71,7 @@ function ServerSettingsModal({ closeModal }) {
 
   return (
     <Modal closeModal={closeModal}>
-      <h2>{name}</h2>
+      <h2>{serverName}</h2>
       <h3>Server Settings</h3>
       <button className="modal-view-btn" onClick={() => setView("details")}>
         Server Details
@@ -98,14 +96,14 @@ function ServerSettingsModal({ closeModal }) {
                     )}
                   </div>
                   {!editDescription ? (
-                    <div id="server-description">{description}</div>
+                    <div id="server-description">{serverDescription}</div>
                   ) : (
                     <textarea
                       name="server-description"
                       id="server-description"
                       placeholder="Type Server Description"
-                      value={serverDescription}
-                      onChange={(e) => setServerDescription(e.target.value)}
+                      value={newServerDescription}
+                      onChange={(e) => setNewServerDescription(e.target.value)}
                     />
                   )}
                 </div>
@@ -196,7 +194,7 @@ function ServerSettingsModal({ closeModal }) {
                       (image === null || image === undefined ? " selected" : "")
                     }
                   >
-                    {name.substring(0, 1).toUpperCase()}
+                    {serverName.substring(0, 1).toUpperCase()}
                   </button>
                 </li>
               </ul>
@@ -207,7 +205,7 @@ function ServerSettingsModal({ closeModal }) {
           </>
         </form>
       ) : (
-        <MangeUsers id={id} />
+        <MangeUsers id={serverID} />
       )}
     </Modal>
   );
