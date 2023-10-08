@@ -154,19 +154,18 @@ const usersSlice = createSlice({
       state.byChannelID = action.payload.userIDsByChannelID;
       const userObjByServerID = action.payload.usersInServers;
       Object.entries(userObjByServerID).forEach(([serverID, users]) => {
-        users.forEach((user) => {
-          if (user.userID in state.dataByID) {
-            state.dataByID[user.userID].serverRoles[serverID] = user.roleID;
-          } else {
-            const { userID, username, userImageUrl } = user;
-            state.dataByID[user.userID] = { userID, username, userImageUrl };
-            state.dataByID[user.userID].serverRoles = {};
-            state.dataByID[user.userID].serverRoles[serverID] = user.roleID;
-          }
-        });
-        state.byServerID[serverID] = users.map((user) => user.userID);
+        addUsersToIDsAndServersHelper(state, users, serverID);
       });
       state.status = "succeeded";
+    },
+    addNewServerUsers: (state, action) => {
+      const { serverID, users, userIDsByChannelID } = action.payload;
+      // add users to byID and servers
+      addUsersToIDsAndServersHelper(state, users, serverID);
+      // add user channels
+      Object.entries(userIDsByChannelID).forEach(([channelID, userIDs]) => {
+        state.byChannelID[channelID] = userIDs;
+      });
     },
   },
   extraReducers(builder) {
@@ -263,6 +262,20 @@ const usersSlice = createSlice({
       });
   },
 });
+
+function addUsersToIDsAndServersHelper(state, users, serverID) {
+  users.forEach((user) => {
+    if (user.userID in state.dataByID) {
+      state.dataByID[user.userID].serverRoles[serverID] = user.roleID;
+    } else {
+      const { userID, username, userImageUrl } = user;
+      state.dataByID[user.userID] = { userID, username, userImageUrl };
+      state.dataByID[user.userID].serverRoles = {};
+      state.dataByID[user.userID].serverRoles[serverID] = user.roleID;
+    }
+  });
+  state.byServerID[serverID] = users.map((user) => user.userID);
+}
 
 function updateUserServerRoleHelper(userID, serverID, roleID, state) {
   state.status = "serverRole";
@@ -450,5 +463,6 @@ export const {
   currentUserServerRoleUpdate,
   updateUserImage,
   addUsers,
+  addNewServerUsers,
 } = usersSlice.actions;
 export default usersSlice.reducer;

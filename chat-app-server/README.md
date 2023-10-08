@@ -100,11 +100,36 @@ endpoint does, and example request and response structures.
   - Response:
   ```json
   {
-    "serverID": 15,
-    "serverName": "The Best Server",
-    "serverDescription": "A place for the best server",
-    "serverImageUrl": null,
-    "roleID": 4
+      "server": 
+        {
+          "serverID": 1,
+          "serverName": "Server",
+          "serverDescription": "abcd",
+          "serverImageUrl": "http://imageurl.com",
+          "roleID": 1
+        },
+      "users": [
+          {
+            "userID": 1,
+            "username": "Bob",
+            "userImageUrl": "http://userimage.com",
+            "roleID": 1
+          }
+        ],
+      "channels":  [
+          {
+            "channelID": 42,
+            "serverID": 1,
+            "roleID": 2,
+            "channelTypeID": 1,
+            "channelName": "General",
+            "channelTime": "2023-10-04T02:48:47.000+00:00",
+            "userRead": "2023-10-04T02:48:47.000+00:00"
+          }
+        ],
+      "userIDsByChannelID": {
+        "42": [1]
+    }
   }
   ```
 

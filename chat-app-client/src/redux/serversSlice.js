@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { addGeneralChannel } from "./channelsSlice";
-import { joinGeneralChannel } from "./usersSlice";
+import { addGeneralChannel, addNewServerChannels } from "./channelsSlice";
+import { addNewServerUsers, joinGeneralChannel } from "./usersSlice";
 
 const initialState = {
   data: [],
@@ -277,7 +277,7 @@ export const updateServerDescription = createAsyncThunk(
 
 export const joinServerByInviteCode = createAsyncThunk(
   "servers/joinServerByInviteCode",
-  async ({ token, inviteCode }) => {
+  async ({ token, inviteCode }, { dispatch }) => {
     const apiUrl = import.meta.env.VITE_CHAT_API;
     const url = `${apiUrl}/invites/${inviteCode}/join`;
 
@@ -290,7 +290,18 @@ export const joinServerByInviteCode = createAsyncThunk(
     if (!res.ok) {
       throw new Error("Failed to join server.");
     }
-    const server = await res.json();
+    const { server, channels, users, userIDsByChannelID } = await res.json();
+    dispatch(
+      addNewServerChannels({ serverID: server.serverID, channels: channels })
+    );
+    dispatch(
+      addNewServerUsers({
+        serverID: server.serverID,
+        users: users,
+        userIDsByChannelID: userIDsByChannelID,
+      })
+    );
+
     return { server };
   }
 );

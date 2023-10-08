@@ -4,6 +4,7 @@ import com.example.chatappserver.model.*;
 import com.example.chatappserver.repository.InvitesDao;
 import com.example.chatappserver.repository.ServersDao;
 import com.example.chatappserver.service.AuthService;
+import com.example.chatappserver.service.ServerService;
 import com.example.chatappserver.websocket.service.ServerWebSocketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -13,7 +14,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -22,15 +26,17 @@ public class InvitesController {
     private final InvitesDao invitesDao;
     private final AuthService authService;
     private final ServersDao serversDao;
+    private final ServerService serverService;
     private final ServerWebSocketService serverWebSocketService;
 
     @Autowired
     public InvitesController(InvitesDao invitesDao, AuthService authService,
-                             ServersDao serversDao,
+                             ServersDao serversDao, ServerService serverService,
                              ServerWebSocketService serverWebSocketService) {
         this.invitesDao = invitesDao ;
         this.authService = authService;
         this.serversDao = serversDao;
+        this.serverService = serverService;
         this.serverWebSocketService = serverWebSocketService;
     }
 
@@ -116,12 +122,14 @@ public class InvitesController {
                     .body("An error occurred while adding the user to the server.");
         }
         // Retrieve the server data
-        Server server = serversDao.getServerByID(invite.getServerID(), user.getUserId());
+        AddServerResponse addServerResponse = serverService.getServerData(
+                invite.getServerID(), user.getUserId()
+        );
         // Broadcast new server user
         serverWebSocketService.sendServerNewUserToSubscribers(invite.getServerID(),
                 user.getUserId(), user.getDbUsername(), user.getUserImageUrl());
 
-        return ResponseEntity.ok(server);
+        return ResponseEntity.ok(addServerResponse);
     }
 
 }

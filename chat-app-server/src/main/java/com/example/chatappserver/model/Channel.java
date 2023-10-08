@@ -7,6 +7,7 @@ public class Channel {
     private int channelTypeID;
     private String channelName;
 
+
     public Channel() {
     }
 

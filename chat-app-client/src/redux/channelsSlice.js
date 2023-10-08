@@ -97,6 +97,10 @@ const channelsSlice = createSlice({
       channel.channelTime = msgTime;
       channel.userRead = msgTime;
     },
+    addNewServerChannels: (state, action) => {
+      const { serverID, channels } = action.payload;
+      state.byServerID[serverID] = channels;
+    },
   },
   extraReducers(builder) {
     builder
@@ -359,5 +363,6 @@ export const {
   markAsRead,
   channelHasNewMessage,
   channelNewMessageCreate,
+  addNewServerChannels,
 } = channelsSlice.actions;
 export default channelsSlice.reducer;
