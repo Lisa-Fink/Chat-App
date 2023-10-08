@@ -339,7 +339,7 @@ function Chat({ socket }) {
 
   const confirmDelete = (message) =>
     confirmDelID === message.messageID && (
-      <div className="message-btn confirm-del">
+      <div className="confirm-del">
         Confirm Delete
         <div>
           <button
