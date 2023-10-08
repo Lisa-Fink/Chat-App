@@ -259,6 +259,27 @@ endpoint does, and example request and response structures.
 - `DELETE /servers/{serverID}/channels/{channelID}/messages/{messageID}`: Delete a message, removing all attachments and
   reactions (CASCADE).
 
+## Reactions
+
+### Create a Reaction
+- `POST /reactions`: Create a new reaction using emojiID, userID, messageID, channelID
+  - Request:
+    ```json
+    {
+      "emojiID": 1,
+    "userID": 5,
+    "messageID": 87,
+    "channelID": 33
+    }
+    ```
+  - Response: reactionID
+  ```json
+  17
+  ```
+  
+### Delete a Reaction:
+- `DELETE /reactions/{reactionID}`: Sender must have the userID associated with the reaction or be an Admin in the server associated with the reaction
+
 ## Servers
 
 ### Create a Server
