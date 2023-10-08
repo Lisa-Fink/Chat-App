@@ -68,6 +68,7 @@ function Signup({ toggleMenu }) {
             {!validEmail && <span class="error">Enter a valid email</span>}
           </div>
           <input
+            autoComplete="email"
             name="email"
             id="email"
             type="text"
@@ -85,6 +86,7 @@ function Signup({ toggleMenu }) {
             )}
           </div>
           <input
+            autoComplete="new-password"
             name="password"
             id="password"
             type="password"
@@ -102,7 +104,7 @@ function Signup({ toggleMenu }) {
             )}
           </div>
           <input
-            name="password-confirmword"
+            name="password-confirm"
             id="password-confirm"
             type="password"
             placeholder="Confirm your password"

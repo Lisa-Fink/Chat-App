@@ -34,6 +34,7 @@ function Login({ toggleMenu }) {
             {!validEmail && <span className="error">Enter a valid email</span>}
           </div>
           <input
+            autoComplete="email"
             name="email"
             id="email"
             type="text"
@@ -53,6 +54,7 @@ function Login({ toggleMenu }) {
             )}
           </div>
           <input
+            autoComplete="current-password"
             name="password"
             id="password"
             type="password"
