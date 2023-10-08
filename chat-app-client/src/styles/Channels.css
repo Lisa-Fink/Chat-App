@@ -92,10 +92,22 @@
   align-items: start;
 }
 
-.server-dropdown li button {
+.server-dropdown li {
+  display: block;
+}
+
+.server-dropdown-btn {
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+.confirm-outline {
+  border: 1px solid var(--medium-grey3);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .code-status {

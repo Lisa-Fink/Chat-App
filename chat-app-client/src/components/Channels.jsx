@@ -176,7 +176,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
   const serverDropDownUl = (
     <ul className="server-dropdown">
       <li>
-        <button onClick={handleInviteClick}>
+        <button className="server-dropdown-btn" onClick={handleInviteClick}>
           Get Invite <MdOutlineContentCopy />
         </button>
         {codeStatus && (
@@ -188,7 +188,10 @@ function Channels({ setShowServerSettingsModal, socket }) {
       {/* if the user is an admin+ show edit option */}
       {server.roleID <= 2 && (
         <li>
-          <button onClick={handleServerSettingsClick}>
+          <button
+            className="server-dropdown-btn"
+            onClick={handleServerSettingsClick}
+          >
             Edit Server <MdSettings />
           </button>
         </li>
@@ -197,11 +200,14 @@ function Channels({ setShowServerSettingsModal, socket }) {
                leave server (creator can't leave) */}
       {server.roleID === 1 ? (
         <li>
-          <button onClick={() => setShowDeleteConfirm(true)}>
+          <button
+            className="server-dropdown-btn"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
             Delete Server
           </button>
           {showDeleteConfirm && (
-            <div>
+            <div className="confirm-outline">
               Confirm
               <button onClick={handleConfirmDelete}>
                 <MdCheck />
@@ -218,7 +224,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
             Leave Server
           </button>
           {showLeaveServerConfirm && (
-            <div>
+            <div className="confirm-outline">
               Confirm{" "}
               <button onClick={handleConfirmLeave}>
                 <MdCheck />
