@@ -14,10 +14,25 @@ import "../../styles/ChannelSettingsModal.css";
 function ChannelSettingsModal({ closeModal }) {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
-  const { channelName, channelID, roleID, serverID } = useSelector(
-    (state) => state.current.channel
+
+  const current = useSelector((state) => state.current);
+  const serverID = current.server;
+  const channelID = current.channel;
+  const channel = useSelector(
+    (state) =>
+      state.channels.byServerID[serverID] &&
+      state.channels.byServerID[serverID].find(
+        (chan) => parseInt(chan.channelID) === parseInt(channelID)
+      )
   );
-  const { server } = useSelector((state) => state.current);
+  const server = useSelector(
+    (state) =>
+      state.servers.data &&
+      state.servers.data.find(
+        (ser) => parseInt(ser.serverID) === parseInt(serverID)
+      )
+  );
+  const { channelName, roleID } = channel;
 
   const [newChannelName, setNewChannelName] = useState(channelName);
   const [newChannelRole, setNewChannelRole] = useState(roleID);

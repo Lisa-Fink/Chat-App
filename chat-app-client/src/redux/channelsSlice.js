@@ -40,12 +40,7 @@ const channelsSlice = createSlice({
     },
     editName: (state, action) => {
       const { serverID, channelID, name } = action.payload;
-      state.byServerID[serverID] = state.byServerID[serverID].map((chan) => {
-        if (parseInt(chan.channelID) === parseInt(channelID)) {
-          chan.channelName = name;
-        }
-        return chan;
-      });
+      editNameHelper(state, serverID, channelID, name);
     },
     deleteChannelUpdate: (state, action) => {
       deleteChannelHelper(state, action);
@@ -121,11 +116,8 @@ const channelsSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(updateChannelName.fulfilled, (state, action) => {
-        state.status = "succeeded";
         const { serverID, channelID, channelName } = action.payload;
-        state.byServerID[serverID].find(
-          (chan) => chan.channelID === parseInt(channelID)
-        ).channelName = channelName;
+        editNameHelper(state, serverID, channelID, channelName);
       })
       .addCase(updateChannelRole.rejected, (state, action) => {
         state.status = "failed";
@@ -168,6 +160,16 @@ const channelsSlice = createSlice({
   },
 });
 
+function editNameHelper(state, serverID, channelID, channelName) {
+  state.status = "edit";
+  state.byServerID[serverID] = state.byServerID[serverID].map((chan) => {
+    if (parseInt(chan.channelID) === parseInt(channelID)) {
+      chan.channelName = channelName;
+    }
+    return chan;
+  });
+}
+
 function addChannelHelper(state, serverID, channel) {
   state.status = "new";
   state.newIDs = [serverID, channel.channelID];
@@ -175,6 +177,7 @@ function addChannelHelper(state, serverID, channel) {
 }
 
 function deleteChannelHelper(state, action) {
+  state.status = "delete";
   const { serverID, channelID } = action.payload;
   state.byServerID[serverID] = state.byServerID[serverID].filter(
     (chan) => parseInt(chan.channelID) !== parseInt(channelID)

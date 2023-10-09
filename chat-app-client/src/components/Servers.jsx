@@ -38,7 +38,12 @@ function Servers({
   const lastServerID = useSelector((state) => state.servers.lastID);
   const serversStatus = useSelector((state) => state.servers.status);
   const serverSub = useRef(false);
-  const curServer = useSelector((state) => state.current.server);
+  const curServerID = useSelector((state) => state.current.server);
+  const curServer = useSelector((state) =>
+    state.servers.data.find(
+      (ser) => parseInt(ser.serverID) === parseInt(curServerID)
+    )
+  );
 
   const [showServerDetails, setShowServerDetails] = useState(0);
   const [showAddServerModal, setShowAddServerModal] = useState(false);
@@ -58,9 +63,7 @@ function Servers({
 
   const handleServerClick = (serverID) => {
     // set current server
-    dispatch(
-      setServer(servers.find((ser) => parseInt(ser.serverID) === serverID))
-    );
+    dispatch(setServer(serverID));
   };
 
   const handleServerHover = (serverID) => {
@@ -93,7 +96,7 @@ function Servers({
   };
 
   const thumbnails = servers.map((server) => {
-    const isCurrentServer = server.serverID === curServer.serverID;
+    const isCurrentServer = curServer && server.serverID === curServerID;
     return (
       <li className="server-thumb-li" key={server.serverID}>
         <div
@@ -104,7 +107,7 @@ function Servers({
               ? " unread-dot"
               : ""
           }${
-            server.serverID !== curServer.serverID &&
+            server.serverID !== curServerID &&
             showServerDetails === server.serverID
               ? " hover-dot"
               : ""
@@ -218,7 +221,7 @@ function useServersChange(
         })
       );
       // set current server
-      dispatch(setServer(lastServer));
+      dispatch(setServer(lastServer.serverID));
       dispatch(updateStatus());
     } else if (serversStatus === "delete") {
       // unsub from server
@@ -228,7 +231,7 @@ function useServersChange(
       clearChannelsForServer();
       // change to next server
       const next_server = servers.length > 0 ? servers[0] : null;
-      dispatch(setServer(next_server));
+      dispatch(setServer(next_server.serverID));
       dispatch(updateStatus()); // change status
     } else if (serversStatus === "update") {
       // unsub from each channel in server and delete each channel

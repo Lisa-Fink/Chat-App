@@ -43,14 +43,28 @@ import {
 
 function Channels({ setShowServerSettingsModal, socket }) {
   const dispatch = useDispatch();
-  const { server, channel } = useSelector((state) => state.current);
+  const current = useSelector((state) => state.current);
+  const serverID = current.server;
+  const channelID = current.channel;
+  const channel = useSelector(
+    (state) =>
+      state.channels.byServerID[serverID] &&
+      state.channels.byServerID[serverID].find(
+        (chan) => parseInt(chan.channelID) === parseInt(channelID)
+      )
+  );
+  const server = useSelector(
+    (state) =>
+      state.servers.data &&
+      state.servers.data.find(
+        (ser) => parseInt(ser.serverID) === parseInt(serverID)
+      )
+  );
   const { token, userID } = useSelector((state) => state.auth);
   const channels = useSelector((state) => state.channels.byServerID);
   const { status, newIDs } = useSelector((state) => state.channels);
   const [curChannels, setCurChannels] = useState(
-    channels && server && server.serverID in channels
-      ? channels[server.serverID]
-      : []
+    channels && serverID in channels ? channels[serverID] : []
   );
 
   const [showServerDropdown, setShowServerDropdown] = useState(false);
@@ -65,7 +79,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
 
   useServerSelect(
     setCurChannels,
-    server,
+    serverID,
     setShowLeaveServerConfirm,
     setShowServerDropdown,
     dispatch,
@@ -73,25 +87,17 @@ function Channels({ setShowServerSettingsModal, socket }) {
   );
   useChannelsChange(socket, channels, dispatch, status, newIDs, token, userID);
   useCurrentServerChannelsChange(
-    server,
+    serverID,
     channels,
     channel,
     setCurChannels,
     dispatch,
-    channel,
-    token,
-    userID
+    status
   );
 
   const handleChannelClick = (e) => {
     const newChannelID = e.currentTarget.dataset.id;
-    dispatch(
-      setChannel(
-        curChannels.find(
-          (chan) => parseInt(chan.channelID) === parseInt(newChannelID)
-        )
-      )
-    );
+    dispatch(setChannel(parseInt(newChannelID)));
   };
 
   const handleAddChannelClick = () => {
@@ -107,7 +113,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
     dispatch(
       removeCurrentUserFromServer({
         token: token,
-        serverID: server.serverID,
+        serverID: serverID,
         userID: userID,
       })
     );
@@ -121,7 +127,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
   };
 
   const handleConfirmDelete = () => {
-    dispatch(deleteServer({ token: token, serverID: server.serverID }));
+    dispatch(deleteServer({ token: token, serverID: serverID }));
     dispatch(setServer(null));
     dispatch(setChannel(null));
     setShowDeleteConfirm(false);
@@ -132,7 +138,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
     const apiUrl = import.meta.env.VITE_CHAT_API;
     const url = `${apiUrl}/invites`;
 
-    const reqBody = { serverID: server.serverID };
+    const reqBody = { serverID: serverID };
     try {
       const res = await fetch(url, {
         method: "POST",
@@ -186,7 +192,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
         )}
       </li>
       {/* if the user is an admin+ show edit option */}
-      {server.roleID <= 2 && (
+      {server && server.roleID <= 2 && (
         <li>
           <button
             className="server-dropdown-btn"
@@ -198,7 +204,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
       )}
       {/* can delete if creator otherwise can
                leave server (creator can't leave) */}
-      {server.roleID === 1 ? (
+      {server && server.roleID === 1 ? (
         <li>
           <button
             className="server-dropdown-btn"
@@ -244,8 +250,8 @@ function Channels({ setShowServerSettingsModal, socket }) {
       <div className="channels-container">
         <div className="channels thin-scroll">
           <div className="col-head">
-            <h2>{server.serverName}</h2>
-            {server.serverName && (
+            <h2>{server && server.serverName}</h2>
+            {server && server.serverName && (
               <button onClick={handleShowServerMenu}>
                 {!showServerDropdown ? <MdOutlineExpandMore /> : <MdClose />}
               </button>
@@ -259,7 +265,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
       </div>
       <div className="server-menu">
         <div>
-          {channel.channelID && (
+          {channelID && (
             <button className="hover-btn" onClick={handleAddChannelClick}>
               <AiOutlinePlusCircle />
             </button>
@@ -277,7 +283,7 @@ export default Channels;
 
 function useServerSelect(
   setCurChannels,
-  server,
+  serverID,
   setShowLeaveServerConfirm,
   setShowServerDropdown
 ) {
@@ -286,10 +292,10 @@ function useServerSelect(
     setShowLeaveServerConfirm(false);
     setShowServerDropdown(false);
 
-    if (!server || !server.serverID) {
+    if (!serverID) {
       setCurChannels([]);
     }
-  }, [server]);
+  }, [serverID]);
 }
 
 function useChannelsChange(
@@ -443,23 +449,50 @@ const deleteChannel = (channelID, serverID, dispatch, socket) => {
 };
 
 function useCurrentServerChannelsChange(
-  server,
+  serverID,
   channels,
   channel,
   setCurChannels,
-  dispatch
+  dispatch,
+  status
 ) {
   // if channels[serverID] changes update the local channels list
   useEffect(() => {
-    if (server && server.serverID && channels[server.serverID]) {
-      setCurChannels(channels[server.serverID]);
-
-      // if the current channel is in the server continue, otherwise select the first channel
-      if (!channel || !channels[server.serverID].includes(channel)) {
-        dispatch(setChannel(channels[server.serverID][0]));
+    if (
+      status === "new" ||
+      status === "newMsg" ||
+      status == "edit" ||
+      status == "delete"
+    ) {
+      if (serverID && channels[serverID]) {
+        setCurChannels(channels[serverID]);
+      }
+      if (status === "delete") {
+        // if the current channel is in the server continue, otherwise select the first channel
+        setToDefault();
       }
     }
-  }, [channels[server.serverID]]);
+  }, [channels[serverID]]);
+  useEffect(() => {
+    if (serverID && channels && channels[serverID]) {
+      setCurChannels(channels[serverID]);
+      setToDefault();
+    }
+  }, [serverID]);
+
+  function setToDefault() {
+    if (
+      serverID &&
+      channels &&
+      channels[serverID] &&
+      (!channel || !channels[serverID].includes(channel))
+    ) {
+      const firstChannelID = channels[serverID][0]
+        ? channels[serverID][0].channelID
+        : null;
+      dispatch(setChannel(firstChannelID));
+    }
+  }
 }
 
 function useCodeStatus(codeRef) {

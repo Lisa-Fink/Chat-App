@@ -5,7 +5,7 @@ import Modal from "./Modal";
 
 function AddChannelModal({ closeModal }) {
   const auth = useSelector((state) => state.auth);
-  const serverID = useSelector((state) => state.current.server.serverID);
+  const serverID = useSelector((state) => state.current.server);
   const dispatch = useDispatch();
 
   const [channelName, setChannelName] = useState("");

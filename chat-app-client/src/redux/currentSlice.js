@@ -1,24 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  server: {
-    serverID: null,
-    serverName: null,
-    serverDescription: null,
-    serverImageUrl: null,
-    roleID: null,
-    hasUnread: null,
-  },
-  channel: {
-    channelID: null,
-    serverID: null,
-    roleID: null,
-    channelTypeID: null,
-    channelName: null,
-    channelTime: null,
-    userRead: null,
-    hasUnread: null,
-  },
+  server: null,
+  channel: null,
 };
 
 const curSlice = createSlice({
@@ -26,34 +10,10 @@ const curSlice = createSlice({
   initialState,
   reducers: {
     setServer: (state, action) => {
-      if (action.payload === null) {
-        state.server = {
-          serverID: null,
-          serverName: null,
-          serverDescription: null,
-          serverImageUrl: null,
-          roleID: null,
-          hasUnread: null,
-        };
-      } else {
-        state.server = action.payload;
-      }
+      state.server = action.payload;
     },
     setChannel: (state, action) => {
-      if (action.payload === null) {
-        state.channel = {
-          channelID: null,
-          serverID: null,
-          roleID: null,
-          channelTypeID: null,
-          channelName: null,
-          channelTime: null,
-          userRead: null,
-          hasUnread: null,
-        };
-      } else {
-        state.channel = action.payload;
-      }
+      state.channel = action.payload;
     },
   },
 });

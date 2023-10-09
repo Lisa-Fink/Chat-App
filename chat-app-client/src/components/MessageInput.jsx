@@ -8,9 +8,17 @@ import EmojiMenu from "./EmojiMenu";
 function MessageInput({ socket, scroll }) {
   const [message, setMessage] = useState("");
   const userID = useSelector((state) => state.auth.userID);
-  const serverID = useSelector((state) => state.current.server.serverID);
+  const serverID = useSelector((state) => state.current.server);
   const token = useSelector((state) => state.auth.token);
-  const channel = useSelector((state) => state.current.channel);
+  const channelID = useSelector((state) => state.current.channel);
+  const channel = useSelector(
+    (state) =>
+      state.channels.byServerID[serverID] &&
+      state.channels.byServerID[serverID].find(
+        (chan) => parseInt(chan.channelID) === parseInt(channelID)
+      )
+  );
+
   const error = useSelector((state) => state.messages.error);
   const channelData = useSelector((state) => state.messages.typingByChannelID);
   const users = useSelector((state) => state.users.dataByID);
@@ -26,12 +34,8 @@ function MessageInput({ socket, scroll }) {
   useResizeTextArea(textAreaRef.current, message);
 
   useEffect(() => {
-    if (
-      channel.channelID &&
-      channel.channelID in channelData &&
-      channelData[channel.channelID]
-    ) {
-      setChannelTyping(channelData[channel.channelID]);
+    if (channelID && channelID in channelData && channelData[channelID]) {
+      setChannelTyping(channelData[channelID]);
     } else {
       setChannelTyping([]);
     }
@@ -46,7 +50,7 @@ function MessageInput({ socket, scroll }) {
       if (!isTyping.current) {
         // if starting to type (hitting a key but not submitting with enter),
         // alert channel (websocket) of typing
-        socket.current.publishTypingStart(userID, channel.channelID);
+        socket.current.publishTypingStart(userID, channelID);
       }
       isTyping.current = Date.now();
       if (typingTimeout.current) clearTimeout(typingTimeout.current);
@@ -65,18 +69,18 @@ function MessageInput({ socket, scroll }) {
   const endTyping = () => {
     isTyping.current = false;
     if (typingTimeout.current) clearTimeout(typingTimeout.current);
-    socket.current.publishTypingEnd(userID, channel.channelID);
+    socket.current.publishTypingEnd(userID, channelID);
   };
 
   const submitMessage = () => {
     // only submit if a server and channel is selected
-    if (serverID && channel.channelID) {
+    if (serverID && channelID) {
       dispatch(
         createMessage({
           token: token,
           userID: userID,
           serverID: serverID,
-          channelID: channel.channelID,
+          channelID: channelID,
           text: message,
           time: new Date().toISOString(),
         })
@@ -148,6 +152,7 @@ function MessageInput({ socket, scroll }) {
       <div className="message-input">
         <textarea
           placeholder={
+            channel &&
             channel.channelName &&
             `Message # ${channel.channelName.slice(0, 17)}${
               channel.channelName.length > 17 ? "..." : ""

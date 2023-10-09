@@ -12,8 +12,13 @@ import Modal from "./Modal";
 function ServerSettingsModal({ closeModal }) {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
-  const { serverName, serverID, serverDescription, serverImageUrl } =
-    useSelector((state) => state.current.server);
+  const serverID = useSelector((state) => state.current.server);
+  const { serverName, serverDescription, serverImageUrl } = useSelector(
+    (state) =>
+      state.servers.data.find(
+        (ser) => parseInt(ser.serverID) === parseInt(serverID)
+      )
+  );
 
   const [image, setImage] = useState(serverImageUrl);
   const [newServerDescription, setNewServerDescription] =

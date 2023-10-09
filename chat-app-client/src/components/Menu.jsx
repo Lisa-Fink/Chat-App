@@ -6,8 +6,23 @@ import { useSelector } from "react-redux";
 import ChannelSettingsModal from "./modals/ChannelSettingsModal";
 
 function Menu() {
-  const { server, channel } = useSelector((state) => state.current);
-
+  const current = useSelector((state) => state.current);
+  const serverID = current.server;
+  const channelID = current.channel;
+  const channel = useSelector(
+    (state) =>
+      state.channels.byServerID[serverID] &&
+      state.channels.byServerID[serverID].find(
+        (chan) => parseInt(chan.channelID) === parseInt(channelID)
+      )
+  );
+  const server = useSelector(
+    (state) =>
+      state.servers.data &&
+      state.servers.data.find(
+        (ser) => parseInt(ser.serverID) === parseInt(serverID)
+      )
+  );
   const [settingsModal, setSettingsModal] = useState(false);
 
   return (

@@ -21,7 +21,23 @@ import { readChannelMsg } from "../redux/channelsSlice";
 
 function Chat({ socket }) {
   const dispatch = useDispatch();
-  const { channel, server } = useSelector((state) => state.current);
+  const current = useSelector((state) => state.current);
+  const serverID = current.server;
+  const channelID = current.channel;
+  const channel = useSelector(
+    (state) =>
+      state.channels.byServerID[serverID] &&
+      state.channels.byServerID[serverID].find(
+        (chan) => parseInt(chan.channelID) === parseInt(channelID)
+      )
+  );
+  const server = useSelector(
+    (state) =>
+      state.servers.data &&
+      state.servers.data.find(
+        (ser) => parseInt(ser.serverID) === parseInt(serverID)
+      )
+  );
   const { token, userID } = useSelector((state) => state.auth);
   const messages = useSelector((state) => state.messages.byChannelID);
   const messagesStatus = useSelector((state) => state.messages.status);
@@ -33,7 +49,7 @@ function Chat({ socket }) {
   const emojis = useSelector((state) => state.emojis.emojis);
 
   const [curMessages, setCurMessages] = useState(
-    channel.channelID in messages ? messages[channel.channelID] : []
+    channelID in messages ? messages[channelID] : []
   );
 
   const [showOptions, setShowOptions] = useState(null);
@@ -66,7 +82,8 @@ function Chat({ socket }) {
   useUpdateMessages(
     scroll,
     channel,
-    server,
+    channelID,
+    serverID,
     dispatch,
     token,
     hasUnread,
@@ -368,8 +385,8 @@ function Chat({ socket }) {
   const messageList = curMessages.map((message) => {
     const isUnknown =
       !message.userID ||
-      !usersInChannel[channel.channelID] ||
-      !usersInChannel[channel.channelID].includes(message.userID);
+      !usersInChannel[channelID] ||
+      !usersInChannel[channelID].includes(message.userID);
     return (
       <li
         className="message"
@@ -414,8 +431,8 @@ function Chat({ socket }) {
   return (
     <div className="chat-container">
       <div className="chat" ref={chatRef} onScroll={handleChatScroll}>
-        {server.serverID !== null &&
-          channel.channelID !== null &&
+        {serverID !== null &&
+          channelID !== null &&
           messagesStatus !== "failed" &&
           usersStatus === "succeeded" && (
             <ul className="message-list">{messageList}</ul>
@@ -527,7 +544,8 @@ const useReadLastViewed = (
 const useUpdateMessages = (
   scroll,
   channel,
-  server,
+  channelID,
+  serverID,
   dispatch,
   token,
   hasUnread,
@@ -537,36 +555,38 @@ const useUpdateMessages = (
   setCurMessages
 ) => {
   const updateCur = () => {
-    hasUnread.current = channel.hasUnread;
-    curChanUserTime.current = channel.userRead;
+    if (channel) {
+      hasUnread.current = channel.hasUnread;
+      curChanUserTime.current = channel.userRead;
+    }
   };
   // if the channel changes, fetch the messages for the new channel
   useEffect(() => {
     scroll();
-    if (channel && channel.channelID) {
+    if (serverID && channelID) {
       dispatch(
         fetchMessagesForChannel({
           token: token,
-          serverID: channel.serverID,
-          channelID: channel.channelID,
+          serverID: serverID,
+          channelID: channelID,
         })
       );
       updateCur();
     } else {
       setCurMessages([]);
     }
-  }, [channel]);
+  }, [channelID]);
   useEffect(() => {
-    if (channels && channels[server.serverID]) {
+    if (serverID && channelID && channels && channels[serverID]) {
       updateCur();
     }
-  }, [channels[server.serverID]]);
+  }, [channels[serverID]]);
 
   // After the messages for the channel are fetched/added to, update the local state
   useEffect(() => {
-    if (!messages[channel.channelID]) return;
-    setCurMessages(messages[channel.channelID]);
+    if (!channelID || !messages[channelID]) return;
+    setCurMessages(messages[channelID]);
     updateCur();
-  }, [messages[channel.channelID]]);
+  }, [messages[channelID]]);
 };
 export default Chat;

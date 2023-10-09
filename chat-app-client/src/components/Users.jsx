@@ -10,7 +10,23 @@ import {
 
 function Users() {
   const dispatch = useDispatch();
-  const { server, channel } = useSelector((state) => state.current);
+  const current = useSelector((state) => state.current);
+  const serverID = current.server;
+  const channelID = current.channel;
+  const channel = useSelector(
+    (state) =>
+      state.channels.byServerID[serverID] &&
+      state.channels.byServerID[serverID].find(
+        (chan) => parseInt(chan.channelID) === parseInt(channelID)
+      )
+  );
+  const server = useSelector(
+    (state) =>
+      state.servers.data &&
+      state.servers.data.find(
+        (ser) => parseInt(ser.serverID) === parseInt(serverID)
+      )
+  );
   const userChannels = useSelector((state) => state.users.byChannelID);
   const usersByID = useSelector((state) => state.users.dataByID);
   const usersStatus = useSelector((state) => state.users.status);
@@ -19,6 +35,7 @@ function Users() {
 
   const curUserChannels = useCurUserChannels(
     usersStatus,
+    channelID,
     channel,
     userChannels
   );
@@ -29,13 +46,14 @@ function Users() {
     const admins = [];
     const mods = [];
     const members = [];
-
-    for (const user of curUserChannels) {
-      const role = usersByID[user].serverRoles[server.serverID];
-      if (role === 1) creator.push(user);
-      else if (role === 2) admins.push(user);
-      else if (role === 3) mods.push(user);
-      else members.push(user);
+    if (curUserChannels) {
+      for (const user of curUserChannels) {
+        const role = usersByID[user].serverRoles[server.serverID];
+        if (role === 1) creator.push(user);
+        else if (role === 2) admins.push(user);
+        else if (role === 3) mods.push(user);
+        else members.push(user);
+      }
     }
 
     return { creator, admins, mods, members };
@@ -91,10 +109,10 @@ function Users() {
 
 export default Users;
 
-function useCurUserChannels(usersStatus, channel, userChannels) {
+function useCurUserChannels(usersStatus, channelID, channel, userChannels) {
   const [curUserChannels, setCurUserChannels] = useState([]);
   useEffect(() => {
-    if (usersStatus === "succeeded") {
+    if (channel && usersStatus === "succeeded") {
       setCurUserChannels(
         channel.channelID in userChannels ? userChannels[channel.channelID] : []
       );
@@ -102,11 +120,13 @@ function useCurUserChannels(usersStatus, channel, userChannels) {
   }, [channel]);
 
   useEffect(() => {
-    // update users list if userChannels changes
-    setCurUserChannels(
-      channel.channelID in userChannels ? userChannels[channel.channelID] : []
-    );
-  }, [userChannels[channel.channelID]]);
+    if (channelID) {
+      // update users list if userChannels changes
+      setCurUserChannels(
+        channelID in userChannels ? userChannels[channelID] : []
+      );
+    }
+  }, [userChannels[channelID]]);
 
   return curUserChannels;
 }
