@@ -35,8 +35,9 @@ const curSlice = createSlice({
           roleID: null,
           hasUnread: null,
         };
+      } else {
+        state.server = action.payload;
       }
-      state.server = action.payload;
     },
     setChannel: (state, action) => {
       if (action.payload === null) {
@@ -50,10 +51,9 @@ const curSlice = createSlice({
           userRead: null,
           hasUnread: null,
         };
+      } else {
+        state.channel = action.payload;
       }
-      state.channel = action.payload;
-      // needs to trigger setCurMessages to be messages[curChannel.id]
-      // needs to trigger setCurUserChannels to be userChannels[curChannel.id]
     },
   },
 });
