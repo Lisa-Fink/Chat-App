@@ -13,7 +13,7 @@ Welcome to the Chat Web Application repository! This real-time chat application 
 
 ## Demo
 
-https://github.com/Lisa-Fink/Chat-App/assets/103152876/9bebc814-790a-43df-8981-a5d51cc67fbd
+https://github.com/Lisa-Fink/Chat-App/assets/103152876/67254e7e-9696-4797-9854-9e1ea410723b
 
 ## Technologies Used
 
