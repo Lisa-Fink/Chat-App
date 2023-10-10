@@ -13,6 +13,7 @@ import AddServerModal from "./modals/AddServerModal";
 import ServerSettingsModal from "./modals/ServerSettingsModal";
 import {
   addUserServerUpdate,
+  currentUserServerRoleUpdate,
   fetchUsersForServer,
   removeUserServerUpdate,
   setUserChannel,
@@ -244,6 +245,7 @@ function useServersChange(
           serverID: lastServerID,
         })
       );
+      dispatch(updateStatus());
     }
   }, [servers, serversStatus]);
 
@@ -314,7 +316,8 @@ function useServersChange(
         // update in role servers
         // triggers clear and refetch all channels/userChannels in server
         dispatch(
-          currentUserRoleUpdate({
+          currentUserServerRoleUpdate({
+            userID: parsed.data.updateUserID,
             serverID: parsed.data.serverID,
             roleID: parsed.data.roleID,
           })

@@ -23,6 +23,8 @@ const channelsSlice = createSlice({
         roleID: 4,
       };
       state.byServerID[serverID] = [channel];
+      state.status = "newServer";
+      state.newIDs = serverID;
     },
     removeServer: (state, action) => {
       const { serverID } = action.payload;
@@ -95,6 +97,8 @@ const channelsSlice = createSlice({
     addNewServerChannels: (state, action) => {
       const { serverID, channels } = action.payload;
       state.byServerID[serverID] = channels;
+      state.status = "newServer";
+      state.newIDs = serverID;
     },
   },
   extraReducers(builder) {
@@ -103,9 +107,12 @@ const channelsSlice = createSlice({
         state.status = "loading";
       })
       .addCase(fetchChannelsForServer.fulfilled, (state, action) => {
-        state.status = "succeeded";
         const { isNew, serverID, channels } = action.payload;
-        if (isNew) state.byServerID[serverID] = channels;
+        if (isNew) {
+          state.byServerID[serverID] = channels;
+          state.status = "newServer";
+          state.newIDs = serverID;
+        }
       })
       .addCase(fetchChannelsForServer.rejected, (state, action) => {
         state.status = "failed";
@@ -147,7 +154,7 @@ const channelsSlice = createSlice({
       .addCase(readChannelMsg.fulfilled, (state, action) => {
         if (action.payload.noUpdate) return;
         const { channelID, serverID, isLast, msgTime } = action.payload;
-
+        state.status = "read";
         const channel = state.byServerID[serverID].find(
           (chan) => parseInt(chan.channelID) === parseInt(channelID)
         );
@@ -186,7 +193,7 @@ function deleteChannelHelper(state, action) {
 
 export const fetchChannelsForServer = createAsyncThunk(
   "channels/fetchChannelsForServer",
-  async ({ token, serverID }, { getState }) => {
+  async ({ token, serverID }, { getState, dispatch }) => {
     const channels = getState().channels.byServerID;
     // check if the channels have already been fetched
     if (serverID in channels) {
@@ -204,8 +211,25 @@ export const fetchChannelsForServer = createAsyncThunk(
     if (!res.ok) {
       throw new Error("Failed to get channels.");
     }
-    const data = await res.json();
-    return { isNew: true, serverID: serverID, channels: data };
+    const newChannels = await res.json();
+    // check read
+    let serverUnread = true;
+    for (const channel of newChannels) {
+      if (
+        channel.channelTime &&
+        (!channel.userRead ||
+          new Date(channel.channelTime).getTime() >
+            new Date(channel.userRead).getTime())
+      ) {
+        channel.hasUnread = true;
+      } else {
+        channel.hasUnread = false;
+        serverUnread = false;
+      }
+    }
+    if (serverUnread)
+      dispatch(updateServerRead({ id: serverID, isUnread: true }));
+    return { isNew: true, serverID: serverID, channels: newChannels };
   }
 );
 
