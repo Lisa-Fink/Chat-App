@@ -143,3 +143,20 @@ select {
 .modal h2 {
   margin-top: 10px;
 }
+
+.confirm-del-modal {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: 1px solid var(--medium-grey3);
+  border-radius: 5px;
+}
+.confirm-del-modal button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20%;
+}

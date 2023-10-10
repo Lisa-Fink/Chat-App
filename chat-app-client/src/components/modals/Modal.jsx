@@ -25,7 +25,7 @@ function Modal({ closeModal, children }) {
         </div>
         {children}
         <button id="close-btn" onClick={closeModal}>
-          Cancel
+          Close
         </button>
       </div>
     </div>

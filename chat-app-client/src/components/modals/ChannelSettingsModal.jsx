@@ -233,7 +233,7 @@ function ChannelSettingsModal({ closeModal }) {
                 <div>
                   <button onClick={handleDeleteClick}>Delete</button>
                   {showDeleteConfirm && (
-                    <div>
+                    <div className="confirm-del-modal">
                       Confirm Delete?{" "}
                       <button onClick={handleDeleteConfirm}>
                         <MdCheck />
