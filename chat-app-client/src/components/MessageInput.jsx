@@ -101,8 +101,11 @@ function MessageInput({ socket, scroll }) {
               {username} and {channelTyping.length - 3} more are typing
             </span>
           );
-        } else if (index === 1 && channelTyping.length === 2) {
-          return <span key={userID}>{username} and</span>;
+        } else if (
+          (index === 2 && channelTyping.length === 3) ||
+          (index === 1 && channelTyping.length === 2)
+        ) {
+          return <span key={userID}>and {username} are typing</span>;
         } else if (index === 0 && channelTyping.length === 1) {
           return <span key={userID}>{username} is typing</span>;
         } else {
