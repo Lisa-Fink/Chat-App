@@ -57,7 +57,9 @@ endpoint does, and example request and response structures.
         "serverID": 123,
         "roleID": 456,
         "channelTypeID": 789,
-        "channelName": "General"
+        "channelName": "General",
+        "channelTime": "2023-10-09T16:23:13.000+00:00",
+        "userRead": null
       }
     ]
     ```

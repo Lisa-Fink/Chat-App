@@ -6,13 +6,13 @@ import java.util.List;
 public class UserDataResponse {
     private List<ServerResponse> servers;
     private Map<Integer, List<UserChannelResponse>> usersInServers;
-    private Map<Integer, List<ChannelLoginResponse>> channelsInServers;
+    private Map<Integer, List<ChannelResponse>> channelsInServers;
     private Map<Integer, List<Integer>> userIDsByChannelID;
 
     public UserDataResponse(
             List<ServerResponse> servers, Map<Integer,
             List<UserChannelResponse>> usersInServers,
-            Map<Integer, List<ChannelLoginResponse>> channelsInServers,
+            Map<Integer, List<ChannelResponse>> channelsInServers,
             Map<Integer, List<Integer>> userIDsByChannelID) {
         this.servers = servers;
         this.usersInServers = usersInServers;
@@ -36,11 +36,11 @@ public class UserDataResponse {
         this.usersInServers = usersInServers;
     }
 
-    public Map<Integer, List<ChannelLoginResponse>> getChannelsInServers() {
+    public Map<Integer, List<ChannelResponse>> getChannelsInServers() {
         return channelsInServers;
     }
 
-    public void setChannelsInServers(Map<Integer, List<ChannelLoginResponse>> channelsInServers) {
+    public void setChannelsInServers(Map<Integer, List<ChannelResponse>> channelsInServers) {
         this.channelsInServers = channelsInServers;
     }
 

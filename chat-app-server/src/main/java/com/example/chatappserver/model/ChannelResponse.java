@@ -2,7 +2,7 @@ package com.example.chatappserver.model;
 
 import java.sql.Timestamp;
 
-public class ChannelLoginResponse {
+public class ChannelResponse {
     private int channelID;
     private int serverID;
     private int roleID;
@@ -11,10 +11,10 @@ public class ChannelLoginResponse {
     private Timestamp channelTime;
     private Timestamp userRead;
 
-    public ChannelLoginResponse() {
+    public ChannelResponse() {
     }
 
-    public ChannelLoginResponse(int channelID, int serverID, int roleID, int channelTypeID, String channelName, Timestamp channelTime, Timestamp userRead) {
+    public ChannelResponse(int channelID, int serverID, int roleID, int channelTypeID, String channelName, Timestamp channelTime, Timestamp userRead) {
         this.channelID = channelID;
         this.serverID = serverID;
         this.roleID = roleID;

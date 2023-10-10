@@ -1,9 +1,6 @@
 package com.example.chatappserver.controller;
 
-import com.example.chatappserver.model.Channel;
-import com.example.chatappserver.model.CustomUserDetails;
-import com.example.chatappserver.model.RoleUpdateRequest;
-import com.example.chatappserver.model.User;
+import com.example.chatappserver.model.*;
 import com.example.chatappserver.repository.ChannelsDao;
 import com.example.chatappserver.repository.UsersDao;
 import com.example.chatappserver.service.AuthService;
@@ -109,10 +106,10 @@ public class ChannelsController {
 
     // Get all Channels in a Server, that the user has access to
     @GetMapping
-    public ResponseEntity<List<Channel>> getChannelsInServer(
+    public ResponseEntity<List<ChannelResponse>> getChannelsInServer(
             @PathVariable int serverID,
             @AuthenticationPrincipal CustomUserDetails user) {
-        List<Channel> channels = channelsDao.getChannelsInServer(
+        List<ChannelResponse> channels = channelsDao.getChannelsInServer(
                 serverID, user.getUserId());
         return ResponseEntity.ok(channels);
     }

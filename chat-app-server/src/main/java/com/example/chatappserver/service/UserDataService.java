@@ -37,14 +37,14 @@ public class UserDataService {
                 ));
 
         // Get all channels for each server, mapped by serverID
-        List<ChannelLoginResponse> channels = channelsDao.getAllUserChannels(userId);
-        Map<Integer, List<ChannelLoginResponse>> channelsInServers = channels.stream()
-                .collect(Collectors.groupingBy(ChannelLoginResponse::getServerID));
+        List<ChannelResponse> channels = channelsDao.getAllUserChannels(userId);
+        Map<Integer, List<ChannelResponse>> channelsInServers = channels.stream()
+                .collect(Collectors.groupingBy(ChannelResponse::getServerID));
 
         // Get all userIDs for each channel, mapped by channelID
         Map<Integer, List<Integer>> userIDsByChannelID = channels.stream()
                 .collect(Collectors.toMap(
-                        ChannelLoginResponse::getChannelID,
+                        ChannelResponse::getChannelID,
                         channel -> usersDao.getUsersInChannel(
                                 channel.getChannelID(),
                                 channel.getServerID())

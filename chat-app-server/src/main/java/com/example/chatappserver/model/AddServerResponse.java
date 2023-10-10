@@ -5,11 +5,11 @@ import java.util.Map;
 
 public class AddServerResponse {
     private Server server;
-    private List<Channel> channels;
+    private List<ChannelResponse> channels;
     List<UserChannelResponse> users;
     Map<Integer, List<Integer>> userIDsByChannelID;
 
-    public AddServerResponse(Server server, List<Channel> channels, List<UserChannelResponse> users, Map<Integer, List<Integer>> userIDsByChannelID) {
+    public AddServerResponse(Server server, List<ChannelResponse> channels, List<UserChannelResponse> users, Map<Integer, List<Integer>> userIDsByChannelID) {
         this.server = server;
         this.channels = channels;
         this.users = users;
@@ -24,11 +24,11 @@ public class AddServerResponse {
         this.server = server;
     }
 
-    public List<Channel> getChannels() {
+    public List<ChannelResponse> getChannels() {
         return channels;
     }
 
-    public void setChannels(List<Channel> channels) {
+    public void setChannels(List<ChannelResponse> channels) {
         this.channels = channels;
     }
 
