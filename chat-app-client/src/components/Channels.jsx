@@ -171,7 +171,9 @@ function Channels({ setShowServerSettingsModal, socket }) {
   const channelList = curChannels.map(
     ({ channelID, channelName, roleID, hasUnread }) => (
       <li key={channelID}>
-        <div className={`chan-icon ${hasUnread ? "unread" : ""}`}></div>
+        <div
+          className={`chan-icon ${hasUnread === true ? "unread" : ""}`}
+        ></div>
         <button data-id={channelID} onClick={handleChannelClick}>
           # {channelName}
         </button>
@@ -265,7 +267,7 @@ function Channels({ setShowServerSettingsModal, socket }) {
       </div>
       <div className="server-menu">
         <div>
-          {channelID && (
+          {channelID && server && server.roleID <= 2 && (
             <button className="hover-btn" onClick={handleAddChannelClick}>
               <AiOutlinePlusCircle />
             </button>
@@ -330,13 +332,25 @@ function useChannelsChange(
       );
       // subscribe
       socket.current.addChannelSub(newIDs[1], handleChannelData);
+    } else if (channelStatus === "newServer") {
+      for (const channel of channels[newIDs]) {
+        dispatch(
+          fetchUsersForChannel({
+            token: token,
+            serverID: channel.serverID,
+            channelID: channel.channelID,
+          })
+        );
+        socket.current.addChannelSub(channel.channelID, handleChannelData);
+      }
     } else if (channelStatus === "newMsg") {
       dispatch(updateServerRead({ id: newIDs[0], isUnread: true }));
     }
     if (
       channelStatus === "new" ||
       channelStatus === "initialized" ||
-      channelStatus === "newMsg"
+      channelStatus === "newMsg" ||
+      channelStatus === "newServer"
     )
       dispatch(channelSuccess());
   }, [channelStatus]);
@@ -462,7 +476,9 @@ function useCurrentServerChannelsChange(
       status === "new" ||
       status === "newMsg" ||
       status == "edit" ||
-      status == "delete"
+      status == "delete" ||
+      status == "read" ||
+      status == "newServer"
     ) {
       if (serverID && channels[serverID]) {
         setCurChannels(channels[serverID]);
@@ -502,7 +518,7 @@ function useCodeStatus(codeRef) {
       setTimeout(() => {
         if (codeRef.current) {
           codeRef.current.style.opacity = 0;
-
+          setCodeStatus("");
           setTimeout(() => setCodeStatus(""), 600);
         }
       }, 1000);
