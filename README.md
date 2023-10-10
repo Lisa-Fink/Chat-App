@@ -11,6 +11,10 @@ Welcome to the Chat Web Application repository! This real-time chat application 
 - **Message Reactions**: Engage in expressive conversations by viewing reactions from other users.
 - **Unread Message Notifications**: Receive real-time notifications for unread messages in servers and channels.
 
+## Demo
+
+https://github.com/Lisa-Fink/Chat-App/assets/103152876/9bebc814-790a-43df-8981-a5d51cc67fbd
+
 ## Technologies Used
 
 - JavaScript
